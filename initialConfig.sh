@@ -25,7 +25,5 @@ echo "xinit /home/pi/kiosk -- vt$(fgconsole)" >> ~/.bashrc
 
 #####
 #	 Option	Action(s)
-# 2	 Display Options	D2 Underscan
-#    Enable compensation? [No]
 # 1	 System Options	S5 Boot / Auto Login
 #    [B2 Console Autologin]
