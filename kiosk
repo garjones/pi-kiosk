@@ -4,4 +4,4 @@ xset s off     # disable screen saver
 xset s noblank # don't blank the video device
 matchbox-window-manager -use_titlebar no &
 unclutter &    # hide X mouse cursor unless mouse activated
-chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://reelyactive.github.io/diy/pi-kiosk/
+chromium-browser --display=:0 --kiosk --incognito --window-position=0,0 https://marquee.csekcreative.com/launch/display.php?device_id=579&synchronization_code=58356-10705&key=1827de5be167d0960a5d4974d759d8ef1a32351a7f3efb0f44746d2123afbb30d8c22edaf2dd59fdc720f4f11daf7cd8882931706b044e01e38d7da123328485
