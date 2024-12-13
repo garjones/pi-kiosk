@@ -11,75 +11,62 @@
 # --------------------------------------------------------------------------------
 # 
 
-#
 # configuration parameters
-#
-WT_HEIGHT=18
+WT_HEIGHT=23
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
+DEBUG=True
 
-#
-# finish and reboot
-#
-do_finish() {
-  whiptail --yesno "Would you like to reboot now?" 20 60 2
-  if [ $? -eq 0 ]; then # yes
-    sync
-    reboot
-  fi
-  exit 0
-}
-
-do_config() {
-  case "$FUN" in
-    1\  *) echo "cameras-01-02" > kiosk.config ;;
-    2\  *) echo "cameras-03-04" > kiosk.config ;;
-    3\  *) echo "cameras-05-06" > kiosk.config ;;
-    4\  *) echo "cameras-07-08" > kiosk.config ;;
-    5\  *) echo "cameras-09-10" > kiosk.config ;;
-    6\  *) echo "cameras-11-12" > kiosk.config ;;
-    7\  *) echo "kiosk-01"      > kiosk.config ;;
-    8\  *) echo "kiosk-02"      > kiosk.config ;;
-    9\  *) echo "kiosk-03"      > kiosk.config ;;
-    10\ *) echo "kiosk-04"      > kiosk.config ;;
-    11\ *) echo "kiosk-05"      > kiosk.config ;;
-    12\ *) echo "kiosk-06"      > kiosk.config ;;
-    13\ *) echo "kiosk-07"      > kiosk.config ;;
-    14\ *) echo "kiosk-08"      > kiosk.config ;;
-    15\ *) echo "kiosk-09"      > kiosk.config ;;
-    16\ *) echo "kiosk-10"      > kiosk.config ;;
-    *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
-  esac
-}
-
-#
-# Interactive use loop
-#
-while true; do
-  FUN=$(whiptail --title "Kelown Curling Club Kiosk Management" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
-    "1  Cameras 1-2"   \
-    "2  Cameras 3-4"   \
-    "3  Cameras 5-6"   \
-    "4  Cameras 7-8"   \
-    "5  Cameras 9-10"  \
-    "6  Cameras 11-12" \
-    "7  Kiosk 1"       \
-    "8  Kiosk 2"       \
-    "9  Kiosk 3"       \
-    "10 Kiosk 4"       \
-    "11 Kiosk 5"       \
-    "12 Kiosk 6"       \
-    "13 Kiosk 7"       \
-    "14 Kiosk 8"       \
-    "15 Kiosk 9"       \
-    "16 Kiosk 10"      \ 
-    3>&1 1>&2 2>&3)
-  RET=$?
-  if [ $RET -eq 1 ]; then
-    do_finish
-  elif [ $RET -eq 0 ]; then
-    do_config
+# check for debug mode
+is_debug () {
+  if [ "$DEBUG" = True ]; then
+    return 0
   else
-    exit 1
+    return 1
   fi
-done
+}
+
+# display main menu
+while true; do
+  # display menu
+  FUN=$(whiptail --title "Kelown Curling Club Kiosk Management" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
+  "C1"  "Display Cameras over sheets 1 & 2"   \
+  "C2"  "Display Cameras over sheets 3 & 4"   \
+  "C3"  "Display Cameras over sheets 5 & 6"   \
+  "C4"  "Display Cameras over sheets 7 & 8"   \
+  "C5"  "Display Cameras over sheets 9 & 10"  \
+  "C6"  "Display Cameras over sheets 11 & 12" \
+  "K1"  "Display Kiosk 1  (kcc-pi-01)"        \
+  "K2"  "Display Kiosk 2  (kcc-pi-02)"        \
+  "K3"  "Display Kiosk 3  (kcc-pi-03)"        \
+  "K4"  "Display Kiosk 4  (kcc-pi-04)"        \
+  "K5"  "Display Kiosk 5  (kcc-pi-05)"        \
+  "K6"  "Display Kiosk 6  (kcc-pi-06)"        \
+  "K7"  "Display Kiosk 7  (kcc-pi-07)"        \
+  "K8"  "Display Kiosk 8  (kcc-pi-08)"        \
+  "K9"  "Display Kiosk 9  (kcc-pi-09)"        \
+  "K10" "Display Kiosk 10 (kcc-pi-010)"       \
+  3>&1 1>&2 2>&3)
+  RET=$?
+
+  # process response
+  if [ $RET -eq 0 ]; then
+    whiptail --yesno "Are you sure?" 20 60 2
+    if [ $? -eq 0 ]; then # yes
+      if is_debug ; then
+        echo "$FUN" > kiosk.config 
+        echo "$FUN"
+        echo "sync"
+        echo "reboot"
+        exit 1
+      else
+        echo "$FUN" > kiosk.config 
+        sync
+        reboot
+        exit 1
+      fi
+    fi
+  else
+    exit 0
+  fi
+  done
