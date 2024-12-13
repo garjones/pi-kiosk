@@ -11,6 +11,9 @@
 # --------------------------------------------------------------------------------
 # 
 
+# autoupdate the service
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
+
 # configuration parameters
 WT_HEIGHT=23
 WT_WIDTH=80
