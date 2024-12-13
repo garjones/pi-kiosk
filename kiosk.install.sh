@@ -32,8 +32,8 @@ sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
 sudo systemctl enable kiosk.service
 
 # make kiosk.sh executable
-chmod u+x ~/kiosk.sh
-chmod u+x ~/kiosk.run.sh
+chmod u+x /home/kcckiosk/kiosk.sh
+chmod u+x /home/kcckiosk/kiosk.run.sh
 
 # move taskbar to bottom
 echo "position=bottom" >> .config/wf-panel-pi.ini
