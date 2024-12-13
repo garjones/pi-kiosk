@@ -15,11 +15,11 @@
 WT_HEIGHT=23
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
-DEBUG=True
+DEBUG=FALSE
 
 # check for debug mode
 is_debug () {
-  if [ "$DEBUG" = True ]; then
+  if [ "$DEBUG" = TRUE ]; then
     return 0
   else
     return 1
