@@ -7,7 +7,7 @@ After=graphical.target
 Environment=DISPLAY=:0.0
 Environment=XAUTHORITY=/home/kcckiosk/.Xauthority
 Type=simple
-ExecStart=/bin/bash /home/kcckiosk/kiosk.sh
+ExecStart=/bin/bash /home/kcckiosk/kiosk.run.sh
 Restart=on-abort
 User=kcckiosk
 Group=kcckiosk
