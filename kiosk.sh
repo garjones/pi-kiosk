@@ -12,6 +12,7 @@
 # 
 
 # autoupdate the service
+rm /home/kcckiosk/kiosk.run.sh
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh
 
 # configuration parameters
