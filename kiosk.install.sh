@@ -11,8 +11,8 @@
 # 
 
 # remove unnecessary packages and update
-sudo apt purge wolfram-engine scratch scratch2 nuscratch sonic-pi idle3 -y
-sudo apt purge smartsim java-common minecraft-pi libreoffice* -y
+sudo apt purge wolfram-engine scratch nuscratch sonic-pi idle3 -y
+sudo apt purge smartsim java-common minecraft-pi -y
 sudo apt clean
 sudo apt autoremove -y
 sudo apt update
