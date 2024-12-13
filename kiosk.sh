@@ -12,7 +12,7 @@
 # 
 
 # autoupdate the service
-wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh
 
 # configuration parameters
 WT_HEIGHT=23
