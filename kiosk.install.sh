@@ -1,4 +1,14 @@
 #!/bin/bash
+# --------------------------------------------------------------------------------
+#  kiosk.install.sh
+# --------------------------------------------------------------------------------
+#  Raspberry Pi based Kiosks
+# 
+#  Installation script
+# --------------------------------------------------------------------------------
+#  (C) Copyright Gareth Jones - gareth@gareth.com
+# --------------------------------------------------------------------------------
+# 
 
 # remove unnecessary packages and update
 sudo apt purge wolfram-engine scratch scratch2 nuscratch sonic-pi idle3 -y
