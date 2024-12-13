@@ -11,56 +11,75 @@
 # --------------------------------------------------------------------------------
 # 
 
+#
+# configuration parameters
+#
+WT_HEIGHT=18
+WT_WIDTH=80
+WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
+
+#
+# finish and reboot
+#
+do_finish() {
+  whiptail --yesno "Would you like to reboot now?" 20 60 2
+  if [ $? -eq 0 ]; then # yes
+    sync
+    reboot
+  fi
+  exit 0
+}
+
+do_config() {
+  case "$FUN" in
+    1\  *) echo "cameras-01-02" > kiosk.config ;;
+    2\  *) echo "cameras-03-04" > kiosk.config ;;
+    3\  *) echo "cameras-05-06" > kiosk.config ;;
+    4\  *) echo "cameras-07-08" > kiosk.config ;;
+    5\  *) echo "cameras-09-10" > kiosk.config ;;
+    6\  *) echo "cameras-11-12" > kiosk.config ;;
+    7\  *) echo "kiosk-01"      > kiosk.config ;;
+    8\  *) echo "kiosk-02"      > kiosk.config ;;
+    9\  *) echo "kiosk-03"      > kiosk.config ;;
+    10\ *) echo "kiosk-04"      > kiosk.config ;;
+    11\ *) echo "kiosk-05"      > kiosk.config ;;
+    12\ *) echo "kiosk-06"      > kiosk.config ;;
+    13\ *) echo "kiosk-07"      > kiosk.config ;;
+    14\ *) echo "kiosk-08"      > kiosk.config ;;
+    15\ *) echo "kiosk-09"      > kiosk.config ;;
+    16\ *) echo "kiosk-10"      > kiosk.config ;;
+    *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+  esac
+}
 
 #
 # Interactive use loop
 #
 while true; do
-  FUN=$(whiptail --title "Raspberry Pi Software Configuration Tool (raspi-config)" --backtitle "$(cat /proc/device-tree/model), ${FMEMSIZE}" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
-    "1 System Options" "Configure system settings" \
-    "2 Display Options" "Configure display settings" \
-    "3 Interface Options" "Configure connections to peripherals" \
-    "4 Performance Options" "Configure performance settings" \
-    "5 Localisation Options" "Configure language and regional settings" \
-    "6 Advanced Options" "Configure advanced settings" \
-    "8 Update" "Update this tool to the latest version" \
-    "9 About raspi-config" "Information about this configuration tool" \
+  FUN=$(whiptail --title "Kelown Curling Club Kiosk Management" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
+    "1  Cameras 1-2"   \
+    "2  Cameras 3-4"   \
+    "3  Cameras 5-6"   \
+    "4  Cameras 7-8"   \
+    "5  Cameras 9-10"  \
+    "6  Cameras 11-12" \
+    "7  Kiosk 1"       \
+    "8  Kiosk 2"       \
+    "9  Kiosk 3"       \
+    "10 Kiosk 4"       \
+    "11 Kiosk 5"       \
+    "12 Kiosk 6"       \
+    "13 Kiosk 7"       \
+    "14 Kiosk 8"       \
+    "15 Kiosk 9"       \
+    "16 Kiosk 10"      \ 
     3>&1 1>&2 2>&3)
   RET=$?
   if [ $RET -eq 1 ]; then
     do_finish
   elif [ $RET -eq 0 ]; then
-    case "$FUN" in
-      1\ *) do_system_menu ;;
-      2\ *) do_display_menu ;;
-      3\ *) do_interface_menu ;;
-      4\ *) do_performance_menu ;;
-      5\ *) do_internationalisation_menu ;;
-      6\ *) do_advanced_menu ;;
-      8\ *) do_update ;;
-      9\ *) do_about ;;
-      *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
-    esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+    do_config
   else
     exit 1
   fi
 done
-
-
-# TODO: create a menu to run one of these
-echo "cameras-01-02" > kiosk.config
-echo "cameras-03-04" > kiosk.config
-echo "cameras-05-06" > kiosk.config
-echo "cameras-07-08" > kiosk.config
-echo "cameras-09-10" > kiosk.config
-echo "cameras-11-12" > kiosk.config
-echo "kiosk-01"      > kiosk.config
-echo "kiosk-02"      > kiosk.config
-echo "kiosk-03"      > kiosk.config
-echo "kiosk-04"      > kiosk.config
-echo "kiosk-05"      > kiosk.config
-echo "kiosk-06"      > kiosk.config
-echo "kiosk-07"      > kiosk.config
-echo "kiosk-08"      > kiosk.config
-echo "kiosk-09"      > kiosk.config
-echo "kiosk-10"      > kiosk.config
