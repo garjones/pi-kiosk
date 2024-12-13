@@ -12,9 +12,9 @@
 # 
 
 # autoupdate the service
-sudo rm /home/kcckiosk/kiosk.run.sh
-wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh
-chmod u+x /home/kcckiosk/kiosk.run.sh
+# sudo rm /home/kcckiosk/kiosk.run.sh
+# wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh
+# chmod u+x /home/kcckiosk/kiosk.run.sh
 
 # configuration parameters
 WT_HEIGHT=23
