@@ -5,8 +5,9 @@ Scripts and instructions to automatically build raspberry pi kiosks
 ## Pre-requisites
 Image Raspberry Pi with full desktop image
 Settings - 
-Configure account as kcckiosk and enabling auto login.
-Configure correct Wifi details.
+- Configure account as kcckiosk and enabling auto login.
+- Configure correct Wifi details.
 
 ## Install
-`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.install.sh)'
+`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.install.sh)"
+
