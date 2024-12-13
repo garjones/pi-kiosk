@@ -7,6 +7,8 @@ Image Raspberry Pi with full desktop image
 Settings - 
 - Configure account as kcckiosk and enabling auto login.
 - Configure correct Wifi details.
+- Configure correct hostname
+- Enable ssh
 
 ## Install
 `code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.install.sh)"
