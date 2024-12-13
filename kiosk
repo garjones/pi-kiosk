@@ -11,6 +11,42 @@
 # --------------------------------------------------------------------------------
 # 
 
+
+#
+# Interactive use loop
+#
+while true; do
+  FUN=$(whiptail --title "Raspberry Pi Software Configuration Tool (raspi-config)" --backtitle "$(cat /proc/device-tree/model), ${FMEMSIZE}" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
+    "1 System Options" "Configure system settings" \
+    "2 Display Options" "Configure display settings" \
+    "3 Interface Options" "Configure connections to peripherals" \
+    "4 Performance Options" "Configure performance settings" \
+    "5 Localisation Options" "Configure language and regional settings" \
+    "6 Advanced Options" "Configure advanced settings" \
+    "8 Update" "Update this tool to the latest version" \
+    "9 About raspi-config" "Information about this configuration tool" \
+    3>&1 1>&2 2>&3)
+  RET=$?
+  if [ $RET -eq 1 ]; then
+    do_finish
+  elif [ $RET -eq 0 ]; then
+    case "$FUN" in
+      1\ *) do_system_menu ;;
+      2\ *) do_display_menu ;;
+      3\ *) do_interface_menu ;;
+      4\ *) do_performance_menu ;;
+      5\ *) do_internationalisation_menu ;;
+      6\ *) do_advanced_menu ;;
+      8\ *) do_update ;;
+      9\ *) do_about ;;
+      *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+    esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
+  else
+    exit 1
+  fi
+done
+
+
 # TODO: create a menu to run one of these
 echo "cameras-01-02" > kiosk.config
 echo "cameras-03-04" > kiosk.config
