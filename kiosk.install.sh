@@ -20,6 +20,8 @@ sudo apt upgrade -y
 sudo apt install unclutter sed wget
 
 # get kiosk files
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/update.sh
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service
@@ -31,6 +33,8 @@ sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
 sudo systemctl enable kiosk.service
 
 # make kiosk.sh executable
+chmod u+x /home/kcckiosk/update.sh
+chmod u+x /home/kcckiosk/upgrade.sh
 chmod u+x /home/kcckiosk/kiosk.sh
 chmod u+x /home/kcckiosk/kiosk.run.sh
 
