@@ -7,7 +7,7 @@ After=graphical.target
 Environment=DISPLAY=:0.0
 Environment=XAUTHORITY=/home/kcckiosk/.Xauthority
 Type=simple
-ExecStart=sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh)"
+ExecStart=/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh)"
 Restart=on-abort
 User=kcckiosk
 Group=kcckiosk
