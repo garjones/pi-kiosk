@@ -66,8 +66,8 @@ while true; do
             echo "$FUN"
             ;;
       esac
-      if is_debug; then echo "sync";    else sync;   fi
-      if is_debug; then echo "reboot";  else reboot; fi
+      if is_debug; then echo "sync";    else sudo sync;   fi
+      if is_debug; then echo "reboot";  else sudo reboot; fi
       exit 1
     fi
   else
