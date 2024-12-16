@@ -36,16 +36,9 @@ while true; do
   "C4"  "Display Cameras over sheets 7 & 8"   \
   "C5"  "Display Cameras over sheets 9 & 10"  \
   "C6"  "Display Cameras over sheets 11 & 12" \
-  "K1"  "Display Kiosk 1  (kcc-pi-01)"        \
-  "K2"  "Display Kiosk 2  (kcc-pi-02)"        \
-  "K3"  "Display Kiosk 3  (kcc-pi-03)"        \
-  "K4"  "Display Kiosk 4  (kcc-pi-04)"        \
-  "K5"  "Display Kiosk 5  (kcc-pi-05)"        \
-  "K6"  "Display Kiosk 6  (kcc-pi-06)"        \
-  "K7"  "Display Kiosk 7  (kcc-pi-07)"        \
-  "K8"  "Display Kiosk 8  (kcc-pi-08)"        \
-  "K9"  "Display Kiosk 9  (kcc-pi-09)"        \
-  "K10" "Display Kiosk 10 (kcc-pi-010)"       \
+  "K1"  "Display Kiosk Upstairs"              \
+  "K2"  "Display Kiosk Downstairs"            \
+
   3>&1 1>&2 2>&3)
   RET=$?
 
