@@ -13,3 +13,8 @@ Settings -
 ## Install
 `code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.install.sh)"
 
+## Update Kiosk Code
+`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/update.sh)"
+
+## Upgrade Pi OS
+`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh)"
