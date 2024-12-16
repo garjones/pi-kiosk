@@ -48,6 +48,18 @@ while true; do
   if [ $RET -eq 0 ]; then
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
+      case "$FUN" in
+        1\ *) do_system_menu ;;
+        2\ *) do_display_menu ;;
+        3\ *) do_interface_menu ;;
+        4\ *) do_performance_menu ;;
+        5\ *) do_internationalisation_menu ;;
+        6\ *) do_advanced_menu ;;
+        8\ *) do_update ;;
+        9\ *) do_about ;;
+        *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
+
+    
       if is_debug ; then
         echo "$FUN" > kiosk.config 
         echo "$FUN"
@@ -60,6 +72,9 @@ while true; do
         reboot
         exit 1
       fi
+
+
+      
     fi
   else
     whiptail --yesno "Are you sure you want to quit?" 20 60 2
