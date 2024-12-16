@@ -52,12 +52,12 @@ while true; do
       case $FUN in
           U1)
             # upgrade service
-            if is_debug; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh; fi ;;
+            if is_debug; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh -O /home/kcckiosk/kiosk.run.sh; fi ;;
 
           U2)
             # upgrade OS
-            if [ is_debug ]; then echo "apt update";  else sudo apt update; fi
-            if [ is_debug ]; then echo "apt upgrade"; else sudo sudo apt upgrade -y; fi
+            if is_debug; then echo "apt update";  else sudo apt update; fi
+            if is_debug; then echo "apt upgrade"; else sudo sudo apt upgrade -y; fi
             ;;
 
           *)
@@ -66,8 +66,8 @@ while true; do
             echo "$FUN"
             ;;
       esac
-      if [ is_debug ]; then echo "sync";    else sync;   fi
-      if [ is_debug ]; then echo "reboot";  else reboot; fi
+      if is_debug; then echo "sync";    else sync;   fi
+      if is_debug; then echo "reboot";  else reboot; fi
       exit 1
     fi
   else
