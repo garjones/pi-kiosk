@@ -17,7 +17,7 @@ sudo apt update
 sudo apt upgrade -y
 
 # install packages
-sudo apt install unclutter sed wget
+sudo apt install unclutter -y
 
 # get kiosk service
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.service /lib/systemd/system/kiosk2.service
