@@ -14,7 +14,7 @@
 sudo apt clean
 sudo apt autoremove -y
 sudo apt update
-sudo apt upgrade
+sudo apt upgrade -y
 
 # install packages
 sudo apt install unclutter sed wget
