@@ -19,7 +19,7 @@ sudo apt upgrade -y
 # install packages
 sudo apt install unclutter sed wget
 
-# get kiosk files
+# get kiosk service
 wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.service /lib/systemd/system/kiosk2.service
 
 # enable the kiosk service
@@ -29,7 +29,7 @@ sudo systemctl enable kiosk.service
 echo "position=bottom" >> .config/wf-panel-pi.ini
 
 # autorun the kiosk configuration on login
-echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
+echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.sh)"' >> .bashrc
 
 # we are done
 sudo reboot
