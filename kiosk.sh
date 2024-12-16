@@ -13,7 +13,7 @@
 # 
 
 # configuration parameters
-WT_HEIGHT=15
+WT_HEIGHT=17
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
 DEBUG=FALSE
@@ -37,6 +37,7 @@ while true; do
   "C4"  "Display Cameras over sheets 7 & 8"   \
   "C5"  "Display Cameras over sheets 9 & 10"  \
   "C6"  "Display Cameras over sheets 11 & 12" \
+  "--"  "-----------------------------------" \
   "K1"  "Display Kiosk Upstairs"              \
   "K2"  "Display Kiosk Downstairs"            \
   "U1"  "Upgrade the Kiosk Applicaiton"       \
@@ -49,7 +50,7 @@ while true; do
     # menu item was selected
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-      case $$FUN in
+      case $FUN in
           U1)
             # upgrade service
             if [ is_debug ]; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh; fi ;;
@@ -73,6 +74,6 @@ while true; do
   else
     # quit was selected
     whiptail --yesno "Are you sure you want to quit?" 20 60 2
-    exit 1
+    if [ $? -eq 0 ]; then exit 1; fi
   fi
 done
