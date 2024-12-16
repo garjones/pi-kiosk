@@ -37,7 +37,7 @@ echo "position=bottom" >> .config/wf-panel-pi.ini
 
 # autorun the kiosk configuration on login
 # echo "sudo /home/kcckiosk/kiosk.sh" >> .bashrc
-echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.sh)"' >> .bashrc
+echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
 
 # we are done
 sudo reboot
