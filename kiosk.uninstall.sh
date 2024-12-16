@@ -21,7 +21,4 @@ sudo rm /home/kcckiosk/main/kiosk.*
 
 # remove autorun from .bashrc
 # echo "sudo /home/kcckiosk/kiosk.sh" >> .bashrc
-# echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.sh)"' >> .bashrc
-
-# we are done
-sudo reboot
+# echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk2.sh)"' >> .bashr
