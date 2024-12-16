@@ -71,11 +71,11 @@ case $kiosk in
         ;;
 
     K1)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=580&synchronization_code=73127-62700&key=7110a09bcb4e20f7fd76af20b22d0ee078a6e391368f5a401e7c51db9d55ea8d98ecb7230394223bf26efabea65ee0ae0bcc4c8f58293d4cf41130c330755209
+    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk "https://marquee.csekcreative.com/launch/display.php?device_id=580&synchronization_code=73127-62700&key=7110a09bcb4e20f7fd76af20b22d0ee078a6e391368f5a401e7c51db9d55ea8d98ecb7230394223bf26efabea65ee0ae0bcc4c8f58293d4cf41130c330755209"
         ;;
 
     K2)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c
+    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk "https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c"
         ;;
 
     *)
