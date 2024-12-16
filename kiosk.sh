@@ -52,25 +52,23 @@ while true; do
       case $$FUN in
           U1)
             # upgrade service
-            if [ is_debug ] && echo "upgrade service" || wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
-            exit 1
-            ;;
+            if [ is_debug ]; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh; fi ;;
 
           U2)
             # upgrade OS
-            if [ is_debug ] && echo "apt update"  || sudo apt update
-            if [ is_debug ] && echo "apt upgrade" || sudo sudo apt upgrade -y
-            exit 1
+            if [ is_debug ]; then echo "apt update";  else sudo apt update; fi
+            if [ is_debug ]; then echo "apt upgrade"; else sudo sudo apt upgrade -y; fi
             ;;
 
           *)
             # do camera or kiosk
             echo "$FUN" > kiosk.config
             echo "$FUN"
-            if [ is_debug ] && echo "sync"   || sync
-            if [ is_debug ] && echo "reboot" || reboot
             ;;
       esac
+      if [ is_debug ]; then echo "sync";    else sync;   fi
+      if [ is_debug ]; then echo "reboot";  else reboot; fi
+      exit 1
     fi
   else
     # quit was selected
