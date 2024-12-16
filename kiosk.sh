@@ -55,7 +55,7 @@ while true; do
           echo "update"
           exit 1
         else
-
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/update.sh)"
           exit 1
         fi
         ;;
@@ -66,6 +66,7 @@ while true; do
           echo "upgrade"
           exit 1
         else
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh)"
           exit 1
         fi
         ;;
