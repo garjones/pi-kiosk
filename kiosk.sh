@@ -49,32 +49,28 @@ while true; do
     # menu item was selected
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-      if [ $FUN - eq "U1"]; then
-        # upgrade service
-        if [ is_debug ]; then
-          echo "upgrade service"
-          exit 1
-        else
-          wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
-          exit 1
-        end if
-      elif [ $FUN - eq "U2"]; then
-        # upgrade OS
-        if [ is_debug ]; then
-          echo "upgrade os"
-          exit 1
-        else
-          sudo apt update
-          sudo apt upgrade -y
-          exit 1
-        end if
-      else
-        # do camera or kiosk
-        echo "$FUN" > kiosk.config
-        echo "$FUN"
-        if [ is_debug ] && echo "sync"   || sync
-        if [ is_debug ] && echo "reboot" || reboot
-      fi
+      case $$FUN in
+          U1)
+            # upgrade service
+            if [ is_debug ] && echo "upgrade service" || wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
+            exit 1
+            ;;
+
+          U2)
+            # upgrade OS
+            if [ is_debug ] && echo "apt update"  || sudo apt update
+            if [ is_debug ] && echo "apt upgrade" || sudo sudo apt upgrade -y
+            exit 1
+            ;;
+
+          *)
+            # do camera or kiosk
+            echo "$FUN" > kiosk.config
+            echo "$FUN"
+            if [ is_debug ] && echo "sync"   || sync
+            if [ is_debug ] && echo "reboot" || reboot
+            ;;
+      esac
     fi
   else
     # quit was selected
