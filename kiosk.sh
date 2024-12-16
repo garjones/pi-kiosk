@@ -39,7 +39,8 @@ while true; do
   "C6"  "Display Cameras over sheets 11 & 12" \
   "K1"  "Display Kiosk Upstairs"              \
   "K2"  "Display Kiosk Downstairs"            \
-  "U1"  "Upgrade the Rapsberry Pi OS"         \
+  "U1"  "Upgrade the Kiosk Applicaiton"       \
+  "U2"  "Upgrade the Rapsberry Pi OS"         \
   3>&1 1>&2 2>&3)
   RET=$?
 
@@ -48,10 +49,25 @@ while true; do
     # menu item was selected
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-      if [ $FUN - eq "U1"] then # upgrade
-        # do upgrade
-        if [ is_debug ] && echo "upgrade" || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh)"
-        exit 1
+      if [ $FUN - eq "U1"]; then
+        # upgrade service
+        if [ is_debug ]; then
+          echo "upgrade service"
+          exit 1
+        else
+          wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
+          exit 1
+        end if
+      elif [ $FUN - eq "U2"]; then
+        # upgrade OS
+        if [ is_debug ]; then
+          echo "upgrade os"
+          exit 1
+        else
+          sudo apt update
+          sudo apt upgrade -y
+          exit 1
+        end if
       else
         # do camera or kiosk
         echo "$FUN" > kiosk.config
