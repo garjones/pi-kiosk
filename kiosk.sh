@@ -38,6 +38,8 @@ while true; do
   "C6"  "Display Cameras over sheets 11 & 12" \
   "K1"  "Display Kiosk Upstairs"              \
   "K2"  "Display Kiosk Downstairs"            \
+  "U1"  "Update the Rapsberry Pi OS"          \
+  "U2"  "Update the Kiosk Application"        \
 
   3>&1 1>&2 2>&3)
   RET=$?
