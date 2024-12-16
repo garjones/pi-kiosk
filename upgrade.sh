@@ -17,7 +17,7 @@ sudo apt update
 sudo apt upgrade -y
 
 # install packages
-sudo apt install unclutter sed wget
+sudo apt install unclutter sed wget -y
 
 # we are done
-sudo reboot
+sudo shutdown -h "now"
