@@ -31,17 +31,16 @@ is_debug () {
 while true; do
   # display menu
   FUN=$(whiptail --title "Kelown Curling Club Kiosk Management" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
-  "C1"  "Display Cameras over sheets 1 & 2"   \
-  "C2"  "Display Cameras over sheets 3 & 4"   \
-  "C3"  "Display Cameras over sheets 5 & 6"   \
-  "C4"  "Display Cameras over sheets 7 & 8"   \
-  "C5"  "Display Cameras over sheets 9 & 10"  \
-  "C6"  "Display Cameras over sheets 11 & 12" \
-  "--"  "-----------------------------------" \
-  "K1"  "Display Kiosk Upstairs"              \
-  "K2"  "Display Kiosk Downstairs"            \
-  "U1"  "Upgrade the Kiosk Applicaiton"       \
-  "U2"  "Upgrade the Rapsberry Pi OS"         \
+  "C1"  "Cameras over sheets 1 & 2"     \
+  "C2"  "Cameras over sheets 3 & 4"     \
+  "C3"  "Cameras over sheets 5 & 6"     \
+  "C4"  "Cameras over sheets 7 & 8"     \
+  "C5"  "Cameras over sheets 9 & 10"    \
+  "C6"  "Cameras over sheets 11 & 12"   \
+  "K1"  "Kiosk Upstairs"                \
+  "K2"  "Kiosk Downstairs"              \
+  "U1"  "Upgrade the Kiosk Application" \
+  "U2"  "Upgrade the Rapsberry Pi OS"   \
   3>&1 1>&2 2>&3)
   RET=$?
 
@@ -53,7 +52,7 @@ while true; do
       case $FUN in
           U1)
             # upgrade service
-            if [ is_debug ]; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh; fi ;;
+            if [ is_debug ]; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh; fi ;;
 
           U2)
             # upgrade OS
