@@ -78,38 +78,6 @@ case $kiosk in
     	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=581
         ;;
 
-    K3)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=582
-        ;;
-
-    K4)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=583
-        ;;
-
-    K5)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=584
-        ;;
-
-    K6)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=585
-        ;;
-
-    K7)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=586
-        ;;
-
-    K8)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=587
-        ;;
-
-    K9)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=588
-        ;;
-
-    K10)
-    	/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://marquee.csekcreative.com/launch/display.php?device_id=589
-        ;;
-
     *)
         /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
         ;;
