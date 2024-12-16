@@ -1,24 +1,23 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------
-#  update.sh
+#  kiosk.uninstall.sh
 # --------------------------------------------------------------------------------
 #  Raspberry Pi based Kiosks
 # 
-#  Update kiosk application
+#  Uninstallation script
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 # 
 
-# get kiosk files
-wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh
-wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh
-wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service
+# disable the kiosk service
+sudo systemctl disable kiosk.service
 
-# make kiosk.sh executable
-chmod u+x /home/kcckiosk/kiosk.sh
-chmod u+x /home/kcckiosk/kiosk.run.sh
+# remove  service
+sudo rm /lib/systemd/system/kiosk.service
 
-# we are done
-sudo reboot
- 
+# remove kiosk files
+sudo rm /home/kcckiosk/main/kiosk.*
+
+# remove autorun from .bashrc
+#echo "sudo /home/kcckiosk/kiosk.sh" >> .bashrc

@@ -6,6 +6,7 @@
 #  Raspberry Pi based Kiosks
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
+#  Version 2 - Online version
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -38,56 +39,30 @@ while true; do
   "C6"  "Display Cameras over sheets 11 & 12" \
   "K1"  "Display Kiosk Upstairs"              \
   "K2"  "Display Kiosk Downstairs"            \
-  "U1"  "Update the Kiosk Application"        \
-  "U2"  "Upgrade the Rapsberry Pi OS"         \
+  "U1"  "Upgrade the Rapsberry Pi OS"         \
   3>&1 1>&2 2>&3)
   RET=$?
 
   # process response
   if [ $RET -eq 0 ]; then
+    # menu item was selected
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-    case $kiosk in
-      U1)
-        # do update
-        if is_debug ; then
-          echo "update"
-          exit 1
-        else
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/update.sh)"
-          exit 1
-        fi
-        ;;
-  
-      U2)
+      if [ $FUN - eq "U1"] then # upgrade
         # do upgrade
-        if is_debug ; then
-          echo "upgrade"
-          exit 1
-        else
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh)"
-          exit 1
-        fi
-        ;;
-      *)
+        if [ is_debug ] && echo "upgrade" || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/upgrade.sh)"
+        exit 1
+      else
         # do camera or kiosk
-        if is_debug ; then
-          echo "$FUN" > kiosk.config 
-          echo "$FUN"
-          echo "sync"
-          echo "reboot"
-          exit 1
-        else
-          echo "$FUN" > kiosk.config 
-          sync
-          reboot
-          exit 1
-        fi
-        ;;
-      esac
+        echo "$FUN" > kiosk.config
+        echo "$FUN"
+        if [ is_debug ] && echo "sync"   || sync
+        if [ is_debug ] && echo "reboot" || reboot
+      fi
     fi
   else
+    # quit was selected
     whiptail --yesno "Are you sure you want to quit?" 20 60 2
     exit 1
   fi
-  done
+done
