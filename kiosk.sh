@@ -11,11 +11,6 @@
 # --------------------------------------------------------------------------------
 # 
 
-# autoupdate the service
-# sudo rm /home/kcckiosk/kiosk.run.sh
-# wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh /home/kcckiosk/kiosk.run.sh
-# chmod u+x /home/kcckiosk/kiosk.run.sh
-
 # configuration parameters
 WT_HEIGHT=23
 WT_WIDTH=80
@@ -72,6 +67,7 @@ while true; do
       fi
     fi
   else
-    exit 0
+    whiptail --yesno "Are you sure you want to quit?" 20 60 2
+    exit 1
   fi
   done
