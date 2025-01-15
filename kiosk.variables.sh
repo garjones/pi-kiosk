@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# debug flag
+DEBUG=TRUE
+SCREEN_WIDTH=1024
+SCREEN_HEIGHT=968
+
+echo $DEBUG
+echo $SCREEN_HEIGHT
+echo $SCREEN_WIDTH
+
