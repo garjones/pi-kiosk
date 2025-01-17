@@ -117,7 +117,7 @@ fi
 
 # set config & index
 KCC_CONFIG=${TEMP:0:1}
-KCC_INDEX=${TEMP:1:1}
+KCC_INDEX=${TEMP:1:2}
 
 # read rotation variable
 if is_debug; then 
