@@ -103,6 +103,11 @@ URL_KIOSK=(
   "https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c"
 )
 
+# rotation constants
+ROT_90="transpose=1"
+ROT_180="transpose=2,transpose=2"
+ROT_270="transpose=2"
+
 # read config variable
 if is_debug; then 
   TEMP=$(cat kiosk.config)
@@ -153,11 +158,6 @@ case $KCC_ROTATION in
         ;;
 esac
 
-echo $ROTATION
-echo 'ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0 -top 0 -vf "$ROTATION" &'
-read
-
-
 # --------------------------------------------------------------------------------
 # execute
 # --------------------------------------------------------------------------------
@@ -188,10 +188,10 @@ case $KCC_CONFIG in
         ;;
     C)
         # cameras
-        ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  -vf "$ROTATION" &
-        ffplay ${URL_CAM_AWAY[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) -vf "$ROTATION" & 
-        ffplay ${URL_CAM_HOME[KCC_INDEX+1]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top 0                  -vf "$ROTATION" &
-        ffplay ${URL_CAM_AWAY[KCC_INDEX+1]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top $((SCRN_HEIGHT/2)) -vf "$ROTATION" & 
+        ffplay ${URL_CAM_AWAY[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) -vf "$ROT_180" & 
+        ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  &        
+        ffplay ${URL_CAM_AWAY[KCC_INDEX+1]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) & 
+        ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  -vf "$ROT_90" &
         sleep 10
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_1LEFT -top $LABEL_1TOP -vf "drawtext=text='$KCC_INDEX':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_2LEFT -top $LABEL_2TOP -vf "drawtext=text='$((KCC_INDEX+1))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
