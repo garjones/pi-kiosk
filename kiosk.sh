@@ -54,7 +54,10 @@ while true; do
       case $FUN in
           U1)
             # upgrade service
-            if is_debug; then echo "upgrade service"; else wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh -O /home/kcckiosk/kiosk.run.sh; fi ;;
+            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh    -O /home/kcckiosk/kiosk.run.sh
+            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-h.png  -O /home/kcckiosk/label-bg-h.png
+            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-v.png  -O /home/kcckiosk/label-bg-v.png
+            ;;
 
           U2)
             # upgrade OS
