@@ -6,7 +6,7 @@
 #  Raspberry Pi based Kiosks
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
-#  Version 2 - Online version
+#  Version 2.5 - Support screen rotation
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -39,6 +39,8 @@ while true; do
   "C6"  "Cameras over sheets 11 & 12"   \
   "K1"  "Kiosk Upstairs"                \
   "K2"  "Kiosk Downstairs"              \
+  "S1"  "Screen is Horizontal"          \
+  "S2"  "Screen is Vertical"            \
   "U1"  "Upgrade the Kiosk Application" \
   "U2"  "Upgrade the Rapsberry Pi OS"   \
   3>&1 1>&2 2>&3)
@@ -58,6 +60,18 @@ while true; do
             # upgrade OS
             if is_debug; then echo "apt update";  else sudo apt update; fi
             if is_debug; then echo "apt upgrade"; else sudo sudo apt upgrade -y; fi
+            ;;
+
+          S1)
+            # horizontal rotation
+            echo "H" > kiosk.rotation
+            echo "H"
+            ;;
+
+          S2)
+            # vertical rotation
+            echo "V" > kiosk.rotation
+            echo "V"
             ;;
 
           *)
