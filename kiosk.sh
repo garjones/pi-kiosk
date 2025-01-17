@@ -32,11 +32,11 @@ while true; do
   # display menu
   FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
   "C1"  "Cameras over sheets 1 & 2"     \
-  "C2"  "Cameras over sheets 3 & 4"     \
-  "C3"  "Cameras over sheets 5 & 6"     \
-  "C4"  "Cameras over sheets 7 & 8"     \
-  "C5"  "Cameras over sheets 9 & 10"    \
-  "C6"  "Cameras over sheets 11 & 12"   \
+  "C3"  "Cameras over sheets 3 & 4"     \
+  "C5"  "Cameras over sheets 5 & 6"     \
+  "C7"  "Cameras over sheets 7 & 8"     \
+  "C9"  "Cameras over sheets 9 & 10"    \
+  "C11" "Cameras over sheets 11 & 12"   \
   "K1"  "Kiosk Upstairs"                \
   "K2"  "Kiosk Downstairs"              \
   "S1"  "Screen is Horizontal"          \
