@@ -30,7 +30,7 @@ is_debug () {
 # display main menu
 while true; do
   # display menu
-  FUN=$(whiptail --title "Kelown Curling Club Kiosk Management" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
+  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
   "C1"  "Cameras over sheets 1 & 2"     \
   "C2"  "Cameras over sheets 3 & 4"     \
   "C3"  "Cameras over sheets 5 & 6"     \
