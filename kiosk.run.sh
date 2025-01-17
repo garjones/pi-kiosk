@@ -65,22 +65,6 @@ if is_debug; then
 else
   URL_CAM_HOME=(
     ""
-    "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
-  )
-
-  URL_CAM_AWAY=(
-    ""
     "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
     "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
     "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
@@ -93,6 +77,22 @@ else
     "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
     "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
     "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
+  )
+
+  URL_CAM_AWAY=(
+    ""
+    "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
+    "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
+    "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
+    "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
   )
 fi
 
@@ -188,10 +188,10 @@ case $KCC_CONFIG in
         ;;
     C)
         # cameras
-        ffplay ${URL_CAM_AWAY[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) -vf "$ROT_180" & 
+        ffplay ${URL_CAM_AWAY[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) & 
         ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  &        
         ffplay ${URL_CAM_AWAY[KCC_INDEX+1]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) & 
-        ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  -vf "$ROT_90" &
+        ffplay ${URL_CAM_HOME[KCC_INDEX]}   -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  &
         sleep 10
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_1LEFT -top $LABEL_1TOP -vf "drawtext=text='$KCC_INDEX':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_2LEFT -top $LABEL_2TOP -vf "drawtext=text='$((KCC_INDEX+1))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
