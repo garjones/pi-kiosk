@@ -133,7 +133,11 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1920
         SCRN_HEIGHT=1080
         ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
-        LABEL_URL="label-bg-v.png"
+        if is_debug; then 
+          LABEL_URL="label-bg-v.png"
+        else
+          LABEL_URL="/home/kcckiosk/label-bg-v.png"
+        fi
         LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
         LABEL_1TOP="0"
         LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
@@ -144,7 +148,11 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1080
         SCRN_HEIGHT=1920
         ROTATION="transpose=1"
-        LABEL_URL="label-bg-h.png"
+        if is_debug; then 
+          LABEL_URL="label-bg-h.png"
+        else
+          LABEL_URL="/home/kcckiosk/label-bg-h.png"
+        fi
         LABEL_1LEFT="0"
         LABEL_1TOP="$((SCRN_HEIGHT/2-50))"
         LABEL_2LEFT="$((SCRN_WIDTH/2))"
