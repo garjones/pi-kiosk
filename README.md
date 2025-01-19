@@ -11,7 +11,4 @@ Settings -
 - Enable ssh
 
 ## Install
-`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.install.sh)"
-
-## Uninstall
-`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.uninstall.sh)"
+`code` /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"
