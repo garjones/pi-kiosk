@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # --------------------------------------------------------------------------------
-#  kiosk
+#  kiosk.sh
 # --------------------------------------------------------------------------------
 #  Raspberry Pi based Kiosks
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
-#  Version 2.5 - Support screen rotation
+#  
+#  Version 3.0 Added autoinstall
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -27,6 +28,50 @@ is_debug () {
   fi
 }
 
+# autoupgrade
+sudo apt autoremove -y
+sudo apt update
+sudo apt upgrade -y
+
+# install packages
+sudo apt install unclutter -y
+
+# autoupdate
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service   -O /home/kcckiosk/kiosk.service
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh    -O /home/kcckiosk/kiosk.run.sh
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-h.png  -O /home/kcckiosk/label-bg-h.png
+wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-v.png  -O /home/kcckiosk/label-bg-v.png
+
+# make kiosk.run.sh executable
+chmod u+x /home/kcckiosk/kiosk.run.sh
+
+# create service
+sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
+
+# enable the kiosk service
+sudo systemctl enable kiosk.service
+
+
+# move the taskbar to the bottom
+if grep -Fxq "position=bottom" .config/wf-panel-pi.ini; then
+    # already exists do nothing
+    echo "[Skipped] Taskbar set to bottom"
+else
+    # move taskbar to bottom
+    echo "[Done] Taskbar set to bottom"
+    echo "position=bottom" >> .config/wf-panel-pi.ini
+fi
+
+# autorun the kiosk configuration on login
+if grep -Fxq "https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh" .bashrc; then
+    # already exists do nothing
+    echo "[Skipped] Kiosk configuration autorun"
+else
+    # move taskbar to bottom
+    echo "[Done] Kiosk configuration autorun"
+    echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
+fi
+
 # display main menu
 while true; do
   # display menu
@@ -41,8 +86,6 @@ while true; do
   "K2"  "Kiosk Downstairs"              \
   "S1"  "Screen is Horizontal"          \
   "S2"  "Screen is Vertical"            \
-  "U1"  "Upgrade the Kiosk Application" \
-  "U2"  "Upgrade the Rapsberry Pi OS"   \
   3>&1 1>&2 2>&3)
   RET=$?
 
@@ -52,19 +95,6 @@ while true; do
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
       case $FUN in
-          U1)
-            # upgrade service
-            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh    -O /home/kcckiosk/kiosk.run.sh
-            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-h.png  -O /home/kcckiosk/label-bg-h.png
-            wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-v.png  -O /home/kcckiosk/label-bg-v.png
-            ;;
-
-          U2)
-            # upgrade OS
-            if is_debug; then echo "apt update";  else sudo apt update; fi
-            if is_debug; then echo "apt upgrade"; else sudo sudo apt upgrade -y; fi
-            ;;
-
           S1)
             # horizontal rotation
             echo "H" > kiosk.rotation
