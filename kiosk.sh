@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # --------------------------------------------------------------------------------
 #  kiosk.sh
 # --------------------------------------------------------------------------------
@@ -75,7 +74,7 @@ fi
 # display main menu
 while true; do
   # display menu
-  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
+  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v3" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
   "C01" "Cameras over sheets 1 & 2"     \
   "C03" "Cameras over sheets 3 & 4"     \
   "C05" "Cameras over sheets 5 & 6"     \
@@ -84,37 +83,35 @@ while true; do
   "C11" "Cameras over sheets 11 & 12"   \
   "K01" "Kiosk Upstairs"                \
   "K02" "Kiosk Downstairs"              \
-  "S01" "Change screen to Horizontal"   \
-  "S02" "Change screen to Vertical"            \
+  "S01" "Screen is Horizontal"          \
+  "S02" "Screen is Vertical"            \
   3>&1 1>&2 2>&3)
   RET=$?
 
   # process response
   if [ $RET -eq 0 ]; then
     # menu item was selected
-    whiptail --yesno "Are you sure?" 20 60 2
-    if [ $? -eq 0 ]; then # yes
-      case $FUN in
-          S01)
-            # horizontal rotation
-            ROTATION="H"
-            ;;
-
-          S02)
-            # vertical rotation
-            ROTATION="V"
-            ;;
-
-          *)
-            # write it out
+    case $FUN in
+        S01)
+          # horizontal rotation
+          ROTATION="H"
+          ;;
+        S02)
+          # vertical rotation
+          ROTATION="V"
+          ;;
+        *)
+          # check if sure, then write it out and reboot
+          whiptail --yesno "Are you sure?" 20 60 2
+          if [ $? -eq 0 ]; then # yes
             echo "$FUN$ROTATION" > kiosk.config
             echo "$FUN$ROTATION"
             read
             if is_debug; then echo "sync";    else sudo sync;   fi
             if is_debug; then echo "reboot";  else sudo reboot; fi
-            ;;
-      esac
-    fi
+          fi
+          ;;
+    esac  
   else
     # quit was selected
     whiptail --yesno "Are you sure you want to quit?" 20 60 2
