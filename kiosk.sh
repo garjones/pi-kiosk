@@ -98,19 +98,15 @@ while true; do
           S01)
             # horizontal rotation
             ROTATION="H"
-            echo "H" > kiosk.rotation
-            echo "H"
             ;;
 
           S02)
             # vertical rotation
             ROTATION="V"
-            echo "V" > kiosk.rotation
-            echo "V"
             ;;
 
           *)
-            # do camera or kiosk
+            # write it out
             echo "$FUN$ROTATION" > kiosk.config
             echo "$FUN$ROTATION"
             read
