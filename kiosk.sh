@@ -106,7 +106,6 @@ while true; do
           if [ $? -eq 0 ]; then # yes
             echo "$FUN$ROTATION" > kiosk.config
             echo "$FUN$ROTATION"
-            read
             if is_debug; then echo "sync";    else sudo sync;   fi
             if is_debug; then echo "reboot";  else sudo reboot; fi
           fi
