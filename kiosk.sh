@@ -99,25 +99,22 @@ while true; do
             # horizontal rotation
             echo "H" > kiosk.rotation
             echo "H"
-            return
             ;;
 
           S2)
             # vertical rotation
             echo "V" > kiosk.rotation
             echo "V"
-            return
             ;;
 
           *)
             # do camera or kiosk
             echo "$FUN" > kiosk.config
             echo "$FUN"
+            if is_debug; then echo "sync";    else sudo sync;   fi
+            if is_debug; then echo "reboot";  else sudo reboot; fi
             ;;
       esac
-      if is_debug; then echo "sync";    else sudo sync;   fi
-      if is_debug; then echo "reboot";  else sudo reboot; fi
-      exit 1
     fi
   else
     # quit was selected
