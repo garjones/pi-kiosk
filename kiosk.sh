@@ -84,8 +84,8 @@ while true; do
   "C11" "Cameras over sheets 11 & 12"   \
   "K01" "Kiosk Upstairs"                \
   "K02" "Kiosk Downstairs"              \
-  "S01" "Screen is Horizontal"          \
-  "S02" "Screen is Vertical"            \
+  "S01" "Change screen to Horizontal"   \
+  "S02" "Change screen to Vertical"            \
   3>&1 1>&2 2>&3)
   RET=$?
 
