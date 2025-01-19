@@ -76,16 +76,16 @@ fi
 while true; do
   # display menu
   FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
-  "C1"  "Cameras over sheets 1 & 2"     \
-  "C3"  "Cameras over sheets 3 & 4"     \
-  "C5"  "Cameras over sheets 5 & 6"     \
-  "C7"  "Cameras over sheets 7 & 8"     \
-  "C9"  "Cameras over sheets 9 & 10"    \
+  "C01" "Cameras over sheets 1 & 2"     \
+  "C03" "Cameras over sheets 3 & 4"     \
+  "C05" "Cameras over sheets 5 & 6"     \
+  "C07" "Cameras over sheets 7 & 8"     \
+  "C09" "Cameras over sheets 9 & 10"    \
   "C11" "Cameras over sheets 11 & 12"   \
-  "K1"  "Kiosk Upstairs"                \
-  "K2"  "Kiosk Downstairs"              \
-  "S1"  "Screen is Horizontal"          \
-  "S2"  "Screen is Vertical"            \
+  "K01" "Kiosk Upstairs"                \
+  "K02" "Kiosk Downstairs"              \
+  "S01" "Screen is Horizontal"          \
+  "S02" "Screen is Vertical"            \
   3>&1 1>&2 2>&3)
   RET=$?
 
@@ -95,22 +95,25 @@ while true; do
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
       case $FUN in
-          S1)
+          S01)
             # horizontal rotation
+            ROTATION="H"
             echo "H" > kiosk.rotation
             echo "H"
             ;;
 
-          S2)
+          S02)
             # vertical rotation
+            ROTATION="V"
             echo "V" > kiosk.rotation
             echo "V"
             ;;
 
           *)
             # do camera or kiosk
-            echo "$FUN" > kiosk.config
-            echo "$FUN"
+            echo "$FUN$ROTATION" > kiosk.config
+            echo "$FUN$ROTATION"
+            read
             if is_debug; then echo "sync";    else sudo sync;   fi
             if is_debug; then echo "reboot";  else sudo reboot; fi
             ;;
