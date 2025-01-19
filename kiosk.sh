@@ -81,8 +81,10 @@ while true; do
   "C07" "Cameras over sheets 7 & 8"     \
   "C09" "Cameras over sheets 9 & 10"    \
   "C11" "Cameras over sheets 11 & 12"   \
+  "---" "---------------------------"   \
   "K01" "Kiosk Upstairs"                \
   "K02" "Kiosk Downstairs"              \
+  "---" "---------------------------"   \
   "S01" "Screen is Horizontal"          \
   "S02" "Screen is Vertical"            \
   3>&1 1>&2 2>&3)
@@ -99,6 +101,9 @@ while true; do
         S02)
           # vertical rotation
           ROTATION="V"
+          ;;
+        --)
+          # do nothing
           ;;
         *)
           # check if sure, then write it out and reboot
