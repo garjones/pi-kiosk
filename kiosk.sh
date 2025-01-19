@@ -14,7 +14,7 @@
 # 
 
 # configuration parameters
-WT_HEIGHT=20
+WT_HEIGHT=18
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
 DEBUG=FALSE
