@@ -29,14 +29,6 @@ is_debug () {
 # debug flag
 DEBUG=FALSE
 
-# set home path
-if is_debug; then 
-  HOME_PATH=""
-else
-  HOME_PATH="/home/kcckiosk/"
-fi
-
-
 # camera URLS
 if is_debug; then
   URL_CAM_HOME=(
@@ -116,29 +108,26 @@ ROT_90="transpose=1"
 ROT_180="transpose=2,transpose=2"
 ROT_270="transpose=2"
 
-# read config variable
-TEMP="${HOME_PATH}kiosk.config"
+#  check if we are on a pi and set the home path
+if [ -d "/home/kcckiosk/" ]; then
+  KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
+else
+  KCC_KIOSKCONFIG=$(cat kiosk.config)
+fi
 
 # set config & index
-KCC_CONFIG=${TEMP:0:1}
-KCC_INDEX=${TEMP:1:2}
+KCC_CONFIG=${KCC_KIOSKCONFIG:0:1}
+KCC_INDEX=${KCC_KIOSKCONFIG:1:2}
 
-# read rotation variable
-TEMP="${HOME_PATH}kiosk.rotation"
+#  check if we are on a pi and set the home path
+if [ -d "/home/kcckiosk/" ]; then
+  KCC_ROTATION=$(cat /home/kcckiosk/kiosk.rotation)
+else
+  KCC_ROTATION=$(cat kiosk.rotation)
+fi
 
 # set screen dimensions & label URL
 case $KCC_ROTATION in
-    H)
-        echo "Horizontal"
-        SCRN_WIDTH=1920
-        SCRN_HEIGHT=1080
-        ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
-        LABEL_URL="label-bg-v.png"
-        LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
-        LABEL_1TOP="0"
-        LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
-        LABEL_2TOP="$((SCRN_HEIGHT/2))"
-        ;;
     V)
         echo "Vertical"
         SCRN_WIDTH=1080
@@ -151,9 +140,15 @@ case $KCC_ROTATION in
         LABEL_2TOP="$((SCRN_HEIGHT/2-50))"
         ;;
     *)
-        # error
-        echo "Rotation not set"
-        return
+        echo "Horizontal"
+        SCRN_WIDTH=1920
+        SCRN_HEIGHT=1080
+        ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
+        LABEL_URL="label-bg-v.png"
+        LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
+        LABEL_1TOP="0"
+        LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
+        LABEL_2TOP="$((SCRN_HEIGHT/2))"
         ;;
 esac
 
