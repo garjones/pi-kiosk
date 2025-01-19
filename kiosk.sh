@@ -99,12 +99,14 @@ while true; do
             # horizontal rotation
             echo "H" > kiosk.rotation
             echo "H"
+            return
             ;;
 
           S2)
             # vertical rotation
             echo "V" > kiosk.rotation
             echo "V"
+            return
             ;;
 
           *)
