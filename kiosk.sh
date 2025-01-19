@@ -16,16 +16,6 @@
 WT_HEIGHT=18
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
-DEBUG=FALSE
-
-# check for debug mode
-is_debug () {
-  if [ "$DEBUG" = TRUE ]; then
-    return 0
-  else
-    return 1
-  fi
-}
 
 # autoupgrade
 sudo apt autoremove -y
@@ -106,8 +96,8 @@ while true; do
           if [ $? -eq 0 ]; then # yes
             echo "$FUN$ROTATION" > kiosk.config
             echo "$FUN$ROTATION"
-            if is_debug; then echo "sync";    else sudo sync;   fi
-            if is_debug; then echo "reboot";  else sudo reboot; fi
+            sudo sync
+            sudo reboot
           fi
           ;;
     esac  
