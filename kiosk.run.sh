@@ -115,16 +115,10 @@ else
   KCC_KIOSKCONFIG=$(cat kiosk.config)
 fi
 
-# set config & index
+# get config & index & rotation
 KCC_CONFIG=${KCC_KIOSKCONFIG:0:1}
 KCC_INDEX=${KCC_KIOSKCONFIG:1:2}
-
-#  check if we are on a pi and set the home path
-if [ -d "/home/kcckiosk/" ]; then
-  KCC_ROTATION=$(cat /home/kcckiosk/kiosk.rotation)
-else
-  KCC_ROTATION=$(cat kiosk.rotation)
-fi
+KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
 
 # set screen dimensions & label URL
 case $KCC_ROTATION in
