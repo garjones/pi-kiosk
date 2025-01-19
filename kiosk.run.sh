@@ -27,7 +27,7 @@ is_debug () {
 # variables
 # --------------------------------------------------------------------------------
 # debug flag
-DEBUG=TRUE
+DEBUG=FALSE
 
 # set home path
 if is_debug; then 
