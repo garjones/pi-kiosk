@@ -62,7 +62,7 @@ else
 fi
 
 # autorun the kiosk configuration on login
-if grep -Fxq "https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh" .bashrc; then
+if grep -Fxq 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' .bashrc; then
     # already exists do nothing
     echo "[Skipped] Kiosk configuration autorun"
 else
