@@ -39,7 +39,6 @@ sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
 # enable the kiosk service
 sudo systemctl enable kiosk.service
 
-
 # move the taskbar to the bottom
 if grep -Fxq "position=bottom" .config/wf-panel-pi.ini; then
     # already exists do nothing
@@ -72,10 +71,19 @@ fi
 KCC_CONFIG=${KCC_KIOSKCONFIG:0:3}
 KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
 
+# wlr-randr --output HDMI-A-1 --transform normal
+# wlr-randr --output HDMI-A-2 --transform normal
+
+wlr-randr --output HDMI-A-1 --transform 90
+wlr-randr --output HDMI-A-2 --transform 90
+
+read
+
+
 # display main menu
 while true; do
   # display menu
-  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --default-item $KCC_CONFIG --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
+  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v3" --backtitle "(c) Gareth Jones - gareth@gareth.com" --default-item $KCC_CONFIG --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
   "C01" "Cameras over sheets 1 & 2"     \
   "C03" "Cameras over sheets 3 & 4"     \
   "C05" "Cameras over sheets 5 & 6"     \
