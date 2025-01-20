@@ -26,8 +26,12 @@ is_debug () {
 # --------------------------------------------------------------------------------
 # variables
 # --------------------------------------------------------------------------------
-# debug flag
-DEBUG=FALSE
+# set debug flag if we are not on a pi
+if [ -d "/home/kcckiosk/" ]; then
+  DEBUG=TRUE
+else
+  DEBUG=FALSE
+fi
 
 # camera URLS
 if is_debug; then
