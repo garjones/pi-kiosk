@@ -130,6 +130,9 @@ case $KCC_ROTATION in
         LABEL_1TOP="$((SCRN_HEIGHT/2-50))"
         LABEL_2LEFT="$((SCRN_WIDTH/2))"
         LABEL_2TOP="$((SCRN_HEIGHT/2-50))"
+
+        wlr-randr --output HDMI-A-1 --transform 90
+        wlr-randr --output HDMI-A-2 --transform 90
         ;;
     *)
         echo "Horizontal"
@@ -141,6 +144,9 @@ case $KCC_ROTATION in
         LABEL_1TOP="0"
         LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
         LABEL_2TOP="$((SCRN_HEIGHT/2))"
+
+        wlr-randr --output HDMI-A-1 --transform normal
+        wlr-randr --output HDMI-A-2 --transform normal
         ;;
 esac
 
