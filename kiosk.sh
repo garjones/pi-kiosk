@@ -73,10 +73,10 @@ KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
 
 # wlr-randr --output HDMI-A-1 --transform normal
 # wlr-randr --output HDMI-A-2 --transform normal
-XDG_RUNTIME_DIR=/run/user/1000
-wlr-randr --output HDMI-A-1 --transform 90
-wlr-randr --output HDMI-A-2 --transform 90
-
+#XDG_RUNTIME_DIR=/run/user/1000
+#wlr-randr --output HDMI-A-1 --transform 90
+#wlr-randr --output HDMI-A-2 --transform 90
+/home/kcckiosk/test.sh
 read
 
 
