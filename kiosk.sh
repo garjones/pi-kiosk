@@ -71,6 +71,13 @@ fi
 KCC_CONFIG=${KCC_KIOSKCONFIG:0:3}
 KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
 
+# test rotation
+wlr-randr --output HDMI-A-1 --transform 90
+wlr-randr --output HDMI-A-2 --transform 90
+
+read
+
+
 # display main menu
 while true; do
   # display menu
