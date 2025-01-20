@@ -95,14 +95,10 @@ while true; do
         S01)
           # horizontal rotation
           KCC_ROTATION="H"
-          wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform normal
-          wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform normal
           ;;
         S02)
           # vertical rotation
           KCC_ROTATION="V"
-          wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform 90
-          wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform 90
           ;;
         *)
           # check if sure, then write it out and reboot
