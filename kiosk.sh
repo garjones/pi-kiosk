@@ -6,26 +6,15 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 3.0 Added autoinstall
+#  Version 3.1 remove debug code
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
-# 
 
 # configuration parameters
 WT_HEIGHT=18
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
-DEBUG=FALSE
-
-# check for debug mode
-is_debug () {
-  if [ "$DEBUG" = TRUE ]; then
-    return 0
-  else
-    return 1
-  fi
-}
 
 # autoupgrade
 sudo apt autoremove -y
@@ -106,8 +95,8 @@ while true; do
           if [ $? -eq 0 ]; then # yes
             echo "$FUN$ROTATION" > kiosk.config
             echo "$FUN$ROTATION"
-            if is_debug; then echo "sync";    else sudo sync;   fi
-            if is_debug; then echo "reboot";  else sudo reboot; fi
+            sudo sync
+            sudo reboot
           fi
           ;;
     esac  
