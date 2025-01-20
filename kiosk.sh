@@ -60,10 +60,22 @@ else
     echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
 fi
 
+# get the current config
+#  check if we are on a pi and set the home path
+if [ -d "/home/kcckiosk/" ]; then
+  KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
+else
+  KCC_KIOSKCONFIG=$(cat kiosk.config)
+fi
+
+# get config & index & rotation
+KCC_CONFIG=${KCC_KIOSKCONFIG:0:3}
+KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
+
 # display main menu
 while true; do
   # display menu
-  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
+  FUN=$(whiptail --title "Kelowna Curling Club Kiosk Management v2" --backtitle "(c) Gareth Jones - gareth@gareth.com" --default-item $KCC_CONFIG --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
   "C01" "Cameras over sheets 1 & 2"     \
   "C03" "Cameras over sheets 3 & 4"     \
   "C05" "Cameras over sheets 5 & 6"     \
@@ -83,22 +95,22 @@ while true; do
     case $FUN in
         S01)
           # horizontal rotation
-          ROTATION="H"
-          wlr-randr --output HDMI-A-1 --transform normal
-          wlr-randr --output HDMI-A-2 --transform normal
+          KCC_ROTATION="H"
+          wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform normal
+          wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform normal
           ;;
         S02)
           # vertical rotation
-          ROTATION="V"
-          wlr-randr --output HDMI-A-1 --transform 90
-          wlr-randr --output HDMI-A-2 --transform 90
+          KCC_ROTATION="V"
+          wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform 90
+          wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform 90
           ;;
         *)
           # check if sure, then write it out and reboot
           whiptail --yesno "Are you sure?" 20 60 2
           if [ $? -eq 0 ]; then # yes
-            echo "$FUN$ROTATION" > kiosk.config
-            echo "$FUN$ROTATION"
+            echo "$FUN$KCC_ROTATION" > kiosk.config
+            echo "$FUN$KCC_ROTATION"
             sudo sync
             sudo reboot
           fi
