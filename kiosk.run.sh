@@ -160,6 +160,10 @@ if ! is_debug; then
   # fix chromium errors that may distrupt
   sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
   sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
+
+  # test screen rotation
+  wlr-randr --output HDMI-A-1 --transform 90
+  wlr-randr --output HDMI-A-2 --transform 90
 fi
 
 # do it
