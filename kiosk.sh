@@ -84,10 +84,14 @@ while true; do
         S01)
           # horizontal rotation
           ROTATION="H"
+          wlr-randr --output HDMI-A-1 --transform normal
+          wlr-randr --output HDMI-A-2 --transform normal
           ;;
         S02)
           # vertical rotation
           ROTATION="V"
+          wlr-randr --output HDMI-A-1 --transform 90
+          wlr-randr --output HDMI-A-2 --transform 90
           ;;
         *)
           # check if sure, then write it out and reboot
