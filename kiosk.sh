@@ -95,10 +95,14 @@ while true; do
         S01)
           # horizontal rotation
           KCC_ROTATION="H"
+          /bin/bash -c "wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform normal"
+          /bin/bash -c "wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform normal"
           ;;
         S02)
           # vertical rotation
           KCC_ROTATION="V"
+          /bin/bash -c "wlr-randr --output HDMI-A-1 --mode 1920x1080@60Hz --transform 90"
+          /bin/bash -c "wlr-randr --output HDMI-A-2 --mode 1920x1080@60Hz --transform 90"
           ;;
         *)
           # check if sure, then write it out and reboot
