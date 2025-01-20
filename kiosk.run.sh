@@ -194,6 +194,9 @@ case $KCC_CONFIG in
         ;;
 esac
 
+wlr-randr --output HDMI-A-1 --transform 90
+wlr-randr --output HDMI-A-2 --transform 90
+
 # keep process alive
 while true; do
    sleep 10
