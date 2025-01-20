@@ -15,24 +15,18 @@
 # functions
 # --------------------------------------------------------------------------------
 is_debug () {
-  if [ "$DEBUG" = TRUE ]; then
-    return 0
-  else
+  if [ -d "/home/kcckiosk/" ]; then
     return 1
+  else
+    return 0
   fi
+
 }
 
 
 # --------------------------------------------------------------------------------
 # variables
 # --------------------------------------------------------------------------------
-# set debug flag if we are not on a pi
-if [ -d "/home/kcckiosk/" ]; then
-  DEBUG=TRUE
-else
-  DEBUG=FALSE
-fi
-
 # camera URLS
 if is_debug; then
   URL_CAM_HOME=(
