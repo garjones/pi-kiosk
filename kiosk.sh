@@ -121,8 +121,3 @@ while true; do
     if [ $? -eq 0 ]; then exit 1; fi
   fi
 done
-
-wlr-randr --output HDMI-A-1 --transform 90
-wlr-randr --output HDMI-A-2 --transform 90
-
-
