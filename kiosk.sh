@@ -155,13 +155,13 @@ do_position_taskbar() {
 
 # autorun the kiosk configuration on login
 do_set_autorun() {
-  if grep -Fxq 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' .bashrc; then
+  if grep -Fxq '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' .bashrc; then
       # already exists do nothing
       echo "[Skipped] Kiosk configuration autorun"
   else
       # move taskbar to bottom
       echo "[Done] Kiosk configuration autorun"
-      echo 'sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
+      echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
   fi
 }
 
