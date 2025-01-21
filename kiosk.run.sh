@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 2.0 - support screen rotation
+#  Version 4 - Support Screen Rotation
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -107,10 +107,10 @@ ROT_180="transpose=2,transpose=2"
 ROT_270="transpose=2"
 
 #  check if we are on a pi and set the home path
-if [ -d "/home/kcckiosk/" ]; then
-  KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
-else
+if is_debug; then
   KCC_KIOSKCONFIG=$(cat kiosk.config)
+else
+  KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
 fi
 
 # get config & index & rotation
@@ -187,9 +187,6 @@ case $KCC_CONFIG in
         /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
         ;;
 esac
-
-wlr-randr --output HDMI-A-1 --transform 90
-wlr-randr --output HDMI-A-2 --transform 90
 
 # keep process alive
 while true; do
