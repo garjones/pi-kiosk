@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------
-#  menutest.sh
+#  kiosk.sh
 # --------------------------------------------------------------------------------
 #  Raspberry Pi based Kiosks
 # 
@@ -14,7 +14,7 @@
 # configuration parameters
 WT_TITLE="Kelowna Curling Club Kiosk Management v4"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
-WT_HEIGHT=10
+WT_HEIGHT=14
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
 
