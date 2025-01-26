@@ -125,7 +125,11 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1080
         SCRN_HEIGHT=1920
         ROTATION="transpose=1"
-        LABEL_URL="label-bg-h.png"
+        if is_debug; then
+          LABEL_URL="label-bg-h.png"
+        else
+          LABEL_URL="/home/kcckiosk/label-bg-h.png"
+        fi
         LABEL_1LEFT="0"
         LABEL_1TOP="$((SCRN_HEIGHT/2-50))"
         LABEL_2LEFT="$((SCRN_WIDTH/2))"
@@ -136,6 +140,11 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1920
         SCRN_HEIGHT=1080
         ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
+        if is_debug; then
+          LABEL_URL="label-bg-v.png"
+        else
+          LABEL_URL="/home/kcckiosk/label-bg-v.png"
+        fi
         LABEL_URL="label-bg-v.png"
         LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
         LABEL_1TOP="0"
@@ -174,11 +183,11 @@ case $KCC_CONFIG in
         ;;
     C)
         # cameras
-        #ffplay ${URL_CAM_AWAY[$((KCC_INDEX+1))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  &
-        #ffplay ${URL_CAM_HOME[$((KCC_INDEX+1))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top 0                  &        
-        #ffplay ${URL_CAM_AWAY[$((KCC_INDEX+0))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) & 
-        #ffplay ${URL_CAM_HOME[$((KCC_INDEX+0))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top $((SCRN_HEIGHT/2)) & 
-        #sleep 10
+        ffplay ${URL_CAM_AWAY[$((KCC_INDEX+1))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top 0                  &
+        ffplay ${URL_CAM_HOME[$((KCC_INDEX+1))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top 0                  &        
+        ffplay ${URL_CAM_AWAY[$((KCC_INDEX+0))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left 0                 -top $((SCRN_HEIGHT/2)) & 
+        ffplay ${URL_CAM_HOME[$((KCC_INDEX+0))]} -an -noborder -x $((SCRN_WIDTH/2)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2)) -top $((SCRN_HEIGHT/2)) & 
+        sleep 10
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_1LEFT -top $LABEL_1TOP -vf "drawtext=text='$KCC_INDEX':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_2LEFT -top $LABEL_2TOP -vf "drawtext=text='$((KCC_INDEX+1))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ;;
