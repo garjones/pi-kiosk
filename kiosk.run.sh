@@ -125,39 +125,40 @@ case $KCC_CONFIG in
         # all cameras
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
- .m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top 0                   -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-.m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top 0                  -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
-.m4v
+
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top 0                  -vf "transpose=1" &
-        ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
+        ;;
     *)
         # error
         /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
