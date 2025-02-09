@@ -121,6 +121,43 @@ case $KCC_CONFIG in
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_1LEFT -top $LABEL_1TOP -vf "drawtext=text='$((KCC_INDEX+0))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_2LEFT -top $LABEL_2TOP -vf "drawtext=text='$((KCC_INDEX+1))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ;;
+    A)
+        # all cameras
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+ 
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top 0                   -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
+
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top 0                  -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
+
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top 0                  -vf "transpose=1" &
+        ffplay /home/kcckiosk/BigBuckBunny_640x360 -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
     *)
         # error
         /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
