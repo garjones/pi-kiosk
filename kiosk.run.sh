@@ -158,6 +158,21 @@ case $KCC_CONFIG in
 
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top 0                  -vf "transpose=1" &
         ffplay /home/kcckiosk/BigBuckBunny_640x360.m4v -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
+
+        sleep 10
+        
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 0))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='1':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 1))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='2':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 2))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='3':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 3))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='4':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 4))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='5':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 5))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='6':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 6))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='7':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 7))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='8':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 8))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='9':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 9))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='10':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='11':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
+        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='12':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
         ;;
     *)
         # error
