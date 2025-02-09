@@ -84,7 +84,6 @@ case $KCC_ROTATION in
         SCRN_HEIGHT=1080
         ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
         LABEL_URL="/home/kcckiosk/label-bg-v.png"
-        LABEL_URL="label-bg-v.png"
         LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
         LABEL_1TOP="0"
         LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
