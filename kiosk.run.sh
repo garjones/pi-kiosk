@@ -12,87 +12,40 @@
 # --------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------
-# functions
-# --------------------------------------------------------------------------------
-is_debug () {
-  if [ -d "/home/kcckiosk/" ]; then
-    return 1
-  else
-    return 0
-  fi
-
-}
-
-
-# --------------------------------------------------------------------------------
 # variables
 # --------------------------------------------------------------------------------
 # camera URLS
-if is_debug; then
-  URL_CAM_HOME=(
-    ""
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-  )
+URL_CAM_HOME=(
+  ""
+  "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
+  "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
+  "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
+  "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
+)
 
-  URL_CAM_AWAY=(
-    ""
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-    "BigBuckBunny_640x360.m4v"
-  )
-else
-  URL_CAM_HOME=(
-    ""
-    "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
-  )
-
-  URL_CAM_AWAY=(
-    ""
-    "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
-    "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
-    "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
-  )
-fi
+URL_CAM_AWAY=(
+  ""
+  "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
+  "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
+  "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
+  "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
+)
 
 # kiosk URLS
 URL_KIOSK=(
@@ -106,14 +59,8 @@ ROT_90="transpose=1"
 ROT_180="transpose=2,transpose=2"
 ROT_270="transpose=2"
 
-#  check if we are on a pi and set the home path
-if is_debug; then
-  KCC_KIOSKCONFIG=$(cat kiosk.config)
-else
-  KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
-fi
-
 # get config & index & rotation
+KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
 KCC_CONFIG=${KCC_KIOSKCONFIG:0:1}
 KCC_INDEX=${KCC_KIOSKCONFIG:1:2}
 KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
@@ -125,11 +72,7 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1080
         SCRN_HEIGHT=1920
         ROTATION="transpose=1"
-        if is_debug; then
-          LABEL_URL="label-bg-h.png"
-        else
-          LABEL_URL="/home/kcckiosk/label-bg-h.png"
-        fi
+        LABEL_URL="/home/kcckiosk/label-bg-h.png"
         LABEL_1LEFT="0"
         LABEL_1TOP="$((SCRN_HEIGHT/2-50))"
         LABEL_2LEFT="$((SCRN_WIDTH/2))"
@@ -140,11 +83,7 @@ case $KCC_ROTATION in
         SCRN_WIDTH=1920
         SCRN_HEIGHT=1080
         ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
-        if is_debug; then
-          LABEL_URL="label-bg-v.png"
-        else
-          LABEL_URL="/home/kcckiosk/label-bg-v.png"
-        fi
+        LABEL_URL="/home/kcckiosk/label-bg-v.png"
         LABEL_URL="label-bg-v.png"
         LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
         LABEL_1TOP="0"
@@ -156,30 +95,22 @@ esac
 # --------------------------------------------------------------------------------
 # execute
 # --------------------------------------------------------------------------------
-# only do x windows settings if we are on a pi
-if ! is_debug; then
-  # set xwindows variables
-  xset s noblank
-  xset s off
-  xset -dpms
+# set xwindows variables
+xset s noblank
+xset s off
+xset -dpms
 
-  # hide the mouse
-  unclutter -idle 0.5 -root &
+# hide the mouse
+unclutter -idle 0.5 -root &
 
-  # fix chromium errors that may distrupt
-  sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
-  sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
-fi
+# fix chromium errors that may distrupt
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
+sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
 
 # do it
 case $KCC_CONFIG in
     K)
-        # kiosks
-        if is_debug; then
-          echo ${URL_KIOSK[KCC_INDEX]}
-        else
-          /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
-        fi
+        /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
         ;;
     C)
         # cameras

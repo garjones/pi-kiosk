@@ -6,13 +6,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 4 - Modularized and added submenus
+#  Version 5 - Modularized and added submenus
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v4"
+WT_TITLE="Kelowna Curling Club Kiosk Management v5"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=14
 WT_WIDTH=80
@@ -143,25 +143,25 @@ do_create_service() {
 
 # move the taskbar to the bottom
 do_position_taskbar() {
-  if grep -Fxq "position=bottom" .config/wf-panel-pi.ini; then
+  if grep -Fxq "position=bottom" /home/kcckiosk/.config/wf-panel-pi.ini; then
       # already exists do nothing
       echo "[Skipped] Taskbar set to bottom"
   else
       # move taskbar to bottom
       echo "[Done] Taskbar set to bottom"
-      echo "position=bottom" >> .config/wf-panel-pi.ini
+      echo "position=bottom" >> /home/kcckiosk/.config/wf-panel-pi.ini
   fi
 }
 
 # autorun the kiosk configuration on login
 do_set_autorun() {
-  if grep -Fxq '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' .bashrc; then
+  if grep -Fxq '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' /home/kcckiosk/.bashrc; then
       # already exists do nothing
       echo "[Skipped] Kiosk configuration autorun"
   else
       # move taskbar to bottom
       echo "[Done] Kiosk configuration autorun"
-      echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> .bashrc
+      echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> /home/kcckiosk/.bashrc
   fi
 }
 
@@ -173,7 +173,7 @@ do_write_config() {
     # check if sure, then write it out and reboot
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-      echo "$FUN$ROTATION" > kiosk.config
+      echo "$FUN$ROTATION" > /home/kcckiosk/kiosk.config
       echo "$FUN$ROTATION"
       sudo sync
       sudo reboot
