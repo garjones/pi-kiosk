@@ -123,42 +123,31 @@ case $KCC_CONFIG in
         ;;
     A)
         # all cameras
-        ffplay ${URL_CAM_AWAY[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 0)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 1)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 2)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 3)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 4)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 5)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 6)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 7)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 8)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top 0                   -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 9)) -top $((SCRN_HEIGHT/2))  -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top 0                  -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
-
-        ffplay ${URL_CAM_AWAY[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top 0                  -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2)) -vf "transpose=1" &
-
+        ffplay ${URL_CAM_AWAY[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 0)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 0)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 1)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 1)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 2)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 2)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 3)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 3)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 4)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 4)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 5)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 5)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 6)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 6)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 7)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 7)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 8)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 8)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 9)) -top 0                      -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 9)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 10)) -top 0                     -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2+50)) -vf "transpose=1" &
+        ffplay ${URL_CAM_AWAY[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 11)) -top 0                     -vf "transpose=1" &
+        ffplay ${URL_CAM_HOME[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2+50)) -vf "transpose=1" &
+-50
         sleep 10
         
         ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 0))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='1':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
