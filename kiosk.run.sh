@@ -52,6 +52,16 @@ URL_KIOSK=(
   ""
   "https://marquee.csekcreative.com/launch/display.php?device_id=580&synchronization_code=73127-62700&key=7110a09bcb4e20f7fd76af20b22d0ee078a6e391368f5a401e7c51db9d55ea8d98ecb7230394223bf26efabea65ee0ae0bcc4c8f58293d4cf41130c330755209"
   "https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c"
+
+
+
+# downstairs
+https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c
+
+#upstairs
+https://marquee.csekcreative.com/launch/display.php?device_id=572&synchronization_code=10543-48822&key=54d6ed5688b801a8e43b6d44f81fa7b87f28dcf1b11a9f4b0f722627ffc4ed469dead0bd7a1f62a971054885b50758f50b0aeec038bf9319e6c441ae43ca3bdd
+
+
 )
 
 # rotation constants
