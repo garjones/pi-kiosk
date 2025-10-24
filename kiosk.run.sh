@@ -109,7 +109,7 @@ sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/
 # do it
 case $KCC_CONFIG in
     K)
-        /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
+        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
         ;;
     C)
         # cameras
@@ -163,7 +163,7 @@ case $KCC_CONFIG in
         ;;
     *)
         # error
-        /usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
+        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
         ;;
 esac
 
