@@ -80,8 +80,8 @@ case $KCC_ROTATION in
         ;;
     *)
         echo "Horizontal"
-        SCRN_WIDTH=1920
-        SCRN_HEIGHT=1080
+        SCRN_WIDTH=3820
+        SCRN_HEIGHT=2160
         ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
         LABEL_URL="/home/kcckiosk/label-bg-v.png"
         LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
