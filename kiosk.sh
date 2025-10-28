@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 5 - Modularized and added submenus
+#  Version 6 - Added support for random sheets
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -54,15 +54,18 @@ do_menu_main() {
 do_menu_cameras() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Canera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "C01" "Cameras over sheets 1 & 2"     \
-  "C03" "Cameras over sheets 3 & 4"     \
-  "C05" "Cameras over sheets 5 & 6"     \
-  "C07" "Cameras over sheets 7 & 8"     \
-  "C09" "Cameras over sheets 9 & 10"    \
-  "C11" "Cameras over sheets 11 & 12"   \
-  "A00" "All Camera Test"               \
+  "C0102" "Cameras over sheets 1 & 2"     \
+  "C0304" "Cameras over sheets 3 & 4"     \
+  "C0506" "Cameras over sheets 5 & 6"     \
+  "C0708" "Cameras over sheets 7 & 8"     \
+  "C0910" "Cameras over sheets 9 & 10"    \
+  "C1112" "Cameras over sheets 11 & 12"   \
+  "A0000" "All Camera Test"               \
   3>&1 1>&2 2>&3)
   RET=$?
+
+  # if custom cameras
+  $FUN="C0103"
 
   # process response
   if [ $RET -eq 0 ]; then
@@ -126,6 +129,9 @@ do_install_packages() (
 do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      -O /home/kcckiosk/kiosk.run.sh
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-h.png    -O /home/kcckiosk/label-bg-h.png
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-v.png    -O /home/kcckiosk/label-bg-v.png
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-all.png  -O /home/kcckiosk/label-bg-all.png
 }
 
 # create/enable service
