@@ -126,9 +126,6 @@ do_install_packages() (
 do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      -O /home/kcckiosk/kiosk.run.sh
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-h.png    -O /home/kcckiosk/label-bg-h.png
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-v.png    -O /home/kcckiosk/label-bg-v.png
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/label-bg-all.png  -O /home/kcckiosk/label-bg-all.png
 }
 
 # create/enable service
