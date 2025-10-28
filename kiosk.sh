@@ -145,13 +145,13 @@ do_create_service() {
 
 # move the taskbar to the bottom
 do_position_taskbar() {
-  if grep -Fxq "position=bottom" /home/kcckiosk/.config/wf-panel-pi.ini; then
+  if grep -Fxq "position=bottom" /home/kcckiosk/.config/wf-panel-pi/wf-panel-pi.ini; then
       # already exists do nothing
       echo "[Skipped] Taskbar set to bottom"
   else
       # move taskbar to bottom
       echo "[Done] Taskbar set to bottom"
-      echo "position=bottom" >> /home/kcckiosk/.config/wf-panel-pi.ini
+      echo "position=bottom" >> /home/kcckiosk/.config/wf-panel-pi/wf-panel-pi.ini
   fi
 }
 
