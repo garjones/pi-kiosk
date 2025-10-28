@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # --------------------------------------------------------------------------------
 #  kiosk.sh
@@ -31,7 +30,6 @@ do_menu_main() {
     "P1" "Display Cameras"        \
     "P2" "Display Kiosk"          \
     "P3" "Change Screen Rotation" \
-    "P4" "Custom Configuration"   \    
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -42,7 +40,6 @@ do_menu_main() {
         P1) do_menu_cameras ;;
         P2) do_menu_kiosks;;
         P3) do_menu_screen ;;
-        P4) do_menu_custom;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -107,24 +104,6 @@ do_menu_screen() {
   # process response
   if [ $RET -eq 0 ]; then
     do_screen_rotation
-  else
-    return 0
-  fi
-}
-
-
-do_menu_custom() {
-  # display menu
-  whiptail --msgbox "\
-      Only use this funtionality if you know exactly what you are doing. \
-      " 20 70 1
-
-  # prompt for string
-  FUN=$(whiptail --inputbox "Please enter a config string" 20 60 "" 3>&1 1>&2 2>&3)
-  
-  # process response
-  if [ $RET -eq 0 ]; then
-    do_write_config
   else
     return 0
   fi
