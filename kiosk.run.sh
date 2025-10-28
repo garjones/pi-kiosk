@@ -109,18 +109,16 @@ KCC_CONFIG=${KCC_KIOSKCONFIG:1:1}
 KCC_INDEX=${KCC_KIOSKCONFIG:2:2}
 KCC_INDEX2=${KCC_KIOSKCONFIG:4:2}
 
-
+# trim the sheet numbers
+SHEET_TOP=$((10#$KCC_INDEX2))
+SHEET_BOT=$((10#$KCC_INDEX))
 
 # Extract resolution string like "3840x2160"
 RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
-
-# video and label variables
-SHEET_TOP="$KCC_INDEX2"
-SHEET_BOT="$KCC_INDEX"
-
 SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
 SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
 
+# define positons of windows
 VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 VID_H="$((SCRN_HEIGHT/2))"
 VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
