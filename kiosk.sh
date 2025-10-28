@@ -17,7 +17,7 @@ WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=14
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
-
+ROTATION="H"
 
 # --------------------------------------------------------------------------------
 # menus
