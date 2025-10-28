@@ -6,13 +6,49 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 4.5 - Better label support
+#  Version 6 - Total re-write
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
+
 # --------------------------------------------------------------------------------
-# variables
+# functions
+# --------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------
+#  do_label() - Draw white label, black border, text in centre
+# --------------------------------------------------------------------------------
+#    1 - Label
+#    2 - Width
+#    3 - Height
+#    4 - Left
+#    5 - Top
+#    6 - Border Width
+# --------------------------------------------------------------------------------
+do_label() {
+  ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
+    "color=white:size=$2x$3:rate=1,
+    drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
+    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2" &
+}
+
+# --------------------------------------------------------------------------------
+#  do_video() - Display a video feed
+# --------------------------------------------------------------------------------
+#    $1 - URL
+#    $2 - Width
+#    $3 - Height
+#    $4 - Left
+#    $5 - Top
+# --------------------------------------------------------------------------------
+do_video() {
+  ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
+}
+
+
+# --------------------------------------------------------------------------------
+# constants
 # --------------------------------------------------------------------------------
 # camera URLS
 URL_CAM_HOME=(
@@ -59,46 +95,45 @@ ROT_90="transpose=1"
 ROT_180="transpose=2,transpose=2"
 ROT_270="transpose=2"
 
+# label constants
+LBL_WIDTH="100"
+LBL_BORDER="1"
+
+# --------------------------------------------------------------------------------
+# variables
+# --------------------------------------------------------------------------------
 # get config & index & rotation
 KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
-KCC_CONFIG=${KCC_KIOSKCONFIG:0:1}
-KCC_INDEX=${KCC_KIOSKCONFIG:1:2}
-KCC_ROTATION=${KCC_KIOSKCONFIG:3:1}
+KCC_ROTATION=${KCC_KIOSKCONFIG:0:1}
+KCC_CONFIG=${KCC_KIOSKCONFIG:1:1}
+KCC_INDEX=${KCC_KIOSKCONFIG:2:2}
+KCC_INDEX2=${KCC_KIOSKCONFIG:4:2}
 
-# set screen dimensions & label URL
-case $KCC_ROTATION in
-    V)
-        echo "Vertical"
-        SCRN_WIDTH=1080
-        SCRN_HEIGHT=1920
-        ROTATION="transpose=1"
-        LABEL_URL="/home/kcckiosk/label-bg-h.png"
-        LABEL_1LEFT="0"
-        LABEL_1TOP="$((SCRN_HEIGHT/2-50))"
-        LABEL_2LEFT="$((SCRN_WIDTH/2))"
-        LABEL_2TOP="$((SCRN_HEIGHT/2-50))"
-        ;;
-    *)
-        echo "Horizontal"
-        SCRN_WIDTH=3820
-        SCRN_HEIGHT=2160
-        ROTATION="transpose=2,transpose=2,transpose=2,transpose=2"
-        LABEL_URL="/home/kcckiosk/label-bg-v.png"
-        LABEL_1LEFT="$((SCRN_WIDTH/2-50))"
-        LABEL_1TOP="0"
-        LABEL_2LEFT="$((SCRN_WIDTH/2-50))"
-        LABEL_2TOP="$((SCRN_HEIGHT/2))"
-        ;;
-esac
+
+
+# Extract resolution string like "3840x2160"
+RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
+
+# video and label variables
+SHEET_TOP="$KCC_INDEX2"
+SHEET_BOT="$KCC_INDEX"
+
+SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
+SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
+
+VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
+VID_H="$((SCRN_HEIGHT/2))"
+VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
+VID_T="$((SCRN_HEIGHT/2))"
+LBL_W="$LBL_WIDTH"
+LBL_H="$((SCRN_HEIGHT/2))"
+LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
+LBL_T="$((SCRN_HEIGHT/2))"
+LBL_B="$LBL_BORDER"
 
 # --------------------------------------------------------------------------------
-# execute
+# screen setup
 # --------------------------------------------------------------------------------
-# set xwindows variables
-xset s noblank
-xset s off
-xset -dpms
-
 # hide the mouse
 unclutter -idle 0.5 -root &
 
@@ -106,68 +141,32 @@ unclutter -idle 0.5 -root &
 sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
 sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
 
-# do it
+# --------------------------------------------------------------------------------
+# execute
+# --------------------------------------------------------------------------------
 case $KCC_CONFIG in
     K)
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
         ;;
     C)
-        # cameras
-        ffplay ${URL_CAM_AWAY[$((KCC_INDEX+1))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/2-50)) -y $((SCRN_HEIGHT/2)) -left 0                    -top 0                  &
-        ffplay ${URL_CAM_HOME[$((KCC_INDEX+1))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/2-50)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2+50)) -top 0                  &        
-        ffplay ${URL_CAM_AWAY[$((KCC_INDEX+0))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/2-50)) -y $((SCRN_HEIGHT/2)) -left 0                    -top $((SCRN_HEIGHT/2)) & 
-        ffplay ${URL_CAM_HOME[$((KCC_INDEX+0))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/2-50)) -y $((SCRN_HEIGHT/2)) -left $((SCRN_WIDTH/2+50)) -top $((SCRN_HEIGHT/2)) & 
+        #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER
+        do_video  ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0
+        do_video  ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0
+        do_video  ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
+        do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
+        do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B
+        do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B
+	      ;;
 
-        ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_1LEFT -top $LABEL_1TOP -fs -x 100 -y $((SCRN_HEIGHT/2)) -vf "drawtext=text='$((KCC_INDEX+0))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay $LABEL_URL -an -noborder -alwaysontop -left $LABEL_2LEFT -top $LABEL_2TOP -fs -x 100 -y $((SCRN_HEIGHT/2)) -vf "drawtext=text='$((KCC_INDEX+1))':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ;;
-    A)
-        # all cameras
-        ffplay ${URL_CAM_AWAY[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 0)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((1))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 0)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 1)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((2))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 1)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 2)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((3))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 2)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 3)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((4))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 3)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 4)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((5))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 4)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 5)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((6))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 5)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 6)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((7))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 6)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 7)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((8))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 7)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 8)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((9))]}  -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 8)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 9)) -top 0                      -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((10))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 9)) -top $((SCRN_HEIGHT/2+50))  -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 10)) -top 0                     -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((11))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2+50)) -vf "transpose=1" &
-        ffplay ${URL_CAM_AWAY[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 11)) -top 0                     -vf "transpose=1" &
-        ffplay ${URL_CAM_HOME[$((12))]} -an -noborder -alwaysontop -x $((SCRN_WIDTH/12)) -y $((SCRN_HEIGHT/2-50)) -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2+50)) -vf "transpose=1" &
-
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 0))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='1':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 1))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='2':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 2))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='3':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 3))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='4':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 4))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='5':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 5))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='6':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 6))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='7':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 7))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='8':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 8))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='9':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 9))  -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='10':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 10)) -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='11':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ffplay /home/kcckiosk/label-bg-all.png -an -noborder -alwaysontop -left $((SCRN_WIDTH/12 * 11)) -top $((SCRN_HEIGHT/2-50)) -vf "drawtext=text='12':font='Arial':x=(w-text_w)/2:y=(h-text_h)/2:fontsize=48:fontcolor=black" &
-        ;;
     *)
         # error
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
         ;;
 esac
 
-# keep process alive
+# --------------------------------------------------------------------------------
+# keep alive
+# --------------------------------------------------------------------------------
 while true; do
    sleep 10
 done
