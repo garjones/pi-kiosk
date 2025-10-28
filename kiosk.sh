@@ -178,8 +178,8 @@ do_write_config() {
     # check if sure, then write it out and reboot
     whiptail --yesno "Are you sure?" 20 60 2
     if [ $? -eq 0 ]; then # yes
-      echo "$FUN$ROTATION" > /home/kcckiosk/kiosk.config
-      echo "$FUN$ROTATION"
+      echo "$ROTATION$FUN" > /home/kcckiosk/kiosk.config
+      echo "$ROTATION$FUN"
       sudo sync
       sudo reboot
     fi
