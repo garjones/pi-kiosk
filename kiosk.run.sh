@@ -131,11 +131,11 @@ LBL_T="$((SCRN_HEIGHT/2))"
 LBL_B="$LBL_BORDER"
 
 # check for screen rotation
-if [ "$KCC_ROTATION" = "V" ]; then
-    echo "Vertical"
+if [ "$KCC_ROTATION" = "H" ]; then
+    echo "Horizontal"
     LBL_R=""
 else
-    echo "Horizontal"
+	echo "Vertical"
     LBL_R=",transpose=2"
 fi
 
