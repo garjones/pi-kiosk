@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 5 - Total re-write
+#  Version 5.5 - Updated rotations
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -110,8 +110,6 @@ KCC_CONFIG=${KCC_KIOSKCONFIG:1:1}
 KCC_INDEX=${KCC_KIOSKCONFIG:2:2}
 KCC_INDEX2=${KCC_KIOSKCONFIG:4:2}
 
-
-
 # Extract resolution string like "3840x2160"
 RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
 
@@ -132,17 +130,15 @@ LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 LBL_T="$((SCRN_HEIGHT/2))"
 LBL_B="$LBL_BORDER"
 
-# set screen dimensions & label URL
-case $KCC_ROTATION in
-    V)
-        echo "Vertical"
-        LBL_R=""
-        ;;
-    *)
-        echo "Horizontal"
-        LBL_R=",transpose=2"
-        ;;
-esac
+# check for screen rotation
+if [ "$KCC_ROTATION" = "V" ]; then
+    echo "Vertical"
+    LBL_R=""
+else
+    echo "Horizontal"
+    LBL_R=",transpose=2"
+fi
+
 
 # --------------------------------------------------------------------------------
 # screen setup
