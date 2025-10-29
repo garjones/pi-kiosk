@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 6 - Total re-write
+#  Version 5 - Total re-write
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -25,12 +25,13 @@
 #    4 - Left
 #    5 - Top
 #    6 - Border Width
+#    7 - Rotation
 # --------------------------------------------------------------------------------
 do_label() {
   ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
     "color=white:size=$2x$3:rate=1,
     drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
-    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2" &
+    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2$7" &
 }
 
 # --------------------------------------------------------------------------------
@@ -109,16 +110,18 @@ KCC_CONFIG=${KCC_KIOSKCONFIG:1:1}
 KCC_INDEX=${KCC_KIOSKCONFIG:2:2}
 KCC_INDEX2=${KCC_KIOSKCONFIG:4:2}
 
-# trim the sheet numbers
-SHEET_TOP=$((10#$KCC_INDEX2))
-SHEET_BOT=$((10#$KCC_INDEX))
+
 
 # Extract resolution string like "3840x2160"
 RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
+
+# video and label variables
+SHEET_TOP="$KCC_INDEX2"
+SHEET_BOT="$KCC_INDEX"
+
 SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
 SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
 
-# define positons of windows
 VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 VID_H="$((SCRN_HEIGHT/2))"
 VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
@@ -128,6 +131,18 @@ LBL_H="$((SCRN_HEIGHT/2))"
 LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 LBL_T="$((SCRN_HEIGHT/2))"
 LBL_B="$LBL_BORDER"
+
+# set screen dimensions & label URL
+case $KCC_ROTATION in
+    V)
+        echo "Vertical"
+        LBL_R=""
+        ;;
+    *)
+        echo "Horizontal"
+        LBL_R=",transpose=2"
+        ;;
+esac
 
 # --------------------------------------------------------------------------------
 # screen setup
@@ -147,13 +162,13 @@ case $KCC_CONFIG in
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
         ;;
     C)
-        #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER
+        #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
         do_video  ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0
         do_video  ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0
         do_video  ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
         do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
-        do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B
-        do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B
+        do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
+        do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
 	      ;;
 
     *)
