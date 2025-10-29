@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 6 - Added support for random sheets
+#  Version 6.1 - rolling back
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -61,9 +61,6 @@ do_menu_cameras() {
   "A0000" "All Camera Test"               \
   3>&1 1>&2 2>&3)
   RET=$?
-
-  # if custom cameras
-  $FUN="C0103"
 
   # process response
   if [ $RET -eq 0 ]; then
