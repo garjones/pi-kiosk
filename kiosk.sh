@@ -186,14 +186,10 @@ do_screen_rotation() {
     if [ "$FUN"="H" ]; then 
       # horizontal rotation
       ROTATION="H"
-      wlr-randr --output HDMI-A-1 --transform normal
-      wlr-randr --output HDMI-A-2 --transform normal
       echo "HORIZONTAL"
     else
       # vertical rotation
       ROTATION="V"
-      wlr-randr --output HDMI-A-1 --transform 90
-      wlr-randr --output HDMI-A-2 --transform 90
       echo "VERTICAL"
     fi
     echo $ROTATION
