@@ -27,9 +27,9 @@ do_menu_main() {
   while true; do
     # display menu
     FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
-    "P1" "Display Cameras"        \
-    "P2" "Display Kiosk"          \
-    "P3" "Change Screen Rotation" \
+    "P1" "Display Horizontal Cameras" \
+    "P2" "Display Vertival Cameras"   \    
+    "P3" "Display Kiosk"              \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -37,9 +37,9 @@ do_menu_main() {
     if [ $RET -eq 0 ]; then
       # menu item was selected
       case "$FUN" in
-        P1) do_menu_cameras ;;
-        P2) do_menu_kiosks;;
-        P3) do_menu_screen ;;
+        P1) do_menu_h_cameras ;;
+        P2) do_menu_v_cameras ;;
+        P3) do_menu_kiosks;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -51,7 +51,7 @@ do_menu_main() {
 }
 
 
-do_menu_cameras() {
+do_menu_h_cameras() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Canera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
   "C0102" "Cameras over sheets 1 & 2"     \
@@ -64,17 +64,36 @@ do_menu_cameras() {
   3>&1 1>&2 2>&3)
   RET=$?
 
-  # if custom cameras
-  $FUN="C0103"
-
   # process response
   if [ $RET -eq 0 ]; then
+    ROTATION="H"
     do_write_config
   else
     return 0
   fi
 }
 
+do_menu_v_cameras() {
+  # display menu
+  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Canera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
+  "C0102" "Cameras over sheets 1 & 2"     \
+  "C0304" "Cameras over sheets 3 & 4"     \
+  "C0506" "Cameras over sheets 5 & 6"     \
+  "C0708" "Cameras over sheets 7 & 8"     \
+  "C0910" "Cameras over sheets 9 & 10"    \
+  "C1112" "Cameras over sheets 11 & 12"   \
+  "A0000" "All Camera Test"               \
+  3>&1 1>&2 2>&3)
+  RET=$?
+
+  # process response
+  if [ $RET -eq 0 ]; then
+    ROTATION="V"
+    do_write_config
+  else
+    return 0
+  fi
+}
 
 do_menu_kiosks() {
   # display menu
@@ -87,23 +106,6 @@ do_menu_kiosks() {
   # process response
   if [ $RET -eq 0 ]; then
     do_write_config
-  else
-    return 0
-  fi
-}
-
-
-do_menu_screen() {
-  # display menu
-  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Screen Rotation" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "H" "Screen is Horizontal" \
-  "V" "Screen is Vertical"   \
-  3>&1 1>&2 2>&3)
-  RET=$?
-
-  # process response
-  if [ $RET -eq 0 ]; then
-    do_screen_rotation
   else
     return 0
   fi
@@ -182,18 +184,6 @@ do_write_config() {
     fi
 }
 
-do_screen_rotation() {
-    if [ "$FUN"="H" ]; then 
-      # horizontal rotation
-      ROTATION="H"
-      echo "HORIZONTAL"
-    else
-      # vertical rotation
-      ROTATION="V"
-      echo "VERTICAL"
-    fi
-    echo $ROTATION
-}
 
 # --------------------------------------------------------------------------------
 #  execute
