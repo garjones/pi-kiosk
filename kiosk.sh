@@ -110,6 +110,9 @@ do_menu_screen() {
 
 # autoupgrade
 do_auto_upgrade() {
+  echo "Autoupdating in 5 seconds, ctrl+c to abort..."
+  sleep 5
+
   sudo apt autoremove -y
   sudo apt update
   sudo apt upgrade -y
