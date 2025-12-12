@@ -16,7 +16,7 @@ WT_TITLE="Kelowna Curling Club Kiosk Management v5"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
-WT_MENU_HEIGHT=$((WT_HEIGHT - 11))
+WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
 ROTATION="H"
 
 # --------------------------------------------------------------------------------
@@ -53,16 +53,19 @@ do_menu_main() {
 
 do_menu_cameras() {
   # display menu
+
+  #"C0102" "Cameras over sheets 1 & 2"       \
+  #"C0304" "Cameras over sheets 3 & 4"       \
+  #"C0506" "Cameras over sheets 5 & 6"       \
+  #"C0708" "Cameras over sheets 7 & 8"       \
+  #"C0910" "Cameras over sheets 9 & 10"      \
+  #"C1112" "Cameras over sheets 11 & 12"     \
+  #"S0001" "───────────────────────────────" \
+  #"A0000" "All Camera Test"                 \
+
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "C0102" "Cameras over sheets 1 & 2"       \
-  "C0304" "Cameras over sheets 3 & 4"       \
-  "C0506" "Cameras over sheets 5 & 6"       \
-  "C0708" "Cameras over sheets 7 & 8"       \
-  "C0910" "Cameras over sheets 9 & 10"      \
-  "C1112" "Cameras over sheets 11 & 12"     \
-  "A0001" "OQE - Cameras over sheets 3 & 4" \
-  "A0002" "OQE - Cameras over sheets 6 & 7" \
-  "A0000" "All Camera Test"                 \
+  "C0304" "OQE - Cameras over sheets 3 & 4" \
+  "C0607" "OQE - Cameras over sheets 6 & 7" \
   3>&1 1>&2 2>&3)
   RET=$?
 
