@@ -29,6 +29,7 @@ do_menu_main() {
     FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
     "P1" "Display Cameras"        \
     "P2" "Display Kiosk"          \
+    "P3" "Software Update"        \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -38,6 +39,7 @@ do_menu_main() {
       case "$FUN" in
         P1) do_menu_cameras ;;
         P2) do_menu_kiosks;;
+        P3) do_apt;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -87,7 +89,6 @@ do_menu_kiosks() {
   fi
 }
 
-
 do_menu_screen() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Screen Rotation" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
@@ -108,22 +109,15 @@ do_menu_screen() {
 #  functions for install
 # --------------------------------------------------------------------------------
 
-# autoupgrade
-do_auto_upgrade() {
-  echo "Autoupdating in 5 seconds, ctrl+c to abort..."
-  sleep 5
-
+# apt
+do_apt() {
   sudo apt autoremove -y
   sudo apt update
   sudo apt upgrade -y
+  sudo apt install unclutter -y
 }
 
-# install packages
-do_install_packages() (
-  sudo apt install unclutter -y
-)
-
-# autoupdate
+# autoupdate from git
 do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      -O /home/kcckiosk/kiosk.run.sh
@@ -183,8 +177,7 @@ do_write_config() {
 # --------------------------------------------------------------------------------
 #  execute
 # --------------------------------------------------------------------------------
-do_auto_upgrade
-do_install_packages
+# do_apt
 do_auto_update
 do_create_service
 do_position_taskbar
