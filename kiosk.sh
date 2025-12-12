@@ -60,8 +60,8 @@ do_menu_cameras() {
   "C0708" "Cameras over sheets 7 & 8"       \
   "C0910" "Cameras over sheets 9 & 10"      \
   "C1112" "Cameras over sheets 11 & 12"     \
-  "C0304" "OQE - Cameras over sheets 3 & 4" \
-  "C0304" "OQE - Cameras over sheets 6 & 7" \
+  "A0001" "OQE - Cameras over sheets 3 & 4" \
+  "A0002" "OQE - Cameras over sheets 6 & 7" \
   "A0000" "All Camera Test"                 \
   3>&1 1>&2 2>&3)
   RET=$?
