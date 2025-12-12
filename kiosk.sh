@@ -14,7 +14,7 @@
 # configuration parameters
 WT_TITLE="Kelowna Curling Club Kiosk Management v5"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
-WT_HEIGHT=18
+WT_HEIGHT=25
 WT_WIDTH=80
 WT_MENU_HEIGHT=$((WT_HEIGHT - 11))
 ROTATION="H"
@@ -53,7 +53,7 @@ do_menu_main() {
 
 do_menu_cameras() {
   # display menu
-  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Canera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
+  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
   "C0102" "Cameras over sheets 1 & 2"       \
   "C0304" "Cameras over sheets 3 & 4"       \
   "C0506" "Cameras over sheets 5 & 6"       \
@@ -78,8 +78,8 @@ do_menu_cameras() {
 do_menu_kiosks() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Kiosk Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "K01" "Kiosk Upstairs"   \
-  "K02" "Kiosk Downstairs" \
+  "K01" "Kiosk Advertising (Upstairs)"   \
+  "K02" "Kiosk Practice Ice (Downstairs)" \
   3>&1 1>&2 2>&3)
   RET=$?
 
