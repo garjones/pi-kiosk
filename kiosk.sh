@@ -14,9 +14,9 @@
 # configuration parameters
 WT_TITLE="Kelowna Curling Club Kiosk Management v5"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
-WT_HEIGHT=14
+WT_HEIGHT=18
 WT_WIDTH=80
-WT_MENU_HEIGHT=$((WT_HEIGHT - 7))
+WT_MENU_HEIGHT=$((WT_HEIGHT - 11))
 ROTATION="H"
 
 # --------------------------------------------------------------------------------
