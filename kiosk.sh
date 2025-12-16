@@ -7,13 +7,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 6.1 - rolling back
+#  Version 6.5
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v6"
+WT_TITLE="Kelowna Curling Club Kiosk Management v6.5"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
