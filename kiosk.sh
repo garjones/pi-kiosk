@@ -42,7 +42,7 @@ do_menu_main() {
         P1) do_menu_cameras ;;
         P2) do_menu_kiosks;;
         P3) do_apt;;
-        P4} do_reboot;;
+        P4) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
