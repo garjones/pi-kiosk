@@ -13,7 +13,7 @@
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v5"
+WT_TITLE="Kelowna Curling Club Kiosk Management v6"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
