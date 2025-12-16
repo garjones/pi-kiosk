@@ -144,8 +144,7 @@ do_create_service() {
 # enable autoreboot
 do_enable_autoreboot() {
   # add reboot entry to cron
-  job="0 7 * * * /sbin/shutdown -r now"
-  (crontab -l | grep -v -F "$job" ; echo "$job") | crontab -
+  (echo "0 7 * * * /sbin/shutdown -r now") | crontab -
 
   # enable & start the service
   sudo systemctl enable cron
