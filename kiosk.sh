@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # --------------------------------------------------------------------------------
 #  kiosk.sh
@@ -30,6 +31,7 @@ do_menu_main() {
     "P1" "Display Cameras"        \
     "P2" "Display Kiosk"          \
     "P3" "Software Update"        \
+    "P4" "Reboot"                 \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -40,6 +42,7 @@ do_menu_main() {
         P1) do_menu_cameras ;;
         P2) do_menu_kiosks;;
         P3) do_apt;;
+        P4} do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -121,6 +124,12 @@ do_apt() {
   sudo apt upgrade -y
   sudo apt install unclutter -y
 }
+
+# reboot
+do_reboot() {
+  sudo reboot
+}
+
 
 # autoupdate from git
 do_auto_update() {
