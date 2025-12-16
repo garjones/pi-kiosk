@@ -140,6 +140,18 @@ do_create_service() {
   sudo systemctl enable kiosk.service
 }
 
+
+# enable autoreboot
+do_enable_autoreboot() {
+  # add reboot entry to cron
+  (crontab -l ; echo "0 7 * * * /sbin/shutdown -r now") | crontab -
+  
+  # enable & start the service
+  sudo systemctl enable cron
+  sudo systemctl start cron
+}
+
+
 # move the taskbar to the bottom
 do_position_taskbar() {
   if grep -Fxq "position=bottom" /home/kcckiosk/.config/wf-panel-pi/wf-panel-pi.ini; then
@@ -185,6 +197,7 @@ do_write_config() {
 # do_apt
 do_auto_update
 do_create_service
+do_enable_autoreboot
 do_position_taskbar
 do_set_autorun
 do_menu_main
