@@ -165,8 +165,13 @@ case $KCC_CONFIG in
         do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
         do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
-	      ;;
-
+		;;
+	S)
+        #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
+        do_video  ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0
+        do_video  ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0
+        do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
+		;;	
     *)
         # error
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
