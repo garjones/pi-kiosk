@@ -168,11 +168,11 @@ case $KCC_CONFIG in
 		;;
 	S)
         #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
-		do_label  $SHEET_BOT                    $VID_W  $VID_H  0       0         $LBL_B     $LBL_R
-		do_label  $SHEET_BOT					$VID_W  $VID_H  $VID_L  0         $LBL_B     $LBL_R
+		do_label  " "							$VID_W  $VID_H  0       0         0          $LBL_R
+		do_label  " "							$VID_W  $VID_H  $VID_L  0         0          $LBL_R
         do_video  ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
         do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
-        do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
+        do_label  " "							$LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
 		do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
 		;;	
     *)
