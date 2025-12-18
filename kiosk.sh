@@ -68,7 +68,7 @@ do_menu_cameras() {
 
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
   "C0406" "OQE - Cameras over sheets 4 & 6" \
-  "C0707" "OQE - Cameras over sheets 7 & 7" \
+  "S0700" "OQE - Cameras over sheets 7 Only" \
   3>&1 1>&2 2>&3)
   RET=$?
 
