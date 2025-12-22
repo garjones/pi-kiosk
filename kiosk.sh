@@ -6,13 +6,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 8.2
+#  Version 8.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v8"
+WT_TITLE="Kelowna Curling Club Kiosk Management v8.3"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
@@ -109,6 +109,7 @@ do_menu_custom_cameras() {
   SHEET1=$(whiptail --inputbox "Enter bottom sheet:" 10 60 3>&1 1>&2 2>&3)
   SHEET2=$(whiptail --inputbox "Enter top sheet:" 10 60 3>&1 1>&2 2>&3)
   FUN="C${VAR1}${VAR2}"
+  do_write_config
 }
 
 
