@@ -106,19 +106,9 @@ do_menu_single_camera() {
 
 
 do_menu_custom_cameras() {
-  # display menu
-  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --form "Custom Cameras:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  \
-  "Top Sheet:" 1 1 "" 1 10 20 0 \
-  "Bottom Sheet:" 2 1 "" 2 10 20 0 \
-  3>&1 1>&2 2>&3)
-
-
-    VAR1=$(echo "$FUN" | sed -n 1p)
-    VAR2=$(echo "$FUN" | sed -n 2p)
-
-    echo $FUN
-    echo "VAR1 = $VAR1"
-    echo "VAR2 = $VAR2"
+  SHEET1=$(whiptail --inputbox "Enter bottom sheet:" 10 60 3>&1 1>&2 2>&3)
+  SHEET2=$(whiptail --inputbox "Enter top sheet:" 10 60 3>&1 1>&2 2>&3)
+  FUN="C${VAR1}${VAR2}"
 }
 
 
