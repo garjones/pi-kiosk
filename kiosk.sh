@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # --------------------------------------------------------------------------------
 #  kiosk.sh
@@ -7,13 +6,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 7.0
+#  Version 8.0
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v6.5"
+WT_TITLE="Kelowna Curling Club Kiosk Management v8"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
