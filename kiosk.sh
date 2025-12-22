@@ -108,7 +108,7 @@ do_menu_single_camera() {
 do_menu_custom_cameras() {
   SHEET1=$(whiptail --inputbox "Enter bottom sheet:" 10 60 3>&1 1>&2 2>&3)
   SHEET2=$(whiptail --inputbox "Enter top sheet:" 10 60 3>&1 1>&2 2>&3)
-  FUN="C${VAR1}${VAR2}"
+  FUN="C${SHEET1}${SHEET2}"
   do_write_config
 }
 
