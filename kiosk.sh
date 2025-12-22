@@ -107,16 +107,20 @@ do_menu_single_camera() {
 
 do_menu_custom_cameras() {
   # display menu
-  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "C0102" "Cameras over sheets 1 & 2"       \
-
-  "S0707" "Cameras over sheets 7 Only"      \
+  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --form "Custom Cameras:" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Back --ok-button Select \
+  "Top Sheet:" 1 1 "" 1 10 20 0 \
+  "Bottom Sheet:" 2 1 "" 2 10 20 0 \
   3>&1 1>&2 2>&3)
-  RET=$?
 
   # process response
   if [ $RET -eq 0 ]; then
-    do_write_config
+
+    VAR1=$(echo "$FUN" | sed -n 1p)
+    VAR2=$(echo "$FUN" | sed -n 2p)
+
+    echo $FUN
+    echo "VAR1 = $VAR1"
+    echo "VAR2 = $VAR2"
   else
     return 0
   fi
