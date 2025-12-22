@@ -7,7 +7,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 6.5
+#  Version 7.0
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -28,10 +28,12 @@ do_menu_main() {
   while true; do
     # display menu
     FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
-    "P1" "Display Cameras"        \
-    "P2" "Display Kiosk"          \
-    "P3" "Software Update"        \
-    "P4" "Reboot"                 \
+    "P1" "Club Cameras"      \
+    "P2" "Single Camera"     \
+    "P3" "Custom Cameras"    \
+    "P4" "Kiosk"             \
+    "P5" "Software Update"   \
+    "P6" "Reboot"            \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -39,10 +41,12 @@ do_menu_main() {
     if [ $RET -eq 0 ]; then
       # menu item was selected
       case "$FUN" in
-        P1) do_menu_cameras ;;
-        P2) do_menu_kiosks;;
-        P3) do_apt;;
-        P4) do_reboot;;
+        P1) do_menu_club_cameras;;
+        P2) do_menu_single_camera;;
+        P3) do_menu_custom_cameras;;
+        P4) do_menu_kiosks;;
+        P5) do_apt;;
+        P6) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -54,7 +58,54 @@ do_menu_main() {
 }
 
 
-do_menu_cameras() {
+do_menu_club_cameras() {
+  # display menu
+  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
+  "C0102" "Cameras over sheets 1 & 2"       \
+  "C0304" "Cameras over sheets 3 & 4"       \
+  "C0506" "Cameras over sheets 5 & 6"       \
+  "C0708" "Cameras over sheets 7 & 8"       \
+  "C0910" "Cameras over sheets 9 & 10"      \
+  "C1112" "Cameras over sheets 11 & 12"     \
+  3>&1 1>&2 2>&3)
+  RET=$?
+
+  # process response
+  if [ $RET -eq 0 ]; then
+    do_write_config
+  else
+    return 0
+  fi
+}
+
+
+do_menu_single_camera() {
+  # display menu
+  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
+  "S0101" "Camera over sheet 1"       \
+  "S0202" "Camera over sheet 2"       \
+  "S0303" "Camera over sheet 3"       \
+  "S0404" "Camera over sheet 4"       \
+  "S0505" "Camera over sheet 5"       \
+  "S0606" "Camera over sheet 6"       \
+  "S0707" "Camera over sheet 7"       \
+  "S0808" "Camera over sheet 8"       \
+  "S0909" "Camera over sheet 9"       \
+  "S1010" "Camera over sheet 10"      \
+  "S1111" "Camera over sheet 11"      \
+  "S1212" "Camera over sheet 12"      \
+  3>&1 1>&2 2>&3)
+  RET=$?
+
+  # process response
+  if [ $RET -eq 0 ]; then
+    do_write_config
+  else
+    return 0
+  fi
+}
+
+do_menu_custom_cameras() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Camera Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
   "C0102" "Cameras over sheets 1 & 2"       \
@@ -76,6 +127,12 @@ do_menu_cameras() {
     return 0
   fi
 }
+
+
+
+
+
+
 
 
 do_menu_kiosks() {
