@@ -47,42 +47,87 @@ do_video() {
   ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
 }
 
+# --------------------------------------------------------------------------------
+# determine if script is running on a raspberry pi
+# --------------------------------------------------------------------------------
+if [[ "$(uname)" == "Linux" ]]; then
+    ON_PI=true
+else
+    ON_PI=false
+fi
 
 # --------------------------------------------------------------------------------
-# constants
+# constants & variables
 # --------------------------------------------------------------------------------
-# camera URLS
-URL_CAM_HOME=(
-  ""
-  "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
-)
+# home cameras
+if $ON_PI; then
+    URL_CAM_HOME=(
+      ""
+      "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
+      "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
+      "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
+      "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
+    )
+else
+    URL_CAM_HOME=(
+      ""
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v" 
+    )
+fi
 
-URL_CAM_AWAY=(
-  ""
-  "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
-)
+# away cameras
+if $ON_PI; then
+    URL_CAM_AWAY=(
+      ""
+      "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
+      "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
+      "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
+      "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
+    )
+else
+    URL_CAM_AWAY=(
+      ""
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+      "BigBuckBunny_640x360.m4v"
+    )
+fi
 
 # kiosk URLS (upstairs is #1, downstairs is #2
 URL_KIOSK=(
@@ -100,24 +145,39 @@ ROT_270="transpose=2"
 LBL_WIDTH="100"
 LBL_BORDER="1"
 
-# --------------------------------------------------------------------------------
-# variables
-# --------------------------------------------------------------------------------
-# get config & index & rotation
-KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
+# get config
+if $ON_PI; then
+    KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
+else
+    KCC_KIOSKCONFIG=$(cat kiosk.config)
+fi
+
+# extract variables from config
 KCC_ROTATION=${KCC_KIOSKCONFIG:0:1}
 KCC_CONFIG=${KCC_KIOSKCONFIG:1:1}
-KCC_INDEX=${KCC_KIOSKCONFIG:2:2}
-KCC_INDEX2=${KCC_KIOSKCONFIG:4:2}
+SHEET_TOP=$((10#${KCC_KIOSKCONFIG:4:2}))
+SHEET_BOT=$((10#${KCC_KIOSKCONFIG:2:2}))
 
 # Extract resolution string like "3840x2160"
-RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
-SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
-SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
+if $ON_PI; then
+    RES=$(kmsprint | awk '/Crtc/ { match($0, /[0-9]+x[0-9]+/); print substr($0, RSTART, RLENGTH); exit }')
+    SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
+    SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
+else
+    SCRN_WIDTH="1800"
+    SCRN_HEIGHT="1169"
+fi
 
-# remove leading zero
-SHEET_TOP=$((10#$KCC_INDEX2))
-SHEET_BOT=$((10#$KCC_INDEX))
+# display variables for debug
+echo "Screen Rotation : $KCC_ROTATION"
+echo "Config          : $KCC_CONFIG"
+echo "Bottom Sheet    : $SHEET_BOT"
+echo "Top Sheet       : $SHEET_TOP"
+echo "Screen Widh     : $SCRN_WIDTH"
+echo "Screen Height   : $SCRN_HEIGHT"
+if ! $ON_PI; then
+    read -p "Press Enter to continue..."
+fi
 
 # video and label variables
 VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
@@ -130,32 +190,38 @@ LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 LBL_T="$((SCRN_HEIGHT/2))"
 LBL_B="$LBL_BORDER"
 
+LIP_I="99"
+LIP_W=$LBL_W
+LIP_H=$LBL_W
+LIP_L="$((SCRN_WIDTH/2-LIP_W/2))"
+LIP_T="$((SCRN_HEIGHT/2-LIP_H/2))"
+LIP_B="$LBL_BORDER"
+
 # check for screen rotation
 if [ "$KCC_ROTATION" = "H" ]; then
-    echo "Horizontal"
     LBL_R=""
 else
-	echo "Vertical"
     LBL_R=",transpose=2"
 fi
-
 
 # --------------------------------------------------------------------------------
 # screen setup
 # --------------------------------------------------------------------------------
-# hide the mouse
-unclutter -idle 0.5 -root &
+if $ON_PI; then
+    # hide the mouse
+    unclutter -idle 0.5 -root &
 
-# fix chromium errors that may distrupt
-sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
-sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
+    # fix chromium errors that may distrupt
+    sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
+    sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
+fi
 
 # --------------------------------------------------------------------------------
 # execute
 # --------------------------------------------------------------------------------
 case $KCC_CONFIG in
     K)
-        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[KCC_INDEX]}"
+        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[SHEET_BOT]}"
         ;;
     C)
         #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
@@ -165,16 +231,18 @@ case $KCC_CONFIG in
         do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label  $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R
         do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
-		;;
+        sleep 5
+        do_label  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R
+		    ;;
 	S)
         #         URL                           WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
-		do_label  " "							$VID_W  $VID_H  0       0         0          $LBL_R
-		do_label  " "							$VID_W  $VID_H  $VID_L  0         0          $LBL_R
+		    do_label  " "							              $VID_W  $VID_H  0       0         0          $LBL_R
+		    do_label  " "							              $VID_W  $VID_H  $VID_L  0         0          $LBL_R
         do_video  ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
         do_video  ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
-        do_label  " "							$LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
-		do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
-		;;	
+        do_label  " "							              $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
+        do_label  $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
+		    ;;	
     *)
         # error
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
