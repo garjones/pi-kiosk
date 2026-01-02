@@ -45,7 +45,8 @@ do_label() {
   ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
     "color=white@0:size=$2x$3:rate=1,
     drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
-    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:shadowx=0:shadowy=0:$7" &
+    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:
+    $7" &
 }
 
 
@@ -61,11 +62,14 @@ do_label() {
 #    8 - Rotation
 # --------------------------------------------------------------------------------
 do_labelip() {
-  ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
-    "color=black@0:size=$2x$3:rate=1,
-    drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
-    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=gray:x=(w-text_w)/2:y=(h-text_h)/2:shadowx=0:shadowy=0:$7" &
+    ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
+    "color=black@0:size=${2}x${3}:rate=1,
+    drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
+    drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
+    drawtext=text='${1}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+    $7" &
 }
+
 
 
 
@@ -171,9 +175,6 @@ URL_KIOSK=(
   "https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c"
 )
 
-# label constants
-LBL_WIDTH="100"
-
 # get config
 if $ON_PI; then
     KCC_KIOSKCONFIG=$(cat /home/kcckiosk/kiosk.config)
@@ -217,11 +218,22 @@ if ! $ON_PI; then
     read -p "Press Enter to continue..."
 fi
 
+# label constants
+LBL_WIDTH="100"
+
+# ip label variables
+LIP_I=$MY_IP
+LIP_W="$((SCRN_WIDTH))"
+LIP_H="50"
+LIP_L="0"
+LIP_T="$((SCRN_HEIGHT-LIP_H))"
+LIP_B="0"
+
 # video variables
 VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 VID_H="$((SCRN_HEIGHT/2))"
 VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
-VID_T="$((SCRN_HEIGHT/2))"
+VID_T=$VID_H
 
 # label variables
 LBL_W="$LBL_WIDTH"
@@ -229,14 +241,6 @@ LBL_H="$((SCRN_HEIGHT/2))"
 LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
 LBL_T="$((SCRN_HEIGHT/2))"
 LBL_B="1"
-
-# ip label variables
-LIP_I=$MY_IP
-LIP_W=200
-LIP_H=50
-LIP_L="$((SCRN_WIDTH-LIP_W))"
-LIP_T="$((SCRN_HEIGHT-LIP_H))"
-LIP_B="0"
 
 # rotation constants
 # ROT_90=",transpose=1"
