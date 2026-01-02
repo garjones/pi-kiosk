@@ -243,19 +243,26 @@ echo "Top Sheet       : $SHEET_TOP"
 echo "Screen Widh     : $SCRN_WIDTH"
 echo "Screen Height   : $SCRN_HEIGHT"
 echo "IP address      : $MY_IP"
+echo ""
 echo "Usable Height   : $USE_H"
+echo ""
 echo "Video Width     : $VID_W"
 echo "Video Height    : $VID_H"
 echo "Video Left      : $VID_L"
 echo "Video Top       : $VID_T"
+echo ""
 echo "Label Width     : $LBL_W"
 echo "Label Height    : $LBL_H"
 echo "Label Left      : $LBL_L"
 echo "Label Top       : $LBL_T"
+echo "" 
+echo "IP Width        : $LIP_W"
+echo "IP Height       : $LIP_H"
+echo "IP Left         : $LIP_L"
+echo "IP Top          : $LIP_T"
 if ! $ON_PI; then
     read -p "Press Enter to continue..."
 fi
-
 
 # rotation constants
 # ROT_90=",transpose=1"

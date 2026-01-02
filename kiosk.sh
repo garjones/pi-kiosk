@@ -193,17 +193,12 @@ do_enable_autoreboot() {
 }
 
 
-# move the taskbar to the bottom
-do_position_taskbar() {
-  if grep -Fxq "position=bottom" /home/kcckiosk/.config/wf-panel-pi/wf-panel-pi.ini; then
-      # already exists do nothing
-      echo "[Skipped] Taskbar set to bottom"
-  else
-      # move taskbar to bottom
-      echo "[Done] Taskbar set to bottom"
-      echo "position=bottom" >> /home/kcckiosk/.config/wf-panel-pi/wf-panel-pi.ini
-  fi
-}
+# disable desktop environment
+do_kiosk_mode() {
+    if [ -e /etc/xdg/labwc/autostart ]; then
+        sudo mv /etc/xdg/labwc/autostart /etc/xdg/labwc/autostart.disabled
+    fi
+
 
 # autorun the kiosk configuration on login
 do_set_autorun() {
@@ -239,6 +234,6 @@ do_write_config() {
 do_auto_update
 do_create_service
 do_enable_autoreboot
-do_position_taskbar
+do_kiosk_mode
 do_set_autorun
 do_menu_main
