@@ -59,7 +59,7 @@ do_label() {
 #    4 - Left
 #    5 - Top
 #    6 - Border Width
-#    8 - Rotation
+#    7 - Rotation
 # --------------------------------------------------------------------------------
 do_labelip() {
     ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
@@ -296,7 +296,7 @@ case $KCC_CONFIG in
         do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label    $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R    
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
-        sleep 5
+        sleep 10
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
 		;;
 	S)
@@ -307,7 +307,7 @@ case $KCC_CONFIG in
         do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label    " "							  $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
-        sleep 5
+        sleep 10
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R
 		;;	
     *)
