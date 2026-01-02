@@ -39,7 +39,7 @@ do_kiosk() {
 #    4 - Left
 #    5 - Top
 #    6 - Border Width
-#    8 - Rotation
+#    7 - Rotation
 # --------------------------------------------------------------------------------
 do_label() {
   ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
@@ -194,8 +194,8 @@ if $ON_PI; then
     SCRN_WIDTH=$(echo "$RES" | cut -d'x' -f1)
     SCRN_HEIGHT=$(echo "$RES" | cut -d'x' -f2)
 else
-    SCRN_WIDTH="1800"
-    SCRN_HEIGHT="1169"
+    SCRN_WIDTH="1920"
+    SCRN_HEIGHT="1080"
 fi
 
 # get ip address
@@ -206,6 +206,35 @@ else
     MY_IP="255.255.255.255"
 fi
 
+# label constants
+LBL_WIDTH="100"
+LBL_HEIGHT="50"
+
+# usable height
+USE_H="$((SCRN_HEIGHT-LBL_HEIGHT))"
+
+# ip label variables
+LIP_I=$MY_IP
+LIP_W="$((SCRN_WIDTH))"
+LIP_H="$((LBL_HEIGHT))"
+LIP_L="0"
+LIP_T="$((USE_H))"
+LIP_B="0"
+
+# video variables
+VID_W="$(((SCRN_WIDTH/2)-(LBL_WIDTH/2)))"
+VID_H="$((USE_H/2))"
+VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
+VID_T="$((USE_H/2))"
+
+# label variables
+LBL_W="$LBL_WIDTH"
+LBL_H="$((USE_H/2))"
+LBL_L="$(((SCRN_WIDTH/2)-(LBL_WIDTH/2)))"
+LBL_T="$((USE_H/2))"
+LBL_B="1"
+
+
 # display variables for debug
 echo "Screen Rotation : $KCC_ROTATION"
 echo "Config          : $KCC_CONFIG"
@@ -214,33 +243,19 @@ echo "Top Sheet       : $SHEET_TOP"
 echo "Screen Widh     : $SCRN_WIDTH"
 echo "Screen Height   : $SCRN_HEIGHT"
 echo "IP address      : $MY_IP"
+echo "Usable Height   : $USE_H"
+echo "Video Width     : $VID_W"
+echo "Video Height    : $VID_H"
+echo "Video Left      : $VID_L"
+echo "Video Top       : $VID_T"
+echo "Label Width     : $LBL_W"
+echo "Label Height    : $LBL_H"
+echo "Label Left      : $LBL_L"
+echo "Label Top       : $LBL_T"
 if ! $ON_PI; then
     read -p "Press Enter to continue..."
 fi
 
-# label constants
-LBL_WIDTH="100"
-
-# ip label variables
-LIP_I=$MY_IP
-LIP_W="$((SCRN_WIDTH))"
-LIP_H="50"
-LIP_L="0"
-LIP_T="$((SCRN_HEIGHT-LIP_H))"
-LIP_B="0"
-
-# video variables
-VID_W="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
-VID_H="$((SCRN_HEIGHT/2))"
-VID_L="$((SCRN_WIDTH/2+LBL_WIDTH/2))"
-VID_T=$VID_H
-
-# label variables
-LBL_W="$LBL_WIDTH"
-LBL_H="$((SCRN_HEIGHT/2))"
-LBL_L="$((SCRN_WIDTH/2-LBL_WIDTH/2))"
-LBL_T="$((SCRN_HEIGHT/2))"
-LBL_B="1"
 
 # rotation constants
 # ROT_90=",transpose=1"
