@@ -294,6 +294,8 @@ fi
 case $KCC_CONFIG in
     K)
         do_kiosk "${URL_KIOSK[SHEET_BOT]}"
+        sleep 10
+        do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R
         ;;
     C)
         #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
