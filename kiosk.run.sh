@@ -23,9 +23,9 @@
 # --------------------------------------------------------------------------------
 do_kiosk() {
     if $ON_PI; then
-        /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk "$1"
-    else
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "$1"
+    else    
+        /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk "$1"
     fi
 }
 
@@ -236,7 +236,7 @@ LIP_W=200
 LIP_H=50
 LIP_L="$((SCRN_WIDTH-LIP_W))"
 LIP_T="$((SCRN_HEIGHT-LIP_H))"
-LIP_B="1"
+LIP_B="0"
 
 # rotation constants
 # ROT_90=",transpose=1"
