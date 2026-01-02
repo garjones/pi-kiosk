@@ -198,7 +198,7 @@ do_kiosk_mode() {
     if [ -e /etc/xdg/labwc/autostart ]; then
         sudo mv /etc/xdg/labwc/autostart /etc/xdg/labwc/autostart.disabled
     fi
-
+}
 
 # autorun the kiosk configuration on login
 do_set_autorun() {
