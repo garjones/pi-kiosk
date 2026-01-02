@@ -100,18 +100,18 @@ if $ON_PI; then
 else
     URL_CAM_HOME=(
       ""
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v" 
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4" 
     )
 fi
 
@@ -135,18 +135,18 @@ if $ON_PI; then
 else
     URL_CAM_AWAY=(
       ""
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
-      "BigBuckBunny_640x360.m4v"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
     )
 fi
 
