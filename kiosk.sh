@@ -171,14 +171,17 @@ do_auto_update() {
 
 # create/enable service
 do_create_service() {
-  # make kiosk.run.sh executable
-  chmod u+x /home/kcckiosk/kiosk.run.sh
+  # only run kiosk setup if the service doesn't already exist
+  if [ ! -e /lib/systemd/system/kiosk.service ]; then
+      # make kiosk.run.sh executable
+      chmod u+x /home/kcckiosk/kiosk.run.sh
 
-  # create service
-  sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
+      # create service symlink
+      sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
 
-  # enable the kiosk service
-  sudo systemctl enable kiosk.service
+      # enable the kiosk service
+      sudo systemctl enable kiosk.service
+  fi
 }
 
 
