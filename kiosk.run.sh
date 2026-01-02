@@ -17,6 +17,20 @@
 # --------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------
+#  do_kiosk() - Display kiosk
+# --------------------------------------------------------------------------------
+#    1 - URL
+# --------------------------------------------------------------------------------
+do_kiosk() {
+    if $ON_PI; then
+        /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk "$1"
+    else
+        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "$1"
+    fi
+}
+
+
+# --------------------------------------------------------------------------------
 #  do_label() - Draw white label, black border, text in centre
 # --------------------------------------------------------------------------------
 #    1 - Label
@@ -253,7 +267,7 @@ fi
 # --------------------------------------------------------------------------------
 case $KCC_CONFIG in
     K)
-        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk "${URL_KIOSK[SHEET_BOT]}"
+        do_kiosk "${URL_KIOSK[SHEET_BOT]}"
         ;;
     C)
         #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
