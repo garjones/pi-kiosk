@@ -281,7 +281,7 @@ fi
 # --------------------------------------------------------------------------------
 if $ON_PI; then
     # hide the mouse
-    unclutter -idle 0.5 -root &
+    # unclutter -idle 0.5 -root &
 
     # fix chromium errors that may distrupt
     sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences

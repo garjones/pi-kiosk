@@ -167,11 +167,21 @@ do_reboot() {
 do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      -O /home/kcckiosk/kiosk.run.sh
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service -O /home/kcckiosk/unclutter.service
 }
 
 # create/enable service
 do_create_service() {
-  # only run kiosk setup if the service doesn't already exist
+  # only create unclutter service if the service doesn't already exist
+  if [ ! -e /lib/systemd/system/unclutter.service ]; then
+      # create service symlink
+      sudo ln -s /home/kcckiosk/unclutter.service /lib/systemd/system/unclutter.service
+
+      # enable the unclutter service
+      sudo systemctl enable unclutter.service
+  fi
+
+  # only create kiosk service if the service doesn't already exist
   if [ ! -e /lib/systemd/system/kiosk.service ]; then
       # make kiosk.run.sh executable
       chmod u+x /home/kcckiosk/kiosk.run.sh
