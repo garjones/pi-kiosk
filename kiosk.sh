@@ -170,7 +170,7 @@ do_apt() {
 
 # apt
 do_raspi_config() {
-  sudo raspi_config
+  sudo raspi-config
 }
 
 # install the kiosk application
