@@ -32,7 +32,9 @@ do_menu_main() {
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
     "P5" "Software Update"   \
-    "P6" "Reboot"            \
+    "P6" "Raspberry Config"  \
+    "P7" "Install Kiosk"     \
+    "P8" "Reboot"            \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -45,7 +47,9 @@ do_menu_main() {
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
         P5) do_apt;;
-        P6) do_reboot;;
+        P6) sudo raspi_config;;
+        P7) do_install;;
+        P8) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -146,8 +150,15 @@ do_menu_screen() {
 }
 
 # --------------------------------------------------------------------------------
-#  functions for install
+#  functions for actions
 # --------------------------------------------------------------------------------
+
+# autoupdate from git
+do_auto_update() {
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service  --no-verbose -O /home/kcckiosk/unclutter.service
+}
 
 # apt
 do_apt() {
@@ -157,21 +168,16 @@ do_apt() {
   sudo apt install unclutter -y
 }
 
-# reboot
-do_reboot() {
-  sudo reboot
+# set hostname
+do_sethostname() {
 }
 
-
-# autoupdate from git
-do_auto_update() {
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
-  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service  --no-verbose -O /home/kcckiosk/unclutter.service
+# set static IP address
+do_setipaddress() {
 }
 
-# create/enable service
-do_create_service() {
+# install the kiosk application
+do_install () {
   # only create unclutter service if the service doesn't already exist
   if [ ! -e /lib/systemd/system/unclutter.service ]; then
       # create service symlink
@@ -192,29 +198,20 @@ do_create_service() {
       # enable the kiosk service
       sudo systemctl enable kiosk.service
   fi
-}
 
-
-# enable autoreboot
-do_enable_autoreboot() {
   # add reboot entry to cron
   (echo "0 7 * * * /sbin/shutdown -r now") | crontab -
 
   # enable & start the service
   sudo systemctl enable cron
   sudo systemctl start cron
-}
 
+  # disable desktop environment
+  if [ -e /etc/xdg/labwc/autostart ]; then
+      sudo mv /etc/xdg/labwc/autostart /etc/xdg/labwc/autostart.disabled
+  fi
 
-# disable desktop environment
-do_kiosk_mode() {
-    if [ -e /etc/xdg/labwc/autostart ]; then
-        sudo mv /etc/xdg/labwc/autostart /etc/xdg/labwc/autostart.disabled
-    fi
-}
-
-# autorun the kiosk configuration on login
-do_set_autorun() {
+  # autorun the kiosk configuration on login
   if grep -Fxq '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' /home/kcckiosk/.bashrc; then
       # already exists do nothing
       echo "[Skipped] Kiosk configuration autorun"
@@ -225,10 +222,7 @@ do_set_autorun() {
   fi
 }
 
-
-# --------------------------------------------------------------------------------
-#  functions for actions
-# --------------------------------------------------------------------------------
+# write the configuration file
 do_write_config() {
     # check if sure, then write it out and reboot
     whiptail --yesno "Are you sure?" 20 60 2
@@ -240,13 +234,13 @@ do_write_config() {
     fi
 }
 
+# reboot
+do_reboot() {
+  sudo reboot
+}
+
 # --------------------------------------------------------------------------------
 #  execute
 # --------------------------------------------------------------------------------
-# do_apt
 do_auto_update
-do_create_service
-do_enable_autoreboot
-do_kiosk_mode
-do_set_autorun
 do_menu_main

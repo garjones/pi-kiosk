@@ -23,7 +23,7 @@ ffplay rtsp://root:missionav@10.200.30.221/axis-media/media.amp  -an -noborder -
 #sheet 6
 ffplay rtsp://root:missionav@10.100.1.126/axis-media/media.amp   -an -noborder -alwaysontop -x $width  -left $((width * 5))   -top $((row * 0))  -vf "transpose=3" &
 ffplay rtsp://root:missionav@10.200.30.150/axis-media/media.amp  -an -noborder -alwaysontop -x $width  -left $((width * 5))   -top $((row * 1))  -vf "transpose=1" &
-q
+
 #sheet 7
 ffplay rtsp://root:missionav@10.100.1.127/axis-media/media.amp   -an -noborder -alwaysontop -x $width  -left $((width * 6))   -top $((row * 0))  -vf "transpose=3" &
 ffplay rtsp://root:missionav@10.100.1.120/axis-media/media.amp   -an -noborder -alwaysontop -x $width  -left $((width * 6))   -top $((row * 1))  -vf "transpose=1" &
