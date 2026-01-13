@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 8.4
+#  Version 9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ do_menu_main() {
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
         P5) do_apt;;
-        P6) sudo raspi_config;;
+        P6) do_raspi_config;;
         P7) do_install;;
         P8) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
@@ -166,6 +166,11 @@ do_apt() {
   sudo apt update
   sudo apt upgrade -y
   sudo apt install unclutter -y
+}
+
+# apt
+do_raspi_config() {
+  sudo raspi_config
 }
 
 # install the kiosk application
