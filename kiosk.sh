@@ -170,10 +170,12 @@ do_apt() {
 
 # set hostname
 do_sethostname() {
+  # do nothing
 }
 
 # set static IP address
 do_setipaddress() {
+  # do nothing
 }
 
 # install the kiosk application
