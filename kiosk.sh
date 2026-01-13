@@ -168,16 +168,6 @@ do_apt() {
   sudo apt install unclutter -y
 }
 
-# set hostname
-do_sethostname() {
-  # do nothing
-}
-
-# set static IP address
-do_setipaddress() {
-  # do nothing
-}
-
 # install the kiosk application
 do_install () {
   # only create unclutter service if the service doesn't already exist
