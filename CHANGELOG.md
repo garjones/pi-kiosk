@@ -14,6 +14,7 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 - `do_labelip` function renders "Kelowna Curling Club" alongside the Pi's IP address
 - Dev/Mac mode — substitutes `tiny-test.mp4` for all RTSP streams and uses Google Chrome instead of Chromium when not running on a Pi
 - Fallback error mode — displays `whatismyipaddress.com` when config is unrecognised
+- `cameras-all.sh` script to test all 24 cameras
 
 ### Changed
 - Config file format extended to 6-character code: `{Rotation}{Mode}{Sheet1}{Sheet2}` (e.g. `HC0102`)
