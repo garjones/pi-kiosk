@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 7
+#  Version 9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -71,8 +71,6 @@ do_labelip() {
 }
 
 
-
-
 # --------------------------------------------------------------------------------
 #  do_video() - Display a video feed
 # --------------------------------------------------------------------------------
@@ -96,24 +94,42 @@ else
 fi
 
 # --------------------------------------------------------------------------------
+# load central config (camera IPs, credentials, kiosk URLs)
+# --------------------------------------------------------------------------------
+if $ON_PI; then
+    ENV_FILE="/home/kcckiosk/kiosk.env"
+else
+    ENV_FILE="kiosk.env"
+fi
+
+if [ ! -f "$ENV_FILE" ]; then
+    # kiosk.env missing - fall back to error screen
+    /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
+    exit 1
+fi
+
+source "$ENV_FILE"
+
+# --------------------------------------------------------------------------------
 # constants & variables
 # --------------------------------------------------------------------------------
-# home cameras
+
+# home cameras (built from kiosk.env)
 if $ON_PI; then
     URL_CAM_HOME=(
       ""
-      "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
-      "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
-      "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
-      "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[1]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[2]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[3]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[4]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[5]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[6]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[7]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[8]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[9]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[10]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[11]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[12]}/axis-media/media.amp"
     )
 else
     URL_CAM_HOME=(
@@ -133,22 +149,22 @@ else
     )
 fi
 
-# away cameras
+# away cameras (built from kiosk.env)
 if $ON_PI; then
     URL_CAM_AWAY=(
       ""
-      "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
-      "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
-      "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
-      "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[1]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[2]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[3]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[4]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[5]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[6]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[7]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[8]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[9]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[10]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[11]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[12]}/axis-media/media.amp"
     )
 else
     URL_CAM_AWAY=(
@@ -168,12 +184,7 @@ else
     )
 fi
 
-# kiosk URLS (upstairs is #1, downstairs is #2
-URL_KIOSK=(
-  ""
-  "https://marquee.csekcreative.com/launch/display.php?device_id=572&synchronization_code=10543-48822&key=54d6ed5688b801a8e43b6d44f81fa7b87f28dcf1b11a9f4b0f722627ffc4ed469dead0bd7a1f62a971054885b50758f50b0aeec038bf9319e6c441ae43ca3bdd"
-  "https://marquee.csekcreative.com/launch/display.php?device_id=581&synchronization_code=79844-79798&key=f76346c1cb478b51a00f86f04003efe9f7492853635869241e8023ec1dcce1313c467df3b81923adb937ddcf348306b12642596ad73da15e6a4540e0d5f8f82c"
-)
+# URL_KIOSK is loaded directly from kiosk.env
 
 # get config
 if $ON_PI; then
@@ -264,11 +275,6 @@ if ! $ON_PI; then
     read -p "Press Enter to continue..."
 fi
 
-# rotation constants
-# ROT_90=",transpose=1"
-# ROT_180=",transpose=2,transpose=2"
-# ROT_270=",transpose=2"
-
 # check for screen rotation
 if [ "$KCC_ROTATION" = "H" ]; then
     LBL_R=""
@@ -280,9 +286,6 @@ fi
 # screen setup
 # --------------------------------------------------------------------------------
 if $ON_PI; then
-    # hide the mouse
-    # unclutter -idle 0.5 -root &
-
     # fix chromium errors that may distrupt
     sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/kcckiosk/.config/chromium/Default/Preferences
     sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/'   /home/kcckiosk/.config/chromium/Default/Preferences
@@ -305,18 +308,18 @@ case $KCC_CONFIG in
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 5
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
-		;;
-	S)
+        ;;
+    S)
         #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
-		do_label    " "							  $VID_W  $VID_H  0       0         0          $LBL_R
-		do_label    " "							  $VID_W  $VID_H  $VID_L  0         0          $LBL_R
+        do_label    " "                           $VID_W  $VID_H  0       0         0          $LBL_R
+        do_label    " "                           $VID_W  $VID_H  $VID_L  0         0          $LBL_R
         do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
         do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
-        do_label    " "							  $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
+        do_label    " "                           $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 5
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R
-		;;	
+        ;;	
     *)
         # error
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
