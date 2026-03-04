@@ -133,7 +133,7 @@ Each Pi can be configured by connecting via SSH:
 ```
 Host:     10.200.30.xxx
 User:     kcckiosk
-Password: kcc12345
+Password: ********
 ```
 
 On login, the configuration menu launches automatically. No shell commands are needed — simply navigate the menus to select the desired display mode, confirm, and the Pi will reboot and begin displaying the new content.
