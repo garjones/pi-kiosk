@@ -45,7 +45,7 @@ In the **General** tab:
 |---|---|
 | Hostname | A unique name for this Pi (e.g. `kiosk-tv01`) |
 | Username | `kcckiosk` |
-| Password | `kcc12345` |
+| Password | `********` |
 | Wi-Fi SSID | *(enter the club's Wi-Fi network name)* |
 | Wi-Fi Password | *(enter the club's Wi-Fi password)* |
 | Wi-Fi Country | `CA` |
@@ -108,7 +108,7 @@ ssh kcckiosk@<pi-ip-address>
 
 When prompted, enter the password:
 ```
-kcc12345
+********
 ```
 
 > On first connection you'll be asked to confirm the host fingerprint — type `yes` and press Enter.
@@ -229,7 +229,7 @@ To change what a Pi is displaying at any time:
 
 ```bash
 ssh kcckiosk@<pi-ip-address>
-# Password: kcc12345
+# Password: ********
 ```
 
 The configuration menu will launch automatically. Select the new display mode, confirm, and the Pi will reboot with the new settings.
@@ -275,7 +275,7 @@ Then select **P7 → Install Kiosk** to restore the autorun.
 | Resource | Details |
 |---|---|
 | Pi SSH user | `kcckiosk` |
-| Pi SSH password | `kcc12345` |
+| Pi SSH password | `********` |
 | Pi IP range | `10.200.30.xxx` |
 | Camera subnet A | `10.100.1.x` |
 | Camera subnet B | `10.200.30.x` |
