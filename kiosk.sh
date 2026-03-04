@@ -157,6 +157,7 @@ do_menu_screen() {
 do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env          --no-verbose -O /home/kcckiosk/kiosk.env
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service  --no-verbose -O /home/kcckiosk/unclutter.service
 }
 
