@@ -6,7 +6,7 @@
 # 
 #  Displays all cameras locally to test them
 #
-#  Version 1
+#  Version 2
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -51,40 +51,54 @@ do_video() {
 
 
 # --------------------------------------------------------------------------------
+# load central config (camera IPs, credentials, kiosk URLs)
+# --------------------------------------------------------------------------------
+ENV_FILE="/home/kcckiosk/kiosk.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "ERROR: Config file not found: $ENV_FILE"
+    exit 1
+fi
+
+source "$ENV_FILE"
+
+
+# --------------------------------------------------------------------------------
 # constants & variables
 # --------------------------------------------------------------------------------
-# home cameras
+
+# home cameras (built from kiosk.env)
 URL_CAM_HOME=(
   ""
-  "rtsp://root:missionav@10.100.1.114/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.123/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.115/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.107/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.221/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.150/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.120/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.143/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.119/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.110/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.118/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.113/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[1]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[2]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[3]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[4]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[5]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[6]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[7]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[8]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[9]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[10]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[11]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[12]}/axis-media/media.amp"
 )
 
-# away cameras
+# away cameras (built from kiosk.env)
 URL_CAM_AWAY=(
   ""
-  "rtsp://root:missionav@10.100.1.108/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.124/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.117/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.125/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.144/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.126/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.127/axis-media/media.amp"
-  "rtsp://root:missionav@10.200.30.220/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.128/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.112/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.129/axis-media/media.amp"
-  "rtsp://root:missionav@10.100.1.111/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[1]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[2]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[3]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[4]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[5]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[6]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[7]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[8]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[9]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[10]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[11]}/axis-media/media.amp"
+  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[12]}/axis-media/media.amp"
 )
 
 # set screen width and height
@@ -118,15 +132,15 @@ do_video    ${URL_CAM_AWAY[12]}  $VID_W  $VID_H  $((VID_W * 11))      0
 
 
 # home cameras
-do_video    ${URL_CAM_HOME[1]}    $VID_W  $VID_H  $((VID_W * 0))       $VID_T
-do_video    ${URL_CAM_HOME[2]}    $VID_W  $VID_H  $((VID_W * 1))       $VID_T
-do_video    ${URL_CAM_HOME[3]}    $VID_W  $VID_H  $((VID_W * 2))       $VID_T
-do_video    ${URL_CAM_HOME[4]}    $VID_W  $VID_H  $((VID_W * 3))       $VID_T
-do_video    ${URL_CAM_HOME[5]}    $VID_W  $VID_H  $((VID_W * 4))       $VID_T
-do_video    ${URL_CAM_HOME[6]}    $VID_W  $VID_H  $((VID_W * 5))       $VID_T
-do_video    ${URL_CAM_HOME[7]}    $VID_W  $VID_H  $((VID_W * 6))       $VID_T
-do_video    ${URL_CAM_HOME[8]}    $VID_W  $VID_H  $((VID_W * 7))       $VID_T
-do_video    ${URL_CAM_HOME[9]}    $VID_W  $VID_H  $((VID_W * 8))       $VID_T
-do_video    ${URL_CAM_HOME[10]}   $VID_W  $VID_H  $((VID_W * 9))       $VID_T
-do_video    ${URL_CAM_HOME[11]}   $VID_W  $VID_H  $((VID_W * 10))      $VID_T
-do_video    ${URL_CAM_HOME[12]}   $VID_W  $VID_H  $((VID_W * 11))      $VID_T
+do_video    ${URL_CAM_HOME[1]}   $VID_W  $VID_H  $((VID_W * 0))       $VID_T
+do_video    ${URL_CAM_HOME[2]}   $VID_W  $VID_H  $((VID_W * 1))       $VID_T
+do_video    ${URL_CAM_HOME[3]}   $VID_W  $VID_H  $((VID_W * 2))       $VID_T
+do_video    ${URL_CAM_HOME[4]}   $VID_W  $VID_H  $((VID_W * 3))       $VID_T
+do_video    ${URL_CAM_HOME[5]}   $VID_W  $VID_H  $((VID_W * 4))       $VID_T
+do_video    ${URL_CAM_HOME[6]}   $VID_W  $VID_H  $((VID_W * 5))       $VID_T
+do_video    ${URL_CAM_HOME[7]}   $VID_W  $VID_H  $((VID_W * 6))       $VID_T
+do_video    ${URL_CAM_HOME[8]}   $VID_W  $VID_H  $((VID_W * 7))       $VID_T
+do_video    ${URL_CAM_HOME[9]}   $VID_W  $VID_H  $((VID_W * 8))       $VID_T
+do_video    ${URL_CAM_HOME[10]}  $VID_W  $VID_H  $((VID_W * 9))       $VID_T
+do_video    ${URL_CAM_HOME[11]}  $VID_W  $VID_H  $((VID_W * 10))      $VID_T
+do_video    ${URL_CAM_HOME[12]}  $VID_W  $VID_H  $((VID_W * 11))      $VID_T
