@@ -4,7 +4,22 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.0] — Current
+## [v9.1] — Current
+
+### Added
+- `kiosk.env` — new centralised config file committed to GitHub containing camera credentials (`CAM_USER`, `CAM_PASS`), home camera IPs (`CAM_HOME[]`), away camera IPs (`CAM_AWAY[]`), and kiosk advertising URLs (`URL_KIOSK[]`)
+- `kiosk.run.sh` now sources `kiosk.env` at startup and builds RTSP URLs dynamically using credentials and IPs from that file
+- `kiosk.run.sh` falls back to `whatismyipaddress.com` error screen if `kiosk.env` is missing on boot
+
+### Changed
+- `do_auto_update()` in `kiosk.sh` now downloads `kiosk.env` from GitHub alongside `kiosk.run.sh`, `kiosk.service`, and `unclutter.service` — ensuring all Pis receive config changes automatically on the next SSH login
+- Camera credentials and IPs removed from `kiosk.run.sh` — now sourced entirely from `kiosk.env`
+- Kiosk advertising URLs removed from `kiosk.run.sh` — now sourced entirely from `kiosk.env`
+- `kiosk.run.sh` updated to version 8
+
+---
+
+## [v9.0]
 
 ### Added
 - Single Sheet camera mode (`S`) — displays Home and Away cameras for one sheet only, with blank panels in the top half of the screen
