@@ -81,7 +81,10 @@ do_labelip() {
 #    $5 - Top
 # --------------------------------------------------------------------------------
 do_video() {
-  ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
+  (while true; do
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
+    sleep 5
+  done) &
 }
 
 # --------------------------------------------------------------------------------
