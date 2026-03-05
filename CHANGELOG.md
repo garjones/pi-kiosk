@@ -4,7 +4,23 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.2] — Current
+## [v9.3] — Current
+
+### Added
+- `P5 → Screen Rotation` added to the main menu in `kiosk.sh` — allows operator to set screen orientation to Horizontal (`H`) or Vertical (`V`) before selecting a display mode
+- `do_menu_rotation()` function handles rotation selection and sets the `ROTATION` variable used when writing `kiosk.config`
+
+### Changed
+- Main menu items renumbered: Software Update `P5→P6`, Raspberry Config `P6→P7`, Install Kiosk `P7→P8`, Reboot `P8→P9`
+- `do_menu_screen()` renamed to `do_menu_rotation()` for clarity
+- `kiosk.sh` updated to version 9.3
+
+### Known Limitations
+- Screen rotation for video feeds in `kiosk.run.sh` is not yet implemented — the `transpose` filter is currently applied to labels only. Full video rotation will be addressed in a future release.
+
+---
+
+## [v9.2]
 
 ### Added
 - `wifi-watchdog.sh` — new script that pings `1.1.1.1` every 15 minutes and reboots the Pi if the network is unreachable. Results are logged to `/var/log/wifi-watchdog.log` with timestamps
