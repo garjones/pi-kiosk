@@ -16,7 +16,8 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 - Camera credentials and IPs removed from `kiosk.run.sh` — now sourced entirely from `kiosk.env`
 - Kiosk advertising URLs removed from `kiosk.run.sh` — now sourced entirely from `kiosk.env`
 - `kiosk.run.sh` updated to version 8
-
+- `cameras-all.sh` updated to version 2, use kiosk.env
+- `INSTALLATION.md` updated to redact SSH password
 ---
 
 ## [v9.0]
