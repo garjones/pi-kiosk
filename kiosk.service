@@ -8,7 +8,8 @@ Environment=DISPLAY=:0.0
 Environment=XAUTHORITY=/home/kcckiosk/.Xauthority
 Type=simple
 ExecStart=/bin/bash /home/kcckiosk/kiosk.run.sh
-Restart=on-abort
+Restart=on-failure
+RestartSec=5
 User=kcckiosk
 Group=kcckiosk
 
