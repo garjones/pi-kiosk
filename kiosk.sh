@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 9.2
+#  Version 9.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -31,10 +31,11 @@ do_menu_main() {
     "P2" "Single Camera"     \
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
-    "P5" "Software Update"   \
-    "P6" "Raspberry Config"  \
-    "P7" "Install Kiosk"     \
-    "P8" "Reboot"            \
+    "P5" "Screen Rotation"   \
+    "P6" "Software Update"   \
+    "P7" "Raspberry Config"  \
+    "P8" "Install Kiosk"     \
+    "P9" "Reboot"            \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -46,10 +47,11 @@ do_menu_main() {
         P2) do_menu_single_camera;;
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
-        P5) do_apt;;
-        P6) do_raspi_config;;
-        P7) do_install;;
-        P8) do_reboot;;
+        P5) do_menu_rotation;;
+        P6) do_apt;;
+        P7) do_raspi_config;;
+        P8) do_install;;
+        P9) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -133,9 +135,10 @@ do_menu_kiosks() {
   fi
 }
 
-do_menu_screen() {
+
+do_menu_rotation() {
   # display menu
-  FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Screen Rotation" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
+  ROTATION=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Screen Rotation" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
   "H" "Screen is Horizontal" \
   "V" "Screen is Vertical"   \
   3>&1 1>&2 2>&3)
@@ -143,11 +146,12 @@ do_menu_screen() {
 
   # process response
   if [ $RET -eq 0 ]; then
-    do_screen_rotation
+    whiptail --msgbox "Screen rotation set to '$ROTATION'. Select a display mode to apply and reboot." 20 60
   else
-    return 0
+    ROTATION="H"
   fi
 }
+
 
 # --------------------------------------------------------------------------------
 #  functions for actions
@@ -170,7 +174,7 @@ do_apt() {
   sudo apt install unclutter -y
 }
 
-# apt
+# raspi-config
 do_raspi_config() {
   sudo raspi-config
 }
@@ -215,7 +219,6 @@ do_install () {
       # already exists do nothing
       echo "[Skipped] Kiosk configuration autorun"
   else
-      # move taskbar to bottom
       echo "[Done] Kiosk configuration autorun"
       echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)"' >> /home/kcckiosk/.bashrc
   fi
