@@ -11,7 +11,7 @@
 #    chmod +x deploy.sh
 #    ./deploy.sh
 #
-#  Version 1
+#  Version 1.1
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -21,7 +21,6 @@
 # --------------------------------------------------------------------------------
 HOSTS_FILE="$(dirname "$0")/pi-hosts.txt"
 SSH_USER="kcckiosk"
-SSH_PASS="kcc12345"
 SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=5"
 
 # --------------------------------------------------------------------------------
@@ -69,6 +68,11 @@ echo ""
 # --------------------------------------------------------------------------------
 # display menu
 # --------------------------------------------------------------------------------
+# prompt for password
+read -s -p "SSH Password: " SSH_PASS
+echo ""
+echo ""
+
 echo "Actions:"
 echo ""
 echo "  1) Auto Update   — pull latest files from GitHub"
