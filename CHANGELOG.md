@@ -6,8 +6,32 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ## [v9.2] — Current
 
+## What's Changed
+
+### Reliability
+- kiosk.service now uses Restart=on-failure with a 5 second delay, so the 
+  display recovers automatically from crashes without needing a reboot
+- Camera streams now reconnect automatically if an individual feed drops — 
+  each stream retries every 5 seconds independently of the others
+- New wifi-watchdog.sh pings 1.1.1.1 every 15 minutes and reboots the Pi 
+  if the network is unreachable. Activity is logged to /var/log/wifi-watchdog.log
+
+### Operational
+- New deploy.sh script — run from your Mac to perform Auto Update, Install, 
+  Reboot, or Update & Install across all Pis in one operation
+- New pi-hosts.txt — add your Pi IPs and hostnames here for use by deploy.sh
+- New CAMERAS.md — reference document mapping all 12 sheets to their camera 
+  IPs with a troubleshooting guide
+
+### How to Deploy
+Run do_install() from the kiosk menu on each Pi, then reboot to activate 
+the new service restart policy and watchdog cron entry.
+
 ### Added
 - `wifi-watchdog.sh` — new script that pings `1.1.1.1` every 15 minutes and reboots the Pi if the network is unreachable. Results are logged to `/var/log/wifi-watchdog.log` with timestamps
+- `deploy.sh` — new centralised deploy script run from a Mac/Linux machine. Reads Pi hostnames and IPs from `pi-hosts.txt` and can perform Auto Update, Install, Reboot, or Update & Install across all Pis in a single operation
+- `pi-hosts.txt` — new file listing all Pi IP addresses and hostnames. Used by `deploy.sh`
+- `CAMERAS.md` — new reference document mapping all 12 sheets to their Home and Away camera IPs, TV screen assignments, subnet breakdown, and a camera troubleshooting guide
 - `do_install()` in `kiosk.sh` now adds the Wi-Fi watchdog to cron (`*/15 * * * *`) alongside the existing daily 7:00 AM reboot entry
 - `do_auto_update()` in `kiosk.sh` now downloads `wifi-watchdog.sh` from GitHub on every SSH login
 
