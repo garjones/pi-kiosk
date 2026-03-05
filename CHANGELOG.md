@@ -38,7 +38,7 @@ the new service restart policy and watchdog cron entry.
 ### Changed
 - `kiosk.service` — `Restart=on-abort` changed to `Restart=on-failure` so the display recovers from crashes, non-zero exit codes, and timeouts, not just abort signals. `RestartSec=5` added to prevent rapid restart loops
 - `do_video()` in `kiosk.run.sh` — wrapped in a subshell loop with a 5 second retry delay so individual RTSP streams reconnect automatically if they drop, without requiring a full service restart
-- `do_video()` in `cameras-all.sh` — same reconnection loop applied for consistency
+- `do_labelip()` in `kiosk.run.sh` — bottom bar now displays hostname alongside IP address (e.g. `10.200.30.101 - kiosk-tv01`)
 - `kiosk.run.sh` updated to version 9
 - `cameras-all.sh` updated to version 3
 
