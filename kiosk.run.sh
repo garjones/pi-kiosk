@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9.2
+#  Version 8
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -66,13 +66,13 @@ do_labelip() {
     "color=black@0:size=${2}x${3}:rate=1,
     drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
     drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
-    drawtext=text='${1}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+    drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
     $7" &
 }
 
 
 # --------------------------------------------------------------------------------
-#  do_video() - Display a video feed
+#  do_video() - Display a video feed with automatic reconnection
 # --------------------------------------------------------------------------------
 #    $1 - URL
 #    $2 - Width
@@ -212,12 +212,14 @@ else
     SCRN_HEIGHT="1080"
 fi
 
-# get ip address
+# get ip address and hostname
 if $ON_PI; then
     MY_IP=$(hostname -I | awk '{print $1}')
+    MY_HOSTNAME=$(hostname)
 else
     # dev env - set to max characters    
     MY_IP="255.255.255.255"
+    MY_HOSTNAME="kiosk-dev"
 fi
 
 # label constants
@@ -257,6 +259,7 @@ echo "Top Sheet       : $SHEET_TOP"
 echo "Screen Widh     : $SCRN_WIDTH"
 echo "Screen Height   : $SCRN_HEIGHT"
 echo "IP address      : $MY_IP"
+echo "Hostname        : $MY_HOSTNAME"
 echo ""
 echo "Usable Height   : $USE_H"
 echo ""
