@@ -6,7 +6,7 @@
 # 
 #  Displays all cameras locally to test them
 #
-#  Version 2.1
+#  Version 3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
