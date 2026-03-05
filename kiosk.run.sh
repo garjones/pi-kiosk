@@ -303,6 +303,8 @@ fi
 case $KCC_CONFIG in
     K)
         do_kiosk "${URL_KIOSK[SHEET_BOT]}"
+        sleep 9
+        do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
         ;;
     C)
         #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
@@ -329,6 +331,8 @@ case $KCC_CONFIG in
     *)
         # error
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk https://whatismyipaddress.com/
+        sleep 9
+        do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R
         ;;
 esac
 
