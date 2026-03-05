@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 9.1
+#  Version 9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -158,6 +158,7 @@ do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env          --no-verbose -O /home/kcckiosk/kiosk.env
+  wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/wifi-watchdog.sh   --no-verbose -O /home/kcckiosk/wifi-watchdog.sh
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service  --no-verbose -O /home/kcckiosk/unclutter.service
 }
 
@@ -197,8 +198,8 @@ do_install () {
       sudo systemctl enable kiosk.service
   fi
 
-  # add reboot entry to cron
-  (echo "0 7 * * * /sbin/shutdown -r now") | crontab -
+  # add cron entries - daily reboot at 7am and wifi watchdog every 15 minutes
+  (echo "0 7 * * * /sbin/shutdown -r now"; echo "*/15 * * * * /bin/bash /home/kcckiosk/wifi-watchdog.sh") | crontab -
 
   # enable & start the service
   sudo systemctl enable cron
