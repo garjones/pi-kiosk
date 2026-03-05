@@ -4,7 +4,23 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.1] — Current
+## [v9.2] — Current
+
+### Added
+- `wifi-watchdog.sh` — new script that pings `1.1.1.1` every 15 minutes and reboots the Pi if the network is unreachable. Results are logged to `/var/log/wifi-watchdog.log` with timestamps
+- `do_install()` in `kiosk.sh` now adds the Wi-Fi watchdog to cron (`*/15 * * * *`) alongside the existing daily 7:00 AM reboot entry
+- `do_auto_update()` in `kiosk.sh` now downloads `wifi-watchdog.sh` from GitHub on every SSH login
+
+### Changed
+- `kiosk.service` — `Restart=on-abort` changed to `Restart=on-failure` so the display recovers from crashes, non-zero exit codes, and timeouts, not just abort signals. `RestartSec=5` added to prevent rapid restart loops
+- `do_video()` in `kiosk.run.sh` — wrapped in a subshell loop with a 5 second retry delay so individual RTSP streams reconnect automatically if they drop, without requiring a full service restart
+- `do_video()` in `cameras-all.sh` — same reconnection loop applied for consistency
+- `kiosk.run.sh` updated to version 9
+- `cameras-all.sh` updated to version 3
+
+---
+
+## [v9.1]
 
 ### Added
 - `kiosk.env` — new centralised config file committed to GitHub containing camera credentials (`CAM_USER`, `CAM_PASS`), home camera IPs (`CAM_HOME[]`), away camera IPs (`CAM_AWAY[]`), and kiosk advertising URLs (`URL_KIOSK[]`)
