@@ -66,7 +66,7 @@ do_labelip() {
     "color=black@0:size=${2}x${3}:rate=1,
     drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
     drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
-    drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+    drawtext=text='${1} - ${MY_HOSTNAME} - ${KCC_VERSION}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
     $7" &
 }
 
