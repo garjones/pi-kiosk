@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # --------------------------------------------------------------------------------
 #  kiosk.sh
@@ -6,13 +7,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 9.5
+#  Version 9.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v9.4"
+WT_TITLE="Kelowna Curling Club Kiosk Management v9.3"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
@@ -31,7 +32,7 @@ do_menu_main() {
     "P2" "Single Camera"     \
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
-    "P5" "Kiosk Update"      \    
+    "P5" "Kiosk Update"      \
     "P6" "Software Update"   \
     "P7" "Raspberry Config"  \
     "P8" "Install Kiosk"     \
@@ -47,7 +48,7 @@ do_menu_main() {
         P2) do_menu_single_camera;;
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
-        P5) do_update;;
+        P5) do_auto_update;;
         P6) do_apt;;
         P7) do_raspi_config;;
         P8) do_install;;
@@ -158,7 +159,7 @@ do_menu_rotation() {
 # --------------------------------------------------------------------------------
 
 # autoupdate from git
-do_update() {
+do_auto_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env          --no-verbose -O /home/kcckiosk/kiosk.env
