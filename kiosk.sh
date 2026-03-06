@@ -32,8 +32,8 @@ do_menu_main() {
     "P2" "Single Camera"     \
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
-    "P5" "Kiosk Update"      \
-    "P6" "Software Update"   \
+    "P5" "Software Update"   \
+    "P6" "System Update"     \
     "P7" "Raspberry Config"  \
     "P8" "Install Kiosk"     \
     "P9" "Reboot"            \
