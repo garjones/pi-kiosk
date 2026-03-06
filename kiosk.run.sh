@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9.3
+#  Version 9.4
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -81,10 +81,7 @@ do_labelip() {
 #    $5 - Top
 # --------------------------------------------------------------------------------
 do_video() {
-  (while true; do
-    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
-    sleep 5
-  done) &
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
 }
 
 # --------------------------------------------------------------------------------
