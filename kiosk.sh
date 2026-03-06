@@ -6,7 +6,7 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 9.4
+#  Version 9.5
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -31,12 +31,11 @@ do_menu_main() {
     "P2" "Single Camera"     \
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
-    "P5" "Screen Rotation"   \
-    "P6" "Kiosk Update"      \    
-    "P7" "Software Update"   \
-    "P8" "Raspberry Config"  \
-    "P9" "Install Kiosk"     \
-    "P10" "Reboot"           \
+    "P5" "Kiosk Update"      \    
+    "P6" "Software Update"   \
+    "P7" "Raspberry Config"  \
+    "P8" "Install Kiosk"     \
+    "P9" "Reboot"            \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -48,12 +47,11 @@ do_menu_main() {
         P2) do_menu_single_camera;;
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
-        P5) do_menu_rotation;;
-        P6) do_update;;
-        P7) do_apt;;
-        P8) do_raspi_config;;
-        P9) do_install;;
-        P10) do_reboot;;
+        P5) do_update;;
+        P6) do_apt;;
+        P7) do_raspi_config;;
+        P8) do_install;;
+        P9) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
