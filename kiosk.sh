@@ -32,10 +32,11 @@ do_menu_main() {
     "P3" "Custom Cameras"    \
     "P4" "Kiosk"             \
     "P5" "Screen Rotation"   \
-    "P6" "Software Update"   \
-    "P7" "Raspberry Config"  \
-    "P8" "Install Kiosk"     \
-    "P9" "Reboot"            \
+    "P6" "Kiosk Update"      \    
+    "P7" "Software Update"   \
+    "P8" "Raspberry Config"  \
+    "P9" "Install Kiosk"     \
+    "P10" "Reboot"           \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -48,10 +49,11 @@ do_menu_main() {
         P3) do_menu_custom_cameras;;
         P4) do_menu_kiosks;;
         P5) do_menu_rotation;;
-        P6) do_apt;;
-        P7) do_raspi_config;;
-        P8) do_install;;
-        P9) do_reboot;;
+        P6) do_update;;
+        P7) do_apt;;
+        P8) do_raspi_config;;
+        P9) do_install;;
+        P10) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -158,7 +160,7 @@ do_menu_rotation() {
 # --------------------------------------------------------------------------------
 
 # autoupdate from git
-do_auto_update() {
+do_update() {
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service      --no-verbose -O /home/kcckiosk/kiosk.service
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh       --no-verbose -O /home/kcckiosk/kiosk.run.sh
   wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env          --no-verbose -O /home/kcckiosk/kiosk.env
@@ -244,5 +246,4 @@ do_reboot() {
 # --------------------------------------------------------------------------------
 #  execute
 # --------------------------------------------------------------------------------
-do_auto_update
 do_menu_main
