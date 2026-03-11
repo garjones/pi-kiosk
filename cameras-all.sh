@@ -52,11 +52,25 @@ do_video() {
   done) &
 }
 
+# --------------------------------------------------------------------------------
+# determine if script is running on a raspberry pi
+# --------------------------------------------------------------------------------
+if [[ "$(uname)" == "Linux" ]]; then
+    ON_PI=true
+else
+    ON_PI=false
+fi
+
+
 
 # --------------------------------------------------------------------------------
 # load central config (camera IPs, credentials, kiosk URLs)
 # --------------------------------------------------------------------------------
-ENV_FILE="/home/kcckiosk/kiosk.env"
+if $ON_PI; then
+    ENV_FILE="/home/kcckiosk/kiosk.env"
+else
+    ENV_FILE="kiosk.env"
+fi
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "ERROR: Config file not found: $ENV_FILE"
