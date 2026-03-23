@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9.4
+#  Version 9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ do_labelip() {
     "color=black@0:size=${2}x${3}:rate=1,
     drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
     drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
-    drawtext=text='${1} - ${MY_HOSTNAME} - ${KCC_VERSION}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+    drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
     $7" &
 }
 
@@ -81,7 +81,10 @@ do_labelip() {
 #    $5 - Top
 # --------------------------------------------------------------------------------
 do_video() {
-    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
+  (while true; do
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
+    sleep 5
+  done) &
 }
 
 # --------------------------------------------------------------------------------
@@ -94,7 +97,7 @@ else
 fi
 
 # --------------------------------------------------------------------------------
-# load central config (camera IPs, credentials, kiosk URLs)
+# load central config (camera IPs, credentials, RTSP URLs, kiosk URLs)
 # --------------------------------------------------------------------------------
 if $ON_PI; then
     ENV_FILE="/home/kcckiosk/kiosk.env"
@@ -111,80 +114,20 @@ fi
 source "$ENV_FILE"
 
 # --------------------------------------------------------------------------------
+# dev override — replace RTSP URLs with local test video when not on Pi
+# --------------------------------------------------------------------------------
+if ! $ON_PI; then
+    URL_CAM_HOME=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
+    URL_CAM_AWAY=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
+fi
+
+# --------------------------------------------------------------------------------
 # constants & variables
 # --------------------------------------------------------------------------------
-
-# home cameras (built from kiosk.env)
-if $ON_PI; then
-    URL_CAM_HOME=(
-      ""
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[1]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[2]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[3]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[4]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[5]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[6]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[7]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[8]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[9]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[10]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[11]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[12]}/axis-media/media.amp"
-    )
-else
-    URL_CAM_HOME=(
-      ""
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4" 
-    )
-fi
-
-# away cameras (built from kiosk.env)
-if $ON_PI; then
-    URL_CAM_AWAY=(
-      ""
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[1]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[2]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[3]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[4]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[5]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[6]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[7]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[8]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[9]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[10]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[11]}/axis-media/media.amp"
-      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[12]}/axis-media/media.amp"
-    )
-else
-    URL_CAM_AWAY=(
-      ""
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-      "tiny-test.mp4"
-    )
-fi
-
-# URL_KIOSK is loaded directly from kiosk.env
 
 # get config
 if $ON_PI; then

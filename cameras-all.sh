@@ -46,28 +46,17 @@ do_label() {
 #    $5 - Top
 # --------------------------------------------------------------------------------
 do_video() {
-    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 &
+  (while true; do
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
+    sleep 5
+  done) &
 }
-
-# --------------------------------------------------------------------------------
-# determine if script is running on a raspberry pi
-# --------------------------------------------------------------------------------
-if [[ "$(uname)" == "Linux" ]]; then
-    ON_PI=true
-else
-    ON_PI=false
-fi
-
 
 
 # --------------------------------------------------------------------------------
 # load central config (camera IPs, credentials, kiosk URLs)
 # --------------------------------------------------------------------------------
-if $ON_PI; then
-    ENV_FILE="/home/kcckiosk/kiosk.env"
-else
-    ENV_FILE="kiosk.env"
-fi
+ENV_FILE="/home/kcckiosk/kiosk.env"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "ERROR: Config file not found: $ENV_FILE"
@@ -80,40 +69,6 @@ source "$ENV_FILE"
 # --------------------------------------------------------------------------------
 # constants & variables
 # --------------------------------------------------------------------------------
-
-# home cameras (built from kiosk.env)
-URL_CAM_HOME=(
-  ""
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[1]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[2]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[3]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[4]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[5]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[6]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[7]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[8]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[9]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[10]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[11]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[12]}/axis-media/media.amp"
-)
-
-# away cameras (built from kiosk.env)
-URL_CAM_AWAY=(
-  ""
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[1]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[2]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[3]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[4]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[5]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[6]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[7]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[8]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[9]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[10]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[11]}/axis-media/media.amp"
-  "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[12]}/axis-media/media.amp"
-)
 
 # set screen width and height
 SCRN_WIDTH=1800
@@ -143,7 +98,6 @@ do_video    ${URL_CAM_AWAY[9]}   $VID_W  $VID_H  $((VID_W * 8))       0
 do_video    ${URL_CAM_AWAY[10]}  $VID_W  $VID_H  $((VID_W * 9))       0
 do_video    ${URL_CAM_AWAY[11]}  $VID_W  $VID_H  $((VID_W * 10))      0
 do_video    ${URL_CAM_AWAY[12]}  $VID_W  $VID_H  $((VID_W * 11))      0
-
 
 # home cameras
 do_video    ${URL_CAM_HOME[1]}   $VID_W  $VID_H  $((VID_W * 0))       $VID_T

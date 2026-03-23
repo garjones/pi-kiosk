@@ -4,19 +4,12 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.3] — Current
-
-### Added
-- `P5 → Screen Rotation` added to the main menu in `kiosk.sh` — allows operator to set screen orientation to Horizontal (`H`) or Vertical (`V`) before selecting a display mode
-- `do_menu_rotation()` function handles rotation selection and sets the `ROTATION` variable used when writing `kiosk.config`
+## [v9.7] — Current
 
 ### Changed
-- Main menu items renumbered: Software Update `P5→P6`, Raspberry Config `P6→P7`, Install Kiosk `P7→P8`, Reboot `P8→P9`
-- `do_menu_screen()` renamed to `do_menu_rotation()` for clarity
-- `kiosk.sh` updated to version 9.3
-
-### Known Limitations
-- Screen rotation for video feeds in `kiosk.run.sh` is not yet implemented — the `transpose` filter is currently applied to labels only. Full video rotation will be addressed in a future release.
+- `kiosk.env` — added `URL_CAM_HOME` and `URL_CAM_AWAY` arrays, built inline from `CAM_USER`, `CAM_PASS`, and the `CAM_HOME`/`CAM_AWAY` IP arrays. RTSP URL construction now lives in one place
+- `kiosk.run.sh` — removed `URL_CAM_HOME`, `URL_CAM_AWAY`, and `URL_KIOSK` array definitions; all three are now sourced directly from `kiosk.env`. A dev override block replaces RTSP URLs with `tiny-test.mp4` after sourcing when not running on a Pi. Updated to version 9
+- `cameras-all.sh` — removed inline URL construction; `URL_CAM_HOME` and `URL_CAM_AWAY` are now sourced from `kiosk.env`. Updated to version 3
 
 ---
 
@@ -53,6 +46,7 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 - `kiosk.run.sh` updated to version 8
 - `cameras-all.sh` updated to version 2, use kiosk.env
 - `INSTALLATION.md` updated to redact SSH password
+
 ---
 
 ## [v9.0]
