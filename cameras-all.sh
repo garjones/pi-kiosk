@@ -124,3 +124,9 @@ do_video    ${URL_CAM_HOME[9]}   $VID_W  $VID_H  $((VID_W * 8))       $VID_T
 do_video    ${URL_CAM_HOME[10]}  $VID_W  $VID_H  $((VID_W * 9))       $VID_T
 do_video    ${URL_CAM_HOME[11]}  $VID_W  $VID_H  $((VID_W * 10))      $VID_T
 do_video    ${URL_CAM_HOME[12]}  $VID_W  $VID_H  $((VID_W * 11))      $VID_T
+
+# --------------------------------------------------------------------------------
+# keep alive — press Enter to quit
+# --------------------------------------------------------------------------------
+read -p "Press Enter to quit..."
+kill 0
