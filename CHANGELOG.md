@@ -2,9 +2,15 @@
 
 All notable changes to the KCC Pi Kiosk project are documented here.
 
+## [v9.4] — Current
+
+### Changed
+- `do_label()` in `kiosk.run.sh` — wrapped in a subshell loop with a 5 second retry delay so sheet number labels restart automatically if the ffplay process exits
+- `do_labelip()` in `kiosk.run.sh` — same automatic restart behaviour applied to the bottom IP/hostname bar
+- 
 ---
 
-## [v9.7] — Current
+## [v9.3]
 
 ### Changed
 - `kiosk.env` — added `URL_CAM_HOME` and `URL_CAM_AWAY` arrays, built inline from `CAM_USER`, `CAM_PASS`, and the `CAM_HOME`/`CAM_AWAY` IP arrays. RTSP URL construction now lives in one place

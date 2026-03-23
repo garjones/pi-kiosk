@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9
+#  Version 9.4
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -42,11 +42,14 @@ do_kiosk() {
 #    7 - Rotation
 # --------------------------------------------------------------------------------
 do_label() {
-  ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
-    "color=white@0:size=$2x$3:rate=1,
-    drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
-    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:
-    $7" &
+  (while true; do
+    ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
+      "color=white@0:size=$2x$3:rate=1,
+      drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
+      drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:
+      $7"
+    sleep 5
+  done) &
 }
 
 
@@ -62,14 +65,16 @@ do_label() {
 #    7 - Rotation
 # --------------------------------------------------------------------------------
 do_labelip() {
+  (while true; do
     ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
-    "color=black@0:size=${2}x${3}:rate=1,
-    drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
-    drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
-    drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
-    $7" &
+      "color=black@0:size=${2}x${3}:rate=1,
+      drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
+      drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
+      drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+      $7"
+    sleep 5
+  done) &
 }
-
 
 # --------------------------------------------------------------------------------
 #  do_video() - Display a video feed with automatic reconnection
