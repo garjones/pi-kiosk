@@ -56,7 +56,7 @@ do_video() {
 # --------------------------------------------------------------------------------
 # load central config (camera IPs, credentials, kiosk URLs)
 # --------------------------------------------------------------------------------
-ENV_FILE="/home/kcckiosk/kiosk.env"
+ENV_FILE="kiosk.env"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "ERROR: Config file not found: $ENV_FILE"
@@ -65,6 +65,18 @@ fi
 
 source "$ENV_FILE"
 
+# --------------------------------------------------------------------------------
+# offline mode
+# --------------------------------------------------------------------------------
+read -p "Offline mode? (y/N): " OFFLINE
+if [[ "$OFFLINE" =~ ^[Yy]$ ]]; then
+    URL_CAM_HOME=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
+    URL_CAM_AWAY=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
+                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
+fi
 
 # --------------------------------------------------------------------------------
 # constants & variables
