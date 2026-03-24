@@ -16,7 +16,7 @@
 #    - pi-hosts.txt — Pi IP addresses and hostnames
 #    - kiosk.env    — camera credentials and IPs
 #
-#  Version 1.2
+#  Version 1.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -176,14 +176,14 @@ function Invoke-Poll($pis, $camEnv) {
 # --------------------------------------------------------------------------------
 function Start-HttpServer($port) {
     $listener = New-Object System.Net.HttpListener
-    $listener.Prefixes.Add("http://localhost:${port}/")
+    $listener.Prefixes.Add("http://localhost:$port/")
     $listener.Start()
-    Write-Host "  HTTP server started — open http://localhost:${port}/kiosk-monitor.html"
+    Write-Host "  HTTP server started - open http://localhost:$port/kiosk-monitor.html"
 
-    $scriptDir = $SCRIPT_DIR  # capture for use inside thread
+    $l   = $listener
+    $dir = $SCRIPT_DIR
 
-    $thread = [System.Threading.Thread]::new({
-        param($l, $dir)
+    $threadBody = {
         while ($l.IsListening) {
             try {
                 $ctx  = $l.GetContext()
@@ -191,20 +191,17 @@ function Start-HttpServer($port) {
                 $resp = $ctx.Response
 
                 $path = $req.Url.LocalPath.TrimStart('/')
-                if ($path -eq "" -or $path -eq "/") { $path = "kiosk-monitor.html" }
+                if ($path -eq '' -or $path -eq '/') { $path = 'kiosk-monitor.html' }
 
                 $file = Join-Path $dir $path
 
                 if (Test-Path $file) {
-                    $mime = switch ([System.IO.Path]::GetExtension($file)) {
-                        ".html" { "text/html" }
-                        ".json" { "application/json" }
-                        default { "text/plain" }
-                    }
+                    $ext  = [System.IO.Path]::GetExtension($file)
+                    $mime = if ($ext -eq '.html') { 'text/html' } elseif ($ext -eq '.json') { 'application/json' } else { 'text/plain' }
                     $bytes = [System.IO.File]::ReadAllBytes($file)
                     $resp.ContentType     = $mime
                     $resp.ContentLength64 = $bytes.Length
-                    $resp.Headers.Add("Access-Control-Allow-Origin", "*")
+                    $resp.Headers.Add('Access-Control-Allow-Origin', '*')
                     $resp.OutputStream.Write($bytes, 0, $bytes.Length)
                 } else {
                     $resp.StatusCode = 404
@@ -212,9 +209,11 @@ function Start-HttpServer($port) {
                 $resp.OutputStream.Close()
             } catch {}
         }
-    })
+    }.GetNewClosure()
+
+    $thread = [System.Threading.Thread]::new($threadBody)
     $thread.IsBackground = $true
-    $thread.Start($listener, $scriptDir)
+    $thread.Start()
     return $listener
 }
 
