@@ -16,7 +16,7 @@
 #    - pi-hosts.txt — Pi IP addresses and hostnames
 #    - kiosk.env    — camera credentials and IPs
 #
-#  Version 1.0
+#  Version 1.1
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -171,6 +171,54 @@ function Invoke-Poll($pis, $camEnv) {
 }
 
 # --------------------------------------------------------------------------------
+# built-in HTTP server — serves status.json and kiosk-monitor.html on port 8080
+# runs in a background thread so the polling loop is not blocked
+# --------------------------------------------------------------------------------
+function Start-HttpServer($port) {
+    $listener = New-Object System.Net.HttpListener
+    $listener.Prefixes.Add("http://localhost:${port}/")
+    $listener.Start()
+    Write-Host "  HTTP server started — open http://localhost:${port}/kiosk-monitor.html"
+
+    $scriptDir = $SCRIPT_DIR  # capture for use inside thread
+
+    $thread = [System.Threading.Thread]::new({
+        param($l, $dir)
+        while ($l.IsListening) {
+            try {
+                $ctx  = $l.GetContext()
+                $req  = $ctx.Request
+                $resp = $ctx.Response
+
+                $path = $req.Url.LocalPath.TrimStart('/')
+                if ($path -eq "" -or $path -eq "/") { $path = "kiosk-monitor.html" }
+
+                $file = Join-Path $dir $path
+
+                if (Test-Path $file) {
+                    $mime = switch ([System.IO.Path]::GetExtension($file)) {
+                        ".html" { "text/html" }
+                        ".json" { "application/json" }
+                        default { "text/plain" }
+                    }
+                    $bytes = [System.IO.File]::ReadAllBytes($file)
+                    $resp.ContentType     = $mime
+                    $resp.ContentLength64 = $bytes.Length
+                    $resp.Headers.Add("Access-Control-Allow-Origin", "*")
+                    $resp.OutputStream.Write($bytes, 0, $bytes.Length)
+                } else {
+                    $resp.StatusCode = 404
+                }
+                $resp.OutputStream.Close()
+            } catch {}
+        }
+    })
+    $thread.IsBackground = $true
+    $thread.Start($listener, $scriptDir)
+    return $listener
+}
+
+# --------------------------------------------------------------------------------
 # entry point
 # --------------------------------------------------------------------------------
 $pis    = Load-Hosts
@@ -188,6 +236,9 @@ Write-Host "  $($pis.Count) Pis, $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Cou
 Write-Host "  Output: $STATUS_FILE"
 Write-Host "  Press Ctrl+C to stop"
 Write-Host "=================================================="
+Write-Host ""
+
+$server = Start-HttpServer 8080
 Write-Host ""
 
 while ($true) {
