@@ -2,7 +2,19 @@
 
 All notable changes to the KCC Pi Kiosk project are documented here.
 
-## [v9.4] — Current
+---
+
+## [v9.5] — Current
+
+### Added
+- `kiosk-manager.ps1` — new Windows PowerShell management tool for the club laptop. Provides a GUI dashboard covering fleet monitoring (ping + SSH port check per Pi), software updates (push latest files from GitHub to all Pis), remote display configuration (set rotation, mode, and sheet assignment on any Pi without SSHing in individually), remote reboot, and a 24-camera viewer via ffplay/xstack. Reads Pi fleet from `pi-hosts.txt` and camera IPs/credentials from `kiosk.env`. Requires `plink.exe` (PuTTY) for SSH and `ffplay.exe` (FFmpeg) for the camera viewer
+
+### Changed
+- `pi-hosts.txt` — updated with live Pi IP addresses (`10.200.30.11`–`10.200.30.23`) and correct hostnames (`kcc-pi-01`–`kcc-pi-13`), replacing the previous placeholder entries. 13 Pis in total
+
+---
+
+## [v9.4]
 
 ### Changed
 - `do_label()` in `kiosk.run.sh` — wrapped in a subshell loop with a 5 second retry delay so sheet number labels restart automatically if the ffplay process exits
