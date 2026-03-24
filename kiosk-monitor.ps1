@@ -16,7 +16,7 @@
 #    - pi-hosts.txt — Pi IP addresses and hostnames
 #    - kiosk.env    — camera credentials and IPs
 #
-#  Version 1.1
+#  Version 1.2
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
