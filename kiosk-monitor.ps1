@@ -16,7 +16,7 @@
 #    - pi-hosts.txt — Pi IP addresses and hostnames
 #    - kiosk.env    — camera credentials and IPs
 #
-#  Version 1.3
+#  Version 1.4
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -211,7 +211,8 @@ function Start-HttpServer($port) {
         }
     }.GetNewClosure()
 
-    $thread = [System.Threading.Thread]::new($threadBody)
+    $threadStart = [System.Threading.ThreadStart]$threadBody
+    $thread = New-Object System.Threading.Thread($threadStart)
     $thread.IsBackground = $true
     $thread.Start()
     return $listener
