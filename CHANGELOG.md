@@ -4,7 +4,15 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.5] — Current
+## [v9.6] — Current
+
+### Added
+- `kiosk-monitor.ps1` — background PowerShell script that polls all 13 Pis and 24 cameras every 30 seconds and writes results to `status.json`. Checks ping, SSH port availability, and `kiosk.service` status per Pi; checks RTSP port 554 reachability per camera
+- `kiosk-monitor.html` — always-on browser dashboard that reads `status.json` every 30 seconds and displays a summary bar (Pis online, kiosk services active, cameras reachable), a Pi fleet grid with colour-coded ping/SSH/service status per Pi, and a camera grid showing Home and Away status for all 12 sheets
+
+---
+
+## [v9.5]
 
 ### Added
 - `kiosk-manager.ps1` — new Windows PowerShell management tool for the club laptop. Provides a GUI dashboard covering fleet monitoring (ping + SSH port check per Pi), software updates (push latest files from GitHub to all Pis), remote display configuration (set rotation, mode, and sheet assignment on any Pi without SSHing in individually), remote reboot, and a 24-camera viewer via ffplay/xstack. Reads Pi fleet from `pi-hosts.txt` and camera IPs/credentials from `kiosk.env`. Requires `plink.exe` (PuTTY) for SSH and `ffplay.exe` (FFmpeg) for the camera viewer
