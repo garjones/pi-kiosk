@@ -17,7 +17,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 3.1
+#  Version 3.2
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -137,6 +137,51 @@ function Test-KioskService($ip) {
     return "unknown"
 }
 
+function Get-KioskConfig($ip) {
+    $text = Invoke-SSH $ip "cat /home/kcckiosk/kiosk.config 2>/dev/null"
+    return $text.Trim()
+}
+
+# --------------------------------------------------------------------------------
+# decode a raw config code (e.g. "HC0102") into a human-readable label
+# --------------------------------------------------------------------------------
+function ConvertTo-ConfigLabel($config) {
+    if ($config -eq "" -or $config.Length -lt 2) { return "Unknown" }
+
+    $rotation = $config.Substring(0, 1)
+    $mode     = $config.Substring(1, 1)
+
+    $rotLabel = switch ($rotation) {
+        "H" { "Horizontal" }
+        "V" { "Vertical" }
+        default { "?" }
+    }
+
+    switch ($mode) {
+        "C" {
+            if ($config.Length -ge 6) {
+                $bot = [int]$config.Substring(2, 2)
+                $top = [int]$config.Substring(4, 2)
+                return "$rotLabel · Cameras · Sheets $bot & $top"
+            }
+        }
+        "S" {
+            if ($config.Length -ge 4) {
+                $sheet = [int]$config.Substring(2, 2)
+                return "$rotLabel · Single Camera · Sheet $sheet"
+            }
+        }
+        "K" {
+            if ($config.Length -ge 4) {
+                $chan = [int]$config.Substring(2, 2)
+                $loc  = switch ($chan) { 1 { "Upstairs" } 2 { "Practice Ice" } default { "Channel $chan" } }
+                return "$rotLabel · Kiosk · $loc"
+            }
+        }
+    }
+    return $config
+}
+
 # --------------------------------------------------------------------------------
 # fetch camera snapshot as base64
 # Returns a base64 string on success, or empty string on failure
@@ -172,10 +217,14 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     # build Pi cards HTML
     $piCards = ""
     foreach ($pi in $piResults) {
-        $cardClass = if (-not $pi.ping) { "offline" } elseif ($pi.service -ne "active") { "degraded" } else { "all-ok" }
-        $pingDot   = if ($pi.ping) { '<span class="dot ok"></span>' }  else { '<span class="dot fail"></span>' }
-        $sshDot    = if ($pi.ssh)  { '<span class="dot ok"></span>' }  else { '<span class="dot fail"></span>' }
-        $svcClass  = switch ($pi.service) { "active" {"active"} "inactive" {"inactive"} "failed" {"failed"} default {"unknown"} }
+        $cardClass   = if (-not $pi.ping) { "offline" } elseif ($pi.service -ne "active") { "degraded" } else { "all-ok" }
+        $pingDot     = if ($pi.ping) { '<span class="dot ok"></span>' }  else { '<span class="dot fail"></span>' }
+        $sshDot      = if ($pi.ssh)  { '<span class="dot ok"></span>' }  else { '<span class="dot fail"></span>' }
+        $svcClass    = switch ($pi.service) { "active" {"active"} "inactive" {"inactive"} "failed" {"failed"} default {"unknown"} }
+        $configLabel = if ($pi.config -ne "") { ConvertTo-ConfigLabel $pi.config } else { "" }
+        $configHtml  = if ($configLabel -ne "") {
+            "<div class=`"pi-config`"><span class=`"pi-config-code`">$($pi.config)</span> $configLabel</div>"
+        } else { "" }
         $piCards += @"
         <div class="pi-card $cardClass">
           <div class="pi-name">$($pi.name)</div>
@@ -185,6 +234,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             <div class="check-badge">$sshDot SSH</div>
             <div class="check-badge"><span class="svc-badge svc-$svcClass">$($pi.service)</span></div>
           </div>
+          $configHtml
         </div>
 "@
     }
@@ -299,6 +349,8 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .svc-inactive { background: #3a2a10; color: #d4a04a; }
     .svc-failed   { background: #4a1a1a; color: #e07070; }
     .svc-unknown  { background: #2a2a2a; color: #888; }
+    .pi-config { margin-top: 8px; font-size: 0.7rem; color: #7a9ab8; line-height: 1.4; }
+    .pi-config-code { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #5b9bd5; font-weight: 700; margin-right: 4px; }
 
     /* ---- camera grid ---- */
     #camera-section { padding: 0 28px; overflow-x: auto; }
@@ -456,11 +508,12 @@ function Invoke-Poll($pis, $camEnv) {
     $piResults = @()
     foreach ($pi in $pis) {
         Write-Host "  Pi $($pi.Name) ($($pi.IP))..." -NoNewline
-        $ping = Test-Ping $pi.IP
-        $ssh  = if ($ping) { Test-TcpPort $pi.IP $SSH_PORT } else { $false }
-        $svc  = if ($ssh)  { Test-KioskService $pi.IP }      else { "unknown" }
-        $piResults += @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc }
-        Write-Host " ping=$ping ssh=$ssh service=$svc"
+        $ping   = Test-Ping $pi.IP
+        $ssh    = if ($ping) { Test-TcpPort $pi.IP $SSH_PORT } else { $false }
+        $svc    = if ($ssh)  { Test-KioskService $pi.IP }      else { "unknown" }
+        $config = if ($ssh)  { Get-KioskConfig $pi.IP }        else { "" }
+        $piResults += @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config }
+        Write-Host " ping=$ping ssh=$ssh service=$svc config=$config"
     }
 
     # poll cameras + fetch snapshots
