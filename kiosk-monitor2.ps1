@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.1
+#  Version 4.2
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -453,6 +453,33 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     }
     .cp-cancel:hover { border-color: #2a6ab0; color: #fff; }
 
+    .cp-actions { padding: 0 18px 16px; display: flex; gap: 8px; flex-shrink: 0; }
+    .cp-action-btn {
+      flex: 1; background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.78rem; font-weight: 600; padding: 8px 10px;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .cp-action-btn:hover    { border-color: #2a6ab0; color: #fff; background: #1e3050; }
+    .cp-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .cp-log {
+      display: none;
+      margin: 0 18px 16px;
+      background: #0a1018;
+      border: 1px solid #253545;
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.68rem;
+      color: #8ab0c8;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      flex-shrink: 0;
+    }
+    .cp-log.visible { display: block; }
+
     .cp-message {
       margin: 0 18px 16px; padding: 10px 14px; border-radius: 4px;
       font-size: 0.8rem; display: none;
@@ -692,8 +719,15 @@ $homeRow
 
     <div class="cp-message" id="cp-message"></div>
 
+    <div class="cp-actions">
+      <button class="cp-action-btn" id="cp-sw-update-btn"  onclick="doSoftwareUpdate()">&#11015; Software Update</button>
+      <button class="cp-action-btn" id="cp-sys-update-btn" onclick="doSystemUpdate()">&#9881; System Update</button>
+    </div>
+
+    <div class="cp-log" id="cp-log"></div>
+
     <div class="cp-footer">
-      <button class="cp-apply"  id="cp-apply-btn" onclick="applyConfig()">Apply &amp; Reboot</button>
+      <button class="cp-apply"  id="cp-apply-btn" onclick="applyConfig()">Reboot</button>
       <button class="cp-cancel" onclick="closeConfigPanel()">Cancel</button>
     </div>
   </div>
@@ -701,14 +735,19 @@ $homeRow
   <script>
     const API = 'http://localhost:8080';
     let cpIp = '';
+    let cpOriginalConfig = '';
 
     function openConfigPanel(name, ip, currentConfig) {
-      cpIp = ip;
-      document.getElementById('cp-pi-name').textContent = name;
-      document.getElementById('cp-pi-ip').textContent   = ip;
-      document.getElementById('cp-message').className   = 'cp-message';
-      document.getElementById('cp-apply-btn').disabled  = false;
-      document.getElementById('cp-apply-btn').textContent = 'Apply & Reboot';
+      cpIp             = ip;
+      cpOriginalConfig = currentConfig;
+      document.getElementById('cp-pi-name').textContent    = name;
+      document.getElementById('cp-pi-ip').textContent      = ip;
+      document.getElementById('cp-message').className      = 'cp-message';
+      document.getElementById('cp-log').className          = 'cp-log';
+      document.getElementById('cp-log').textContent        = '';
+      document.getElementById('cp-apply-btn').disabled     = false;
+      document.getElementById('cp-apply-btn').textContent  = 'Reboot';
+      setActionBtnsDisabled(false);
 
       // parse current config into controls
       const rot  = currentConfig[0] || 'H';
@@ -793,20 +832,31 @@ $homeRow
     }
 
     function updatePreview() {
-      const cfg = buildConfig();
+      const cfg     = buildConfig();
+      const changed = cfg !== cpOriginalConfig;
       document.getElementById('cp-code').textContent       = cfg;
       document.getElementById('cp-label-text').textContent = decodeConfig(cfg);
+      document.getElementById('cp-apply-btn').textContent  = changed ? 'Apply & Reboot' : 'Reboot';
+    }
+
+    function setActionBtnsDisabled(disabled) {
+      document.getElementById('cp-sw-update-btn').disabled  = disabled;
+      document.getElementById('cp-sys-update-btn').disabled = disabled;
+      document.getElementById('cp-apply-btn').disabled      = disabled;
+    }
+
+    function showMessage(msg, type) {
+      const el = document.getElementById('cp-message');
+      el.textContent = msg;
+      el.className   = 'cp-message ' + type;
     }
 
     async function applyConfig() {
-      const cfg    = buildConfig();
-      const btn    = document.getElementById('cp-apply-btn');
-      const msgEl  = document.getElementById('cp-message');
-
-      btn.disabled    = true;
+      const cfg = buildConfig();
+      const btn = document.getElementById('cp-apply-btn');
+      document.getElementById('cp-message').className = 'cp-message';
+      setActionBtnsDisabled(true);
       btn.textContent = 'Applying…';
-      msgEl.className = 'cp-message';
-
       try {
         const resp = await fetch(API + '/set-config', {
           method: 'POST',
@@ -817,17 +867,68 @@ $homeRow
         if (data.success) {
           closeConfigPanel();
         } else {
-          msgEl.textContent = 'Error: ' + (data.error || 'Unknown error');
-          msgEl.className   = 'cp-message error';
-          btn.disabled      = false;
-          btn.textContent   = 'Apply & Reboot';
+          showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+          setActionBtnsDisabled(false);
+          updatePreview();
         }
       } catch (e) {
-        msgEl.textContent = 'Could not reach monitor service (localhost:8080). Is kiosk-monitor2.ps1 running?';
-        msgEl.className   = 'cp-message error';
-        btn.disabled      = false;
-        btn.textContent   = 'Apply & Reboot';
+        showMessage('Could not reach monitor service (localhost:8080). Is kiosk-monitor2.ps1 running?', 'error');
+        setActionBtnsDisabled(false);
+        updatePreview();
       }
+    }
+
+    async function doSoftwareUpdate() {
+      document.getElementById('cp-message').className = 'cp-message';
+      document.getElementById('cp-log').className     = 'cp-log';
+      setActionBtnsDisabled(true);
+      document.getElementById('cp-sw-update-btn').textContent = 'Updating…';
+      try {
+        const resp = await fetch(API + '/software-update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          showMessage('Software updated — Pi is rebooting.', 'success');
+        } else {
+          showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+      } catch (e) {
+        showMessage('Could not reach monitor service (localhost:8080).', 'error');
+      }
+      document.getElementById('cp-sw-update-btn').textContent = '⬇ Software Update';
+      setActionBtnsDisabled(false);
+    }
+
+    async function doSystemUpdate() {
+      document.getElementById('cp-message').className = 'cp-message';
+      const logEl = document.getElementById('cp-log');
+      logEl.textContent = '';
+      logEl.className   = 'cp-log visible';
+      setActionBtnsDisabled(true);
+      document.getElementById('cp-sys-update-btn').textContent = 'Updating…';
+      try {
+        const resp = await fetch(API + '/system-update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp })
+        });
+        const reader  = resp.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          logEl.textContent += decoder.decode(value);
+          logEl.scrollTop    = logEl.scrollHeight;
+        }
+        showMessage('System update complete.', 'success');
+      } catch (e) {
+        showMessage('Could not reach monitor service (localhost:8080).', 'error');
+      }
+      document.getElementById('cp-sys-update-btn').textContent = '⚙ System Update';
+      setActionBtnsDisabled(false);
     }
   </script>
 </body>
@@ -959,6 +1060,55 @@ function Start-HttpListener {
                         $resp.StatusCode = 400
                         $result = '{"success":false,"error":"Missing ip or config"}'
                     }
+
+                } elseif ($req.Url.AbsolutePath -eq "/software-update") {
+                    $ip = $json.ip
+                    if ($ip) {
+                        $cmd = 'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     --no-verbose -O /home/kcckiosk/kiosk.service && ' +
+                               'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      --no-verbose -O /home/kcckiosk/kiosk.run.sh && ' +
+                               'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env         --no-verbose -O /home/kcckiosk/kiosk.env && ' +
+                               'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/wifi-watchdog.sh  --no-verbose -O /home/kcckiosk/wifi-watchdog.sh && ' +
+                               'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service --no-verbose -O /home/kcckiosk/unclutter.service && ' +
+                               'echo "__DONE__" && sudo reboot'
+                        Invoke-SSH-Local $ip $cmd | Out-Null
+                        $result = '{"success":true}'
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip"}'
+                    }
+
+                } elseif ($req.Url.AbsolutePath -eq "/system-update") {
+                    $ip = $json.ip
+                    if ($ip) {
+                        # stream output line by line
+                        $resp.ContentType = "text/plain; charset=utf-8"
+                        $resp.SendChunked = $true
+                        $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
+                        $writer.AutoFlush = $true
+                        try {
+                            $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                         "-p", $SSH_PORT, "${SSH_USER}@${ip}")
+                            $cmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1 && echo '__DONE__'"
+                            if ($IS_WINDOWS) {
+                                $proc = Start-Process -FilePath $SSH -ArgumentList ($sshOpts + $cmd) -NoNewWindow -PassThru -RedirectStandardOutput "$env:TEMP\sysupdate.txt"
+                                $proc.WaitForExit()
+                                Get-Content "$env:TEMP\sysupdate.txt" | ForEach-Object { $writer.WriteLine($_) }
+                            } else {
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1 | ForEach-Object {
+                                    $writer.WriteLine($_)
+                                }
+                            }
+                        } catch {
+                            $writer.WriteLine("ERROR: $_")
+                        }
+                        $writer.Close()
+                        $resp.Close()
+                        continue
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip"}'
+                    }
+
                 } else {
                     $resp.StatusCode = 404
                     $result = '{"success":false,"error":"Not found"}'
