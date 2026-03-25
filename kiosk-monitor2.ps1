@@ -11,12 +11,13 @@
 #  Run this script once -- it loops indefinitely until closed.
 #
 #  Requirements:
-#    - PowerShell 5.1 or later
-#    - plink.exe (PuTTY) -- for kiosk service checks
+#    - PowerShell 7 or later (cross-platform: Windows, macOS, Linux)
+#    - ssh (built-in on macOS/Linux; included with Windows 10/11)
+#    - sshpass (macOS/Linux only -- install via: brew install sshpass)
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 3.0
+#  Version 3.1
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -31,15 +32,17 @@ $SSH_PORT    = 22
 $RTSP_PORT   = 554
 $POLL_SECS   = 30
 
-# locate plink
+# detect platform and locate SSH tools
+$IS_WINDOWS = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
+
 function Find-Tool($name) {
-    $local = Join-Path $SCRIPT_DIR $name
-    if (Test-Path $local) { return $local }
     $inPath = Get-Command $name -ErrorAction SilentlyContinue
     if ($inPath) { return $inPath.Source }
     return $null
 }
-$PLINK = Find-Tool "plink.exe"
+
+$SSH     = Find-Tool "ssh"
+$SSHPASS = Find-Tool "sshpass"   # macOS/Linux only; install via: brew install sshpass
 
 # --------------------------------------------------------------------------------
 # load pi-hosts.txt
@@ -90,7 +93,14 @@ function Load-Env {
 # checks
 # --------------------------------------------------------------------------------
 function Test-Ping($ip) {
-    return (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue)
+    try {
+        if ($IS_WINDOWS) {
+            return (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue)
+        } else {
+            $result = & ping -c 1 -W 2 $ip 2>&1
+            return ($LASTEXITCODE -eq 0)
+        }
+    } catch { return $false }
 }
 
 function Test-TcpPort($ip, $port) {
@@ -103,16 +113,28 @@ function Test-TcpPort($ip, $port) {
     } catch { return $false }
 }
 
-function Test-KioskService($ip) {
-    if (-not $PLINK) { return "unknown" }
+function Invoke-SSH($ip, $command) {
+    if (-not $SSH) { return "unknown" }
     try {
-        $out  = & $PLINK -ssh -pw $SSH_PASS -batch -P $SSH_PORT "${SSH_USER}@${ip}" "systemctl is-active kiosk.service" 2>&1
-        $text = ($out -join "").Trim()
-        if ($text -eq "active")   { return "active" }
-        if ($text -eq "inactive") { return "inactive" }
-        if ($text -eq "failed")   { return "failed" }
-        return "unknown"
-    } catch { return "unknown" }
+        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", "-p", $SSH_PORT, "${SSH_USER}@${ip}")
+        if ($IS_WINDOWS) {
+            # Windows: use ssh directly (password auth via SSH key or Windows OpenSSH)
+            $out = & $SSH @sshOpts $command 2>&1
+        } else {
+            # macOS/Linux: use sshpass for password auth
+            if (-not $SSHPASS) { return "unknown" }
+            $out = & $SSHPASS -p $SSH_PASS $SSH @sshOpts $command 2>&1
+        }
+        return ($out -join "").Trim()
+    } catch { return "" }
+}
+
+function Test-KioskService($ip) {
+    $text = Invoke-SSH $ip "systemctl is-active kiosk.service"
+    if ($text -eq "active")   { return "active" }
+    if ($text -eq "inactive") { return "inactive" }
+    if ($text -eq "failed")   { return "failed" }
+    return "unknown"
 }
 
 # --------------------------------------------------------------------------------
@@ -121,15 +143,23 @@ function Test-KioskService($ip) {
 # --------------------------------------------------------------------------------
 function Get-CameraSnapshot($ip, $user, $pass) {
     try {
-        $url  = "http://${ip}/axis-cgi/jpg/image.cgi"
-        $cred = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${user}:${pass}"))
-        $resp = Invoke-WebRequest -Uri $url `
-                    -Headers @{ Authorization = "Basic $cred" } `
-                    -TimeoutSec 5 `
-                    -ErrorAction Stop
-        if ($resp.StatusCode -eq 200 -and $resp.Content.Length -gt 0) {
-            return [Convert]::ToBase64String($resp.Content)
+        $url     = "http://${ip}/axis-cgi/jpg/image.cgi"
+        $cred    = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${user}:${pass}"))
+        $tmpFile = [System.IO.Path]::GetTempFileName()
+        $resp    = Invoke-WebRequest -Uri $url `
+                       -Headers @{ Authorization = "Basic $cred" } `
+                       -TimeoutSec 5 `
+                       -OutFile $tmpFile `
+                       -PassThru `
+                       -ErrorAction Stop
+        if ($resp.StatusCode -eq 200 -and (Test-Path $tmpFile)) {
+            $bytes = [System.IO.File]::ReadAllBytes($tmpFile)
+            Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
+            if ($bytes.Length -gt 0) {
+                return [Convert]::ToBase64String($bytes)
+            }
         }
+        Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
     } catch { }
     return ""
 }
@@ -487,6 +517,11 @@ Write-Host "  KCC Pi Kiosk Monitor"
 Write-Host "  Polling every $POLL_SECS seconds"
 Write-Host "  $($pis.Count) Pis, $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Count) cameras"
 Write-Host "  Output: $HTML_FILE"
+Write-Host "  Platform: $(if ($IS_WINDOWS) { 'Windows' } else { 'macOS/Linux' })"
+Write-Host "  SSH: $(if ($SSH) { $SSH } else { 'NOT FOUND' })"
+if (-not $IS_WINDOWS) {
+    Write-Host "  sshpass: $(if ($SSHPASS) { $SSHPASS } else { 'NOT FOUND -- install via: brew install sshpass' })"
+}
 Write-Host "  Press Ctrl+C to stop"
 Write-Host "=================================================="
 Write-Host ""
