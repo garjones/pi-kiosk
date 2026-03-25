@@ -14,10 +14,11 @@
 #    - PowerShell 7 or later (cross-platform: Windows, macOS, Linux)
 #    - ssh (built-in on macOS/Linux; included with Windows 10/11)
 #    - sshpass (macOS/Linux only -- install via: brew install sshpass)
+#    - curl (built-in on macOS/Linux and Windows 10/11)
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 3.2
+#  Version 3.9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -38,11 +39,17 @@ $IS_WINDOWS = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
 function Find-Tool($name) {
     $inPath = Get-Command $name -ErrorAction SilentlyContinue
     if ($inPath) { return $inPath.Source }
+    # check common Homebrew locations (macOS) when not on PATH
+    foreach ($prefix in @("/opt/homebrew/bin", "/usr/local/bin")) {
+        $candidate = Join-Path $prefix $name
+        if (Test-Path $candidate) { return $candidate }
+    }
     return $null
 }
 
 $SSH     = Find-Tool "ssh"
 $SSHPASS = Find-Tool "sshpass"   # macOS/Linux only; install via: brew install sshpass
+$CURL    = Find-Tool "curl"
 
 # --------------------------------------------------------------------------------
 # load pi-hosts.txt
@@ -94,10 +101,10 @@ function Load-Env {
 # --------------------------------------------------------------------------------
 function Test-Ping($ip) {
     try {
-        if ($IS_WINDOWS) {
+        if ($script:IS_WINDOWS) {
             return (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue)
         } else {
-            $result = & ping -c 1 -W 2 $ip 2>&1
+            & ping -c 1 -W 2 $ip 2>&1 | Out-Null
             return ($LASTEXITCODE -eq 0)
         }
     } catch { return $false }
@@ -114,16 +121,14 @@ function Test-TcpPort($ip, $port) {
 }
 
 function Invoke-SSH($ip, $command) {
-    if (-not $SSH) { return "unknown" }
+    if (-not $script:SSH) { return "unknown" }
     try {
-        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", "-p", $SSH_PORT, "${SSH_USER}@${ip}")
-        if ($IS_WINDOWS) {
-            # Windows: use ssh directly (password auth via SSH key or Windows OpenSSH)
-            $out = & $SSH @sshOpts $command 2>&1
+        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", "-p", $script:SSH_PORT, "$($script:SSH_USER)@${ip}")
+        if ($script:IS_WINDOWS) {
+            $out = & $script:SSH @sshOpts $command 2>&1
         } else {
-            # macOS/Linux: use sshpass for password auth
-            if (-not $SSHPASS) { return "unknown" }
-            $out = & $SSHPASS -p $SSH_PASS $SSH @sshOpts $command 2>&1
+            if (-not $script:SSHPASS) { return "unknown" }
+            $out = & $script:SSHPASS -p $script:SSH_PASS $script:SSH @sshOpts $command 2>&1
         }
         return ($out -join "").Trim()
     } catch { return "" }
@@ -188,23 +193,16 @@ function ConvertTo-ConfigLabel($config) {
 # --------------------------------------------------------------------------------
 function Get-CameraSnapshot($ip, $user, $pass) {
     try {
-        $url     = "http://${ip}/axis-cgi/jpg/image.cgi"
-        $cred    = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${user}:${pass}"))
         $tmpFile = [System.IO.Path]::GetTempFileName()
-        $resp    = Invoke-WebRequest -Uri $url `
-                       -Headers @{ Authorization = "Basic $cred" } `
-                       -TimeoutSec 5 `
-                       -OutFile $tmpFile `
-                       -PassThru `
-                       -ErrorAction Stop
-        if ($resp.StatusCode -eq 200 -and (Test-Path $tmpFile)) {
+        & curl --digest --user "${user}:${pass}" "http://${ip}/axis-cgi/jpg/image.cgi" `
+               -o $tmpFile --silent --max-time 5 2>$null
+        if (Test-Path $tmpFile) {
             $bytes = [System.IO.File]::ReadAllBytes($tmpFile)
             Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
             if ($bytes.Length -gt 0) {
                 return [Convert]::ToBase64String($bytes)
             }
         }
-        Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
     } catch { }
     return ""
 }
@@ -263,9 +261,9 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
                 $cls    = if ($cam.up) { "up" } else { "down" }
                 $stat   = if ($cam.up) { "UP" } else { "DOWN" }
                 $imgTag = if ($cam.snapshot -ne "") {
-                    "<img class=`"cam-thumb`" src=`"data:image/jpeg;base64,$($cam.snapshot)`" alt=`"Sheet $s $endLabel`">"
+                    "<div class=`"cam-thumb-wrap`"><img class=`"cam-thumb`" src=`"data:image/jpeg;base64,$($cam.snapshot)`" alt=`"Sheet $s $endLabel`"></div>"
                 } else {
-                    "<div class=`"cam-thumb cam-no-image`">No image</div>"
+                    "<div class=`"cam-thumb-wrap cam-no-image`">No image</div>"
                 }
                 $row += @"
       <div class="cam-cell $cls">
@@ -427,9 +425,20 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .cam-status.down { color: #c0392b; }
 
     /* thumbnail */
-    .cam-thumb {
+    .cam-thumb-wrap {
       width: 100%;
-      aspect-ratio: 16/9;
+      padding-top: 177.78%;  /* 16/9 inverted = 9/16 = 56.25%, but we want portrait so 16:9 rotated = height is 177.78% of width */
+      position: relative;
+      overflow: hidden;
+    }
+    .cam-thumb {
+      position: absolute;
+      /* image is 16:9 landscape; rotate 90deg CW to make it portrait */
+      width: 177.78%;   /* image height becomes cell width: 100% / (9/16) */
+      height: 56.25%;   /* image width scaled down to fit: 100% * (9/16) */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
       object-fit: cover;
       display: block;
     }
@@ -572,6 +581,7 @@ Write-Host "  $($pis.Count) Pis, $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Cou
 Write-Host "  Output: $HTML_FILE"
 Write-Host "  Platform: $(if ($IS_WINDOWS) { 'Windows' } else { 'macOS/Linux' })"
 Write-Host "  SSH: $(if ($SSH) { $SSH } else { 'NOT FOUND' })"
+Write-Host "  curl: $(if ($CURL) { $CURL } else { 'NOT FOUND' })"
 if (-not $IS_WINDOWS) {
     Write-Host "  sshpass: $(if ($SSHPASS) { $SSHPASS } else { 'NOT FOUND -- install via: brew install sshpass' })"
 }
