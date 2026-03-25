@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # --------------------------------------------------------------------------------
 #  kiosk.sh
@@ -7,13 +6,13 @@
 # 
 #  Configuration Script. Allows operator to configure actions of Pi
 #  
-#  Version 9.6
+#  Version 9.7
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
 
 # configuration parameters
-WT_TITLE="Kelowna Curling Club Kiosk Management v9.6"
+WT_TITLE="Kelowna Curling Club Kiosk Management v9.7"
 WT_COPYRIGHT="(c) Gareth Jones - gareth@gareth.com"
 WT_HEIGHT=25
 WT_WIDTH=80
@@ -28,15 +27,16 @@ do_menu_main() {
   while true; do
     # display menu
     FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Quit --ok-button Select \
-    "P1" "Club Cameras"      \
-    "P2" "Single Camera"     \
-    "P3" "Custom Cameras"    \
-    "P4" "Kiosk"             \
-    "P5" "Software Update"   \
-    "P6" "System Update"     \
-    "P7" "Raspberry Config"  \
-    "P8" "Install Kiosk"     \
-    "P9" "Reboot"            \
+    "P1"  "Club Cameras"      \
+    "P2"  "Single Camera"     \
+    "P3"  "Custom Cameras"    \
+    "P4"  "Kiosk"             \
+    "P5"  "Screen Rotation"   \
+    "P6"  "Software Update"   \
+    "P7"  "System Update"     \
+    "P8"  "Raspberry Config"  \
+    "P9"  "Install Kiosk"     \
+    "P10" "Reboot"            \
     3>&1 1>&2 2>&3)
     RET=$?
 
@@ -44,15 +44,16 @@ do_menu_main() {
     if [ $RET -eq 0 ]; then
       # menu item was selected
       case "$FUN" in
-        P1) do_menu_club_cameras;;
-        P2) do_menu_single_camera;;
-        P3) do_menu_custom_cameras;;
-        P4) do_menu_kiosks;;
-        P5) do_auto_update;;
-        P6) do_apt;;
-        P7) do_raspi_config;;
-        P8) do_install;;
-        P9) do_reboot;;
+        P1)  do_menu_club_cameras;;
+        P2)  do_menu_single_camera;;
+        P3)  do_menu_custom_cameras;;
+        P4)  do_menu_kiosks;;
+        P5)  do_menu_rotation;;
+        P6)  do_auto_update;;
+        P7)  do_apt;;
+        P8)  do_raspi_config;;
+        P9)  do_install;;
+        P10) do_reboot;;
         *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
       esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
     else
@@ -123,7 +124,7 @@ do_menu_custom_cameras() {
 do_menu_kiosks() {
   # display menu
   FUN=$(whiptail --title "$WT_TITLE" --backtitle "$WT_COPYRIGHT" --menu "Kiosk Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT  --cancel-button Back --ok-button Select \
-  "K01" "Kiosk Advertising (Upstairs)"   \
+  "K01" "Kiosk Advertising (Upstairs)"    \
   "K02" "Kiosk Practice Ice (Downstairs)" \
   3>&1 1>&2 2>&3)
   RET=$?
