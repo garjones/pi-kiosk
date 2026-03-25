@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 3.9
+#  Version 4.0
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -32,6 +32,7 @@ $SSH_PASS    = "kcc12345"
 $SSH_PORT    = 22
 $RTSP_PORT   = 554
 $POLL_SECS   = 30
+$HTTP_PORT   = 8080
 
 # detect platform and locate SSH tools
 $IS_WINDOWS = ($PSVersionTable.PSVersion.Major -lt 6) -or $IsWindows
@@ -147,6 +148,12 @@ function Get-KioskConfig($ip) {
     return $text.Trim()
 }
 
+function Set-KioskConfig($ip, $config) {
+    $result = Invoke-SSH $ip "echo '$config' > /home/kcckiosk/kiosk.config && sudo sync && sudo reboot"
+    # reboot closes the SSH session so any output or error is expected
+    return $true
+}
+
 # --------------------------------------------------------------------------------
 # decode a raw config code (e.g. "HC0102") into a human-readable label
 # --------------------------------------------------------------------------------
@@ -224,7 +231,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             "<div class=`"pi-config`"><span class=`"pi-config-code`">$($pi.config)</span> $configLabel</div>"
         } else { "" }
         $piCards += @"
-        <div class="pi-card $cardClass">
+        <div class="pi-card $cardClass" onclick="openConfigPanel('$($pi.name)','$($pi.ip)','$($pi.config)')" title="Click to configure">
           <div class="pi-name">$($pi.name)</div>
           <div class="pi-ip">$($pi.ip)</div>
           <div class="pi-checks">
@@ -349,6 +356,109 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .svc-unknown  { background: #2a2a2a; color: #888; }
     .pi-config { margin-top: 8px; font-size: 0.7rem; color: #7a9ab8; line-height: 1.4; }
     .pi-config-code { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #5b9bd5; font-weight: 700; margin-right: 4px; }
+
+    /* ---- Pi card clickable ---- */
+    .pi-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .pi-card:hover { box-shadow: 0 0 0 2px #2a6ab0; }
+
+    /* ---- config panel ---- */
+    #config-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+    }
+    #config-overlay.open { display: block; }
+
+    #config-panel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 360px;
+      height: 100vh;
+      background: #131f2e;
+      border-left: 3px solid #1e5fa8;
+      z-index: 101;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      overflow-y: auto;
+    }
+    #config-panel.open { transform: translateX(0); }
+
+    .cp-header {
+      background: #1a2a3a;
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid #253545;
+      flex-shrink: 0;
+    }
+    .cp-title { font-size: 1rem; font-weight: 600; color: #fff; }
+    .cp-ip    { font-size: 0.72rem; color: #6a8aaa; font-family: 'Consolas', monospace; margin-top: 2px; }
+    .cp-close {
+      background: none; border: none; color: #7a9ab8; font-size: 1.4rem;
+      cursor: pointer; line-height: 1; padding: 0 0 0 12px; flex-shrink: 0;
+    }
+    .cp-close:hover { color: #fff; }
+
+    .cp-body { padding: 20px 18px; flex: 1; }
+
+    .cp-section { margin-bottom: 20px; }
+    .cp-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #3a6080; margin-bottom: 8px;
+    }
+
+    .toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .toggle-btn {
+      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.78rem; font-weight: 600; padding: 6px 14px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .toggle-btn:hover  { border-color: #2a6ab0; color: #fff; }
+    .toggle-btn.active { background: #1e5fa8; border-color: #2a7ad8; color: #fff; }
+
+    .cp-select {
+      width: 100%; background: #1a2535; border: 1px solid #2a3a4a;
+      border-radius: 4px; color: #e0e0e0; font-size: 0.82rem;
+      padding: 7px 10px; appearance: none;
+    }
+    .cp-select:focus { outline: none; border-color: #2a6ab0; }
+
+    .cp-preview {
+      background: #0f1923; border: 1px solid #253545; border-radius: 4px;
+      padding: 10px 14px; margin-bottom: 20px; text-align: center;
+    }
+    .cp-preview-code {
+      font-family: 'Consolas', monospace; font-size: 1.4rem;
+      font-weight: 700; color: #5b9bd5; display: block;
+    }
+    .cp-preview-label { font-size: 0.72rem; color: #7a9ab8; margin-top: 4px; }
+
+    .cp-footer { padding: 0 18px 20px; display: flex; gap: 10px; flex-shrink: 0; }
+    .cp-apply {
+      flex: 1; background: #1e5fa8; border: none; border-radius: 4px;
+      color: #fff; font-size: 0.85rem; font-weight: 600; padding: 10px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .cp-apply:hover    { background: #2a7ad8; }
+    .cp-apply:disabled { background: #253545; color: #5a7a9a; cursor: not-allowed; }
+    .cp-cancel {
+      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.85rem; padding: 10px 18px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .cp-cancel:hover { border-color: #2a6ab0; color: #fff; }
+
+    .cp-message {
+      margin: 0 18px 16px; padding: 10px 14px; border-radius: 4px;
+      font-size: 0.8rem; display: none;
+    }
+    .cp-message.error   { background: #4a1a1a; border: 1px solid #c0392b; color: #e07070; display: block; }
+    .cp-message.success { background: #1a4a2a; border: 1px solid #27ae60; color: #5dca80; display: block; }
 
     /* ---- camera grid ---- */
     #camera-section { padding: 0 28px; overflow-x: auto; }
@@ -499,6 +609,227 @@ $homeRow
     </div>
   </div>
 
+  <!-- config panel overlay -->
+  <div id="config-overlay" onclick="closeConfigPanel()"></div>
+
+  <!-- config panel -->
+  <div id="config-panel">
+    <div class="cp-header">
+      <div>
+        <div class="cp-title" id="cp-pi-name">kcc-pi-01</div>
+        <div class="cp-ip"   id="cp-pi-ip">10.200.30.11</div>
+      </div>
+      <button class="cp-close" onclick="closeConfigPanel()">×</button>
+    </div>
+
+    <div class="cp-body">
+      <!-- rotation -->
+      <div class="cp-section">
+        <div class="cp-label">Rotation</div>
+        <div class="toggle-group" id="cp-rotation">
+          <button class="toggle-btn" data-val="H" onclick="setToggle('cp-rotation',this)">H — Horizontal</button>
+          <button class="toggle-btn" data-val="V" onclick="setToggle('cp-rotation',this)">V — Vertical</button>
+        </div>
+      </div>
+
+      <!-- mode -->
+      <div class="cp-section">
+        <div class="cp-label">Mode</div>
+        <div class="toggle-group" id="cp-mode">
+          <button class="toggle-btn" data-val="C" onclick="setToggle('cp-mode',this);updateModeFields()">Cameras</button>
+          <button class="toggle-btn" data-val="S" onclick="setToggle('cp-mode',this);updateModeFields()">Single</button>
+          <button class="toggle-btn" data-val="K" onclick="setToggle('cp-mode',this);updateModeFields()">Kiosk</button>
+        </div>
+      </div>
+
+      <!-- cameras: sheet pair -->
+      <div class="cp-section" id="cp-field-cameras">
+        <div class="cp-label">Sheet Pair</div>
+        <select class="cp-select" id="cp-pair" onchange="updatePreview()">
+          <option value="0102">Sheets 1 &amp; 2</option>
+          <option value="0304">Sheets 3 &amp; 4</option>
+          <option value="0506">Sheets 5 &amp; 6</option>
+          <option value="0708">Sheets 7 &amp; 8</option>
+          <option value="0910">Sheets 9 &amp; 10</option>
+          <option value="1112">Sheets 11 &amp; 12</option>
+        </select>
+      </div>
+
+      <!-- single: sheet number -->
+      <div class="cp-section" id="cp-field-single" style="display:none">
+        <div class="cp-label">Sheet</div>
+        <select class="cp-select" id="cp-sheet" onchange="updatePreview()">
+          <option value="01">Sheet 1</option>
+          <option value="02">Sheet 2</option>
+          <option value="03">Sheet 3</option>
+          <option value="04">Sheet 4</option>
+          <option value="05">Sheet 5</option>
+          <option value="06">Sheet 6</option>
+          <option value="07">Sheet 7</option>
+          <option value="08">Sheet 8</option>
+          <option value="09">Sheet 9</option>
+          <option value="10">Sheet 10</option>
+          <option value="11">Sheet 11</option>
+          <option value="12">Sheet 12</option>
+        </select>
+      </div>
+
+      <!-- kiosk: channel -->
+      <div class="cp-section" id="cp-field-kiosk" style="display:none">
+        <div class="cp-label">Channel</div>
+        <div class="toggle-group" id="cp-kiosk">
+          <button class="toggle-btn" data-val="01" onclick="setToggle('cp-kiosk',this)">Upstairs</button>
+          <button class="toggle-btn" data-val="02" onclick="setToggle('cp-kiosk',this)">Practice Ice</button>
+        </div>
+      </div>
+
+      <!-- preview -->
+      <div class="cp-preview">
+        <span class="cp-preview-code"  id="cp-code">HC0102</span>
+        <div  class="cp-preview-label" id="cp-label-text">Horizontal · Cameras · Sheets 1 &amp; 2</div>
+      </div>
+    </div>
+
+    <div class="cp-message" id="cp-message"></div>
+
+    <div class="cp-footer">
+      <button class="cp-apply"  id="cp-apply-btn" onclick="applyConfig()">Apply &amp; Reboot</button>
+      <button class="cp-cancel" onclick="closeConfigPanel()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8080';
+    let cpIp = '';
+
+    function openConfigPanel(name, ip, currentConfig) {
+      cpIp = ip;
+      document.getElementById('cp-pi-name').textContent = name;
+      document.getElementById('cp-pi-ip').textContent   = ip;
+      document.getElementById('cp-message').className   = 'cp-message';
+      document.getElementById('cp-apply-btn').disabled  = false;
+      document.getElementById('cp-apply-btn').textContent = 'Apply & Reboot';
+
+      // parse current config into controls
+      const rot  = currentConfig[0] || 'H';
+      const mode = currentConfig[1] || 'C';
+
+      setToggleByVal('cp-rotation', rot);
+      setToggleByVal('cp-mode', mode);
+      updateModeFields();
+
+      if (mode === 'C' && currentConfig.length >= 6) {
+        const pair = currentConfig.substring(2, 6);
+        const sel  = document.getElementById('cp-pair');
+        for (let o of sel.options) { if (o.value === pair) { sel.value = pair; break; } }
+      } else if (mode === 'S' && currentConfig.length >= 4) {
+        document.getElementById('cp-sheet').value = currentConfig.substring(2, 4);
+      } else if (mode === 'K' && currentConfig.length >= 4) {
+        setToggleByVal('cp-kiosk', currentConfig.substring(2, 4));
+      }
+
+      updatePreview();
+      document.getElementById('config-overlay').classList.add('open');
+      document.getElementById('config-panel').classList.add('open');
+    }
+
+    function closeConfigPanel() {
+      document.getElementById('config-overlay').classList.remove('open');
+      document.getElementById('config-panel').classList.remove('open');
+    }
+
+    function setToggle(groupId, btn) {
+      document.querySelectorAll('#' + groupId + ' .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updatePreview();
+    }
+
+    function setToggleByVal(groupId, val) {
+      document.querySelectorAll('#' + groupId + ' .toggle-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.val === val);
+      });
+    }
+
+    function getToggleVal(groupId) {
+      const btn = document.querySelector('#' + groupId + ' .toggle-btn.active');
+      return btn ? btn.dataset.val : '';
+    }
+
+    function updateModeFields() {
+      const mode = getToggleVal('cp-mode');
+      document.getElementById('cp-field-cameras').style.display = mode === 'C' ? '' : 'none';
+      document.getElementById('cp-field-single').style.display  = mode === 'S' ? '' : 'none';
+      document.getElementById('cp-field-kiosk').style.display   = mode === 'K' ? '' : 'none';
+      updatePreview();
+    }
+
+    function buildConfig() {
+      const rot  = getToggleVal('cp-rotation') || 'H';
+      const mode = getToggleVal('cp-mode')     || 'C';
+      if (mode === 'C') {
+        return rot + 'C' + document.getElementById('cp-pair').value;
+      } else if (mode === 'S') {
+        const s = document.getElementById('cp-sheet').value;
+        return rot + 'S' + s + s;
+      } else {
+        const ch = getToggleVal('cp-kiosk') || '01';
+        return rot + 'K' + ch + ch;
+      }
+    }
+
+    function decodeConfig(cfg) {
+      if (!cfg || cfg.length < 2) return '';
+      const rot  = cfg[0] === 'H' ? 'Horizontal' : 'Vertical';
+      const mode = cfg[1];
+      if (mode === 'C' && cfg.length >= 6) {
+        return rot + ' · Cameras · Sheets ' + parseInt(cfg.substring(2,4)) + ' & ' + parseInt(cfg.substring(4,6));
+      } else if (mode === 'S' && cfg.length >= 4) {
+        return rot + ' · Single · Sheet ' + parseInt(cfg.substring(2,4));
+      } else if (mode === 'K' && cfg.length >= 4) {
+        const loc = cfg.substring(2,4) === '01' ? 'Upstairs' : 'Practice Ice';
+        return rot + ' · Kiosk · ' + loc;
+      }
+      return cfg;
+    }
+
+    function updatePreview() {
+      const cfg = buildConfig();
+      document.getElementById('cp-code').textContent       = cfg;
+      document.getElementById('cp-label-text').textContent = decodeConfig(cfg);
+    }
+
+    async function applyConfig() {
+      const cfg    = buildConfig();
+      const btn    = document.getElementById('cp-apply-btn');
+      const msgEl  = document.getElementById('cp-message');
+
+      btn.disabled    = true;
+      btn.textContent = 'Applying…';
+      msgEl.className = 'cp-message';
+
+      try {
+        const resp = await fetch(API + '/set-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp, config: cfg })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          closeConfigPanel();
+        } else {
+          msgEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+          msgEl.className   = 'cp-message error';
+          btn.disabled      = false;
+          btn.textContent   = 'Apply & Reboot';
+        }
+      } catch (e) {
+        msgEl.textContent = 'Could not reach monitor service (localhost:8080). Is kiosk-monitor2.ps1 running?';
+        msgEl.className   = 'cp-message error';
+        btn.disabled      = false;
+        btn.textContent   = 'Apply & Reboot';
+      }
+    }
+  </script>
 </body>
 </html>
 "@
@@ -564,6 +895,89 @@ function Invoke-Poll($pis, $camEnv) {
 }
 
 # --------------------------------------------------------------------------------
+# HTTP listener — runs in a background runspace on localhost:8080
+# Handles POST /set-config { ip, config }
+# --------------------------------------------------------------------------------
+function Start-HttpListener {
+    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
+    $rs.Open()
+    $rs.SessionStateProxy.SetVariable("HTTP_PORT",  $script:HTTP_PORT)
+    $rs.SessionStateProxy.SetVariable("SSH_USER",   $script:SSH_USER)
+    $rs.SessionStateProxy.SetVariable("SSH_PASS",   $script:SSH_PASS)
+    $rs.SessionStateProxy.SetVariable("SSH_PORT",   $script:SSH_PORT)
+    $rs.SessionStateProxy.SetVariable("IS_WINDOWS", $script:IS_WINDOWS)
+    $rs.SessionStateProxy.SetVariable("SSH",        $script:SSH)
+    $rs.SessionStateProxy.SetVariable("SSHPASS",    $script:SSHPASS)
+
+    $ps = [System.Management.Automation.PowerShell]::Create()
+    $ps.Runspace = $rs
+    $ps.AddScript({
+        function Invoke-SSH-Local($ip, $command) {
+            try {
+                $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                             "-p", $SSH_PORT, "${SSH_USER}@${ip}")
+                if ($IS_WINDOWS) {
+                    $out = & $SSH @sshOpts $command 2>&1
+                } else {
+                    $out = & $SSHPASS -p $SSH_PASS $SSH @sshOpts $command 2>&1
+                }
+                return ($out -join "").Trim()
+            } catch { return "" }
+        }
+
+        $listener = New-Object System.Net.HttpListener
+        $listener.Prefixes.Add("http://localhost:${HTTP_PORT}/")
+        $listener.Start()
+
+        while ($listener.IsListening) {
+            try {
+                $ctx      = $listener.GetContext()
+                $req      = $ctx.Request
+                $resp     = $ctx.Response
+                $resp.ContentType = "application/json"
+                $resp.Headers.Add("Access-Control-Allow-Origin", "*")
+                $resp.Headers.Add("Access-Control-Allow-Methods", "POST, OPTIONS")
+                $resp.Headers.Add("Access-Control-Allow-Headers", "Content-Type")
+
+                if ($req.HttpMethod -eq "OPTIONS") {
+                    $resp.StatusCode = 200
+                    $resp.Close()
+                    continue
+                }
+
+                $body   = New-Object System.IO.StreamReader($req.InputStream)
+                $json   = $body.ReadToEnd() | ConvertFrom-Json
+                $result = ""
+
+                if ($req.Url.AbsolutePath -eq "/set-config") {
+                    $ip     = $json.ip
+                    $config = $json.config
+                    if ($ip -and $config) {
+                        Invoke-SSH-Local $ip "echo '$config' > /home/kcckiosk/kiosk.config && sudo sync && sudo reboot" | Out-Null
+                        $result = '{"success":true}'
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip or config"}'
+                    }
+                } else {
+                    $resp.StatusCode = 404
+                    $result = '{"success":false,"error":"Not found"}'
+                }
+
+                $bytes = [System.Text.Encoding]::UTF8.GetBytes($result)
+                $resp.ContentLength64 = $bytes.Length
+                $resp.OutputStream.Write($bytes, 0, $bytes.Length)
+                $resp.Close()
+            } catch { }
+        }
+    }) | Out-Null
+
+    $ps.BeginInvoke() | Out-Null
+    Write-Host "  HTTP listener started on http://localhost:${HTTP_PORT}"
+    return $ps
+}
+
+# --------------------------------------------------------------------------------
 # entry point
 # --------------------------------------------------------------------------------
 $pis    = Load-Hosts
@@ -588,6 +1002,8 @@ if (-not $IS_WINDOWS) {
 Write-Host "  Press Ctrl+C to stop"
 Write-Host "=================================================="
 Write-Host ""
+
+$listenerJob = Start-HttpListener
 
 while ($true) {
     Invoke-Poll $pis $camEnv
