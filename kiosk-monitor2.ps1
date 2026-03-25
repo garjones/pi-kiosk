@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.5
+#  Version 4.6
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -51,6 +51,7 @@ function Find-Tool($name) {
 $SSH     = Find-Tool "ssh"
 $SSHPASS = Find-Tool "sshpass"   # macOS/Linux only; install via: brew install sshpass
 $CURL    = Find-Tool "curl"
+$FFPLAY  = Find-Tool "ffplay"
 
 # --------------------------------------------------------------------------------
 # load pi-hosts.txt
@@ -671,6 +672,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     <button class="toolbar-btn danger" onclick="globalAction('reboot-all','Reboot All Pis','Are you sure you want to reboot all $($pis.Count) Pis?')">&#8635; Reboot All</button>
     <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all $($pis.Count) Pis and reboot?')">&#11015; Software Update All</button>
     <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all $($pis.Count) Pis? This will take several minutes.')">&#9881; System Update All</button>
+    <button class="toolbar-btn" id="viewer-btn" onclick="toggleCameraViewer()">&#9654; Camera Viewer</button>
   </div>
 
   <div id="summary-bar">
@@ -1018,6 +1020,63 @@ $homeRow
       document.getElementById('progress-overlay').classList.remove('open');
     }
 
+    // ---- camera viewer ----
+    let viewerRunning = false;
+
+    async function checkViewerStatus() {
+      try {
+        const resp = await fetch(API + '/viewer-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+        viewerRunning = data.running;
+        updateViewerBtn();
+      } catch (e) { }
+    }
+
+    function updateViewerBtn() {
+      const btn = document.getElementById('viewer-btn');
+      if (viewerRunning) {
+        btn.textContent = '&#x2715; Close Viewer';
+        btn.classList.add('danger');
+      } else {
+        btn.innerHTML = '&#9654; Camera Viewer';
+        btn.classList.remove('danger');
+      }
+    }
+
+    async function toggleCameraViewer() {
+      const btn = document.getElementById('viewer-btn');
+      btn.disabled = true;
+      try {
+        if (viewerRunning) {
+          await fetch(API + '/close-camera-viewer', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+          });
+          viewerRunning = false;
+        } else {
+          const resp = await fetch(API + '/launch-camera-viewer', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+          });
+          const data = await resp.json();
+          if (data.success) {
+            viewerRunning = true;
+          } else {
+            alert('Camera Viewer error: ' + (data.error || 'Unknown error'));
+          }
+        }
+      } catch (e) {
+        alert('Could not reach monitor service (localhost:8080).');
+      }
+      updateViewerBtn();
+      btn.disabled = false;
+    }
+
+    // check viewer status on load
+    checkViewerStatus();
+
     async function globalAction(endpoint, title, confirmMsg) {
       if (!confirm(confirmMsg)) return;
 
@@ -1223,6 +1282,8 @@ function Start-HttpListener {
     $rs.SessionStateProxy.SetVariable("SSH",        $script:SSH)
     $rs.SessionStateProxy.SetVariable("SSHPASS",    $script:SSHPASS)
     $rs.SessionStateProxy.SetVariable("HOSTS_FILE", $script:HOSTS_FILE)
+    $rs.SessionStateProxy.SetVariable("FFPLAY",     $script:FFPLAY)
+    $rs.SessionStateProxy.SetVariable("CAM_ENV",    $script:camEnv)
 
     $ps = [System.Management.Automation.PowerShell]::Create()
     $ps.Runspace = $rs
@@ -1424,6 +1485,63 @@ function Start-HttpListener {
                     $writer.WriteLine("All done.")
                     $writer.Close(); $resp.Close(); continue
 
+                } elseif ($req.Url.AbsolutePath -eq "/launch-camera-viewer") {
+                    if (-not $FFPLAY) {
+                        $resp.StatusCode = 500
+                        $result = '{"success":false,"error":"ffplay not found. Install FFmpeg: brew install ffmpeg"}'
+                    } else {
+                        # build RTSP URLs for all 24 cameras
+                        $inputs = @()
+                        for ($i = 0; $i -lt $CAM_ENV.CAM_AWAY.Count; $i++) {
+                            $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_AWAY[$i])/axis-media/media.amp"
+                        }
+                        for ($i = 0; $i -lt $CAM_ENV.CAM_HOME.Count; $i++) {
+                            $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_HOME[$i])/axis-media/media.amp"
+                        }
+
+                        $SCRN_W  = 1920
+                        $SCRN_H  = 1080
+                        $cellW   = [int]($SCRN_W / 12)
+                        $cellH   = [int]($SCRN_H / 2)
+
+                        # build filter_complex
+                        $scaleFilter  = ""
+                        $layoutParts  = @()
+                        $xstackInputs = ""
+                        for ($i = 0; $i -lt 24; $i++) {
+                            $col = if ($i -lt 12) { $i } else { $i - 12 }
+                            $row = if ($i -lt 12) { 0 } else { 1 }
+                            $x   = $col * $cellW
+                            $y   = $row * $cellH
+                            $scaleFilter  += "[$i`:v]scale=${cellW}:${cellH}[v$i];"
+                            $layoutParts  += "${x}_${y}"
+                            $xstackInputs += "[v$i]"
+                        }
+                        $layout        = $layoutParts -join "|"
+                        $filterComplex = "${scaleFilter}${xstackInputs}xstack=inputs=24:layout=${layout}[out]"
+
+                        $inputArgs = ($inputs | ForEach-Object { "-i `"$_`"" }) -join " "
+                        $ffArgs    = "$inputArgs -filter_complex `"$filterComplex`" -map `"[out]`" -an -noborder -x $SCRN_W -y $SCRN_H"
+
+                        $script:viewerProcess = Start-Process -FilePath $FFPLAY `
+                            -ArgumentList $ffArgs -PassThru -WindowStyle Normal
+                        $result = '{"success":true}'
+                    }
+
+                } elseif ($req.Url.AbsolutePath -eq "/close-camera-viewer") {
+                    if ($script:viewerProcess -and -not $script:viewerProcess.HasExited) {
+                        $script:viewerProcess.Kill()
+                        $script:viewerProcess = $null
+                        $result = '{"success":true}'
+                    } else {
+                        $script:viewerProcess = $null
+                        $result = '{"success":true}'
+                    }
+
+                } elseif ($req.Url.AbsolutePath -eq "/viewer-status") {
+                    $running = ($script:viewerProcess -and -not $script:viewerProcess.HasExited)
+                    $result  = "{`"running`":$($running.ToString().ToLower())}"
+
                 } else {
                     $resp.StatusCode = 404
                     $result = '{"success":false,"error":"Not found"}'
@@ -1461,6 +1579,7 @@ Write-Host "  Output: $HTML_FILE"
 Write-Host "  Platform: $(if ($IS_WINDOWS) { 'Windows' } else { 'macOS/Linux' })"
 Write-Host "  SSH: $(if ($SSH) { $SSH } else { 'NOT FOUND' })"
 Write-Host "  curl: $(if ($CURL) { $CURL } else { 'NOT FOUND' })"
+Write-Host "  ffplay: $(if ($FFPLAY) { $FFPLAY } else { 'NOT FOUND -- install via: brew install ffmpeg' })"
 if (-not $IS_WINDOWS) {
     Write-Host "  sshpass: $(if ($SSHPASS) { $SSHPASS } else { 'NOT FOUND -- install via: brew install sshpass' })"
 }
