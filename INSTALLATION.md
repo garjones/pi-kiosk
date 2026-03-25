@@ -236,6 +236,36 @@ The configuration menu will launch automatically. Select the new display mode, c
 
 ---
 
+## Running the Status Monitor
+
+`kiosk-monitor2.ps1` is a PowerShell script that polls all Pis and cameras and generates a live status dashboard (`kiosk-monitor.html`).
+
+### On Windows
+
+PowerShell is built into Windows 10 and 11 — no installation required. Right-click `kiosk-monitor2.ps1` and select **Run with PowerShell**, or run it from a terminal:
+
+```powershell
+.\kiosk-monitor2.ps1
+```
+
+### On macOS
+
+PowerShell is not installed by default on macOS and must be installed separately. The recommended method is via Homebrew:
+
+```bash
+brew install --cask powershell
+```
+
+Once installed, run the monitor from Terminal:
+
+```bash
+pwsh kiosk-monitor2.ps1
+```
+
+> If you don't have Homebrew, install it first from [https://brew.sh](https://brew.sh), or download PowerShell directly from [https://github.com/PowerShell/PowerShell/releases](https://github.com/PowerShell/PowerShell/releases).
+
+---
+
 ## Troubleshooting
 
 ### Screen shows "whatismyipaddress.com"

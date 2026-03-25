@@ -4,7 +4,34 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.7] — Current
+## [v9.8] — Current
+
+### Added
+- `kiosk-monitor2.ps1` — new cross-platform PowerShell monitoring and management dashboard (v4.6), superseding `kiosk-monitor.ps1` and `kiosk-manager.ps1`. Features:
+  - 2-row × 12-column camera grid with live JPEG snapshots fetched via curl with digest auth, displayed as thumbnails rotated 90° clockwise
+  - Pi fleet cards showing ping, SSH, kiosk service status, decoded current config (e.g. `Horizontal · Cameras · Sheets 1 & 2`), and last seen timestamp when offline
+  - Clickable Pi cards open a slide-in config panel for changing rotation, mode, and sheet assignment, with live config code preview
+  - Per-Pi actions in the config panel: Software Update (GitHub files + reboot), System Update (apt with live streamed output), Reboot
+  - Global toolbar actions: Reboot All, Software Update All (parallel), System Update All (sequential with streamed output)
+  - Camera Viewer button launches all 24 RTSP streams in a 2×12 ffplay xstack overlay; Close Viewer button kills all streams
+  - HTTP listener on `localhost:8080` handles all browser-to-script actions
+  - Parallel polling — all 13 Pis and 26 cameras polled concurrently; dashboard written twice per cycle (Pis first, cameras second)
+  - Cross-platform: uses native `ssh`/`sshpass` instead of `plink.exe`; cross-platform ping; curl-based snapshot fetch
+  - Auto-opens browser after first poll completes
+
+### Removed
+- `kiosk-monitor.ps1` — superseded by `kiosk-monitor2.ps1`
+- `kiosk-monitor.html` — superseded by self-contained HTML written by `kiosk-monitor2.ps1`
+- `kiosk-manager.ps1` — all functionality now covered by `kiosk-monitor2.ps1`
+
+### Changed
+- `README.md` — updated repository file table, added Monitoring & Management Dashboard section, removed references to deleted files
+- `INSTALLATION.md` — added Running the Status Monitor section with PowerShell install instructions for macOS
+- `CHANGELOG.md` — updated to reflect v9.8 changes
+
+---
+
+## [v9.7]
 
 ### Added
 - `do_menu_rotation()` wired into the main menu as **P5 — Screen Rotation**, allowing operators to set Horizontal or Vertical orientation before selecting a display mode. Previous P5–P9 items shifted to P6–P10
@@ -39,7 +66,7 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 ### Changed
 - `do_label()` in `kiosk.run.sh` — wrapped in a subshell loop with a 5 second retry delay so sheet number labels restart automatically if the ffplay process exits
 - `do_labelip()` in `kiosk.run.sh` — same automatic restart behaviour applied to the bottom IP/hostname bar
-- 
+
 ---
 
 ## [v9.3]
