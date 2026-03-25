@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9.4
+#  Version 9.7
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -84,10 +84,11 @@ do_labelip() {
 #    $3 - Height
 #    $4 - Left
 #    $5 - Top
+#    $6 - Rotation
 # --------------------------------------------------------------------------------
 do_video() {
   (while true; do
-    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 $6
     sleep 5
   done) &
 }
@@ -229,8 +230,10 @@ fi
 # check for screen rotation
 if [ "$KCC_ROTATION" = "H" ]; then
     LBL_R=""
+    VID_R=""
 else
     LBL_R=",transpose=2"
+    VID_R="-vf transpose=2"
 fi
 
 # --------------------------------------------------------------------------------
@@ -252,22 +255,22 @@ case $KCC_CONFIG in
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
         ;;
     C)
-        #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
-        do_video    ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0
-        do_video    ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0
-        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
-        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
+        #         URL                             WIDTH   HEIGHT  LEFT    TOP       ROTATION
+        do_video    ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0         "$VID_R"
+        do_video    ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0         "$VID_R"
+        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T    "$VID_R"
+        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T    "$VID_R"
         do_label    $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R    
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 9
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
         ;;
     S)
-        #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
+        #         URL                             WIDTH   HEIGHT  LEFT    TOP       ROTATION
         do_label    " "                           $VID_W  $VID_H  0       0         0          $LBL_R
         do_label    " "                           $VID_W  $VID_H  $VID_L  0         0          $LBL_R
-        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
-        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
+        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T    "$VID_R"
+        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T    "$VID_R"
         do_label    " "                           $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 9
