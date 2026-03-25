@@ -4,7 +4,19 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.6] — Current
+## [v9.7] — Current
+
+### Added
+- `do_menu_rotation()` wired into the main menu as **P5 — Screen Rotation**, allowing operators to set Horizontal or Vertical orientation before selecting a display mode. Previous P5–P9 items shifted to P6–P10
+
+### Changed
+- `do_video()` in `kiosk.run.sh` — added `$6` rotation parameter. When screen rotation is set to Vertical (`V`), a `-vf transpose=2` filter is applied to all camera feeds (90° counter-clockwise), matching the existing rotation behaviour of labels and the IP bar
+- `kiosk.sh` updated to version 9.7
+- `kiosk.run.sh` updated to version 9.7
+
+---
+
+## [v9.6]
 
 ### Added
 - `kiosk-monitor.ps1` — background PowerShell script that polls all 13 Pis and 24 cameras every 30 seconds and writes a self-contained `kiosk-monitor.html` file. Checks ping, SSH port availability, and `kiosk.service` status per Pi (via `plink.exe`); checks RTSP port 554 reachability per camera
