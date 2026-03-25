@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.2
+#  Version 4.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -487,7 +487,61 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .cp-message.error   { background: #4a1a1a; border: 1px solid #c0392b; color: #e07070; display: block; }
     .cp-message.success { background: #1a4a2a; border: 1px solid #27ae60; color: #5dca80; display: block; }
 
-    /* ---- camera grid ---- */
+    /* ---- global actions toolbar ---- */
+    #global-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 28px;
+      background: #121c28;
+      border-bottom: 1px solid #1a2a3a;
+      flex-wrap: wrap;
+    }
+    .toolbar-btn {
+      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.78rem; font-weight: 600;
+      padding: 7px 16px; cursor: pointer; transition: all 0.15s;
+    }
+    .toolbar-btn:hover { border-color: #2a6ab0; color: #fff; background: #1e3050; }
+    .toolbar-btn.danger:hover { border-color: #c0392b; color: #e07070; background: #2a1a1a; }
+
+    /* ---- progress modal ---- */
+    #progress-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    #progress-overlay.open { display: flex; }
+    #progress-modal {
+      background: #131f2e; border: 1px solid #1e5fa8; border-radius: 6px;
+      width: 560px; max-width: 95vw; max-height: 80vh;
+      display: flex; flex-direction: column;
+    }
+    .pm-header {
+      background: #1a2a3a; padding: 14px 18px;
+      border-bottom: 1px solid #253545; border-radius: 6px 6px 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pm-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+    .pm-close {
+      background: none; border: none; color: #7a9ab8;
+      font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0;
+    }
+    .pm-close:hover { color: #fff; }
+    .pm-log {
+      font-family: 'Consolas', monospace; font-size: 0.72rem; color: #8ab0c8;
+      background: #0a1018; padding: 14px 16px; flex: 1;
+      overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+      min-height: 200px; max-height: 50vh;
+    }
+    .pm-footer {
+      padding: 12px 18px; border-top: 1px solid #253545;
+      display: flex; justify-content: flex-end;
+    }
+    .pm-done-btn {
+      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.85rem; padding: 8px 20px; cursor: pointer;
+    }
+    .pm-done-btn:hover { border-color: #2a6ab0; color: #fff; }
     #camera-section { padding: 0 28px; overflow-x: auto; }
 
     .cam-grid {
@@ -603,6 +657,12 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     </div>
   </header>
 
+  <div id="global-toolbar">
+    <button class="toolbar-btn danger" onclick="globalAction('reboot-all','Reboot All Pis','Are you sure you want to reboot all $($pis.Count) Pis?')">&#8635; Reboot All</button>
+    <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all $($pis.Count) Pis and reboot?')">&#11015; Software Update All</button>
+    <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all $($pis.Count) Pis? This will take several minutes.')">&#9881; System Update All</button>
+  </div>
+
   <div id="summary-bar">
     <div class="summary-item">
       <div class="summary-count $piSumClass">$pisOk/$pisTotal</div>
@@ -633,6 +693,20 @@ $colHeaders
 $awayRow
       <!-- Home row -->
 $homeRow
+    </div>
+  </div>
+
+  <!-- progress modal -->
+  <div id="progress-overlay">
+    <div id="progress-modal">
+      <div class="pm-header">
+        <div class="pm-title" id="pm-title">Progress</div>
+        <button class="pm-close" id="pm-close-btn" onclick="closeProgressModal()" style="display:none">×</button>
+      </div>
+      <div class="pm-log" id="pm-log"></div>
+      <div class="pm-footer">
+        <button class="pm-done-btn" id="pm-done-btn" onclick="closeProgressModal()" style="display:none">Close</button>
+      </div>
     </div>
   </div>
 
@@ -930,6 +1004,47 @@ $homeRow
       document.getElementById('cp-sys-update-btn').textContent = '⚙ System Update';
       setActionBtnsDisabled(false);
     }
+    function closeProgressModal() {
+      document.getElementById('progress-overlay').classList.remove('open');
+    }
+
+    async function globalAction(endpoint, title, confirmMsg) {
+      if (!confirm(confirmMsg)) return;
+
+      const overlay  = document.getElementById('progress-overlay');
+      const logEl    = document.getElementById('pm-log');
+      const titleEl  = document.getElementById('pm-title');
+      const closeBtn = document.getElementById('pm-close-btn');
+      const doneBtn  = document.getElementById('pm-done-btn');
+
+      titleEl.textContent  = title;
+      logEl.textContent    = '';
+      closeBtn.style.display = 'none';
+      doneBtn.style.display  = 'none';
+      overlay.classList.add('open');
+
+      try {
+        const resp = await fetch(API + '/' + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const reader  = resp.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          logEl.textContent += decoder.decode(value);
+          logEl.scrollTop    = logEl.scrollHeight;
+        }
+      } catch (e) {
+        logEl.textContent += '\nERROR: Could not reach monitor service (localhost:8080).';
+      }
+
+      closeBtn.style.display = 'inline-block';
+      doneBtn.style.display  = 'inline-block';
+    }
+
   </script>
 </body>
 </html>
@@ -1009,6 +1124,7 @@ function Start-HttpListener {
     $rs.SessionStateProxy.SetVariable("IS_WINDOWS", $script:IS_WINDOWS)
     $rs.SessionStateProxy.SetVariable("SSH",        $script:SSH)
     $rs.SessionStateProxy.SetVariable("SSHPASS",    $script:SSHPASS)
+    $rs.SessionStateProxy.SetVariable("HOSTS_FILE", $script:HOSTS_FILE)
 
     $ps = [System.Management.Automation.PowerShell]::Create()
     $ps.Runspace = $rs
@@ -1024,6 +1140,58 @@ function Start-HttpListener {
                 }
                 return ($out -join "").Trim()
             } catch { return "" }
+        }
+
+        function Load-Hosts-Local {
+            $hosts = @()
+            if (-not (Test-Path $HOSTS_FILE)) { return $hosts }
+            foreach ($line in Get-Content $HOSTS_FILE) {
+                $line = $line.Trim()
+                if ($line -eq "" -or $line.StartsWith("#")) { continue }
+                $parts = $line -split '\s+'
+                if ($parts.Count -ge 2) {
+                    $hosts += [PSCustomObject]@{ IP = $parts[0]; Name = $parts[1] }
+                }
+            }
+            return $hosts
+        }
+
+        # run a command on all Pis in parallel, stream results to writer
+        function Invoke-AllParallel($pis, $command, $writer) {
+            $jobs = @()
+            foreach ($pi in $pis) {
+                $jobs += @{
+                    Pi   = $pi
+                    Job  = [System.Threading.Tasks.Task]::Run([System.Func[string]]{
+                        # capture vars for closure
+                        $localIp      = $pi.IP
+                        $localName    = $pi.Name
+                        $localCmd     = $command
+                        $localOpts    = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                          "-p", $SSH_PORT, "${SSH_USER}@${localIp}")
+                        try {
+                            if ($IS_WINDOWS) {
+                                $out = & $SSH @localOpts $localCmd 2>&1
+                            } else {
+                                $out = & $SSHPASS -p $SSH_PASS $SSH @localOpts $localCmd 2>&1
+                            }
+                            return "$localName ($localIp): OK"
+                        } catch {
+                            return "$localName ($localIp): FAILED — $_"
+                        }
+                    })
+                }
+            }
+            # collect results as they complete
+            $remaining = [System.Collections.Generic.List[object]]($jobs)
+            while ($remaining.Count -gt 0) {
+                $done = $remaining | Where-Object { $_.Job.IsCompleted }
+                foreach ($j in $done) {
+                    $writer.WriteLine($j.Job.Result)
+                    $remaining.Remove($j) | Out-Null
+                }
+                Start-Sleep -Milliseconds 200
+            }
         }
 
         $listener = New-Object System.Net.HttpListener
@@ -1080,7 +1248,6 @@ function Start-HttpListener {
                 } elseif ($req.Url.AbsolutePath -eq "/system-update") {
                     $ip = $json.ip
                     if ($ip) {
-                        # stream output line by line
                         $resp.ContentType = "text/plain; charset=utf-8"
                         $resp.SendChunked = $true
                         $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
@@ -1088,26 +1255,76 @@ function Start-HttpListener {
                         try {
                             $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
                                          "-p", $SSH_PORT, "${SSH_USER}@${ip}")
-                            $cmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1 && echo '__DONE__'"
+                            $cmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1"
                             if ($IS_WINDOWS) {
-                                $proc = Start-Process -FilePath $SSH -ArgumentList ($sshOpts + $cmd) -NoNewWindow -PassThru -RedirectStandardOutput "$env:TEMP\sysupdate.txt"
-                                $proc.WaitForExit()
-                                Get-Content "$env:TEMP\sysupdate.txt" | ForEach-Object { $writer.WriteLine($_) }
+                                & $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
                             } else {
-                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1 | ForEach-Object {
-                                    $writer.WriteLine($_)
-                                }
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
                             }
                         } catch {
                             $writer.WriteLine("ERROR: $_")
                         }
-                        $writer.Close()
-                        $resp.Close()
-                        continue
+                        $writer.Close(); $resp.Close(); continue
                     } else {
                         $resp.StatusCode = 400
                         $result = '{"success":false,"error":"Missing ip"}'
                     }
+
+                } elseif ($req.Url.AbsolutePath -eq "/reboot-all") {
+                    $pis = Load-Hosts-Local
+                    $resp.ContentType = "text/plain; charset=utf-8"
+                    $resp.SendChunked = $true
+                    $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
+                    $writer.AutoFlush = $true
+                    $writer.WriteLine("Rebooting $($pis.Count) Pi(s)...")
+                    Invoke-AllParallel $pis "sudo /sbin/shutdown -r now" $writer
+                    $writer.WriteLine("Done.")
+                    $writer.Close(); $resp.Close(); continue
+
+                } elseif ($req.Url.AbsolutePath -eq "/software-update-all") {
+                    $pis = Load-Hosts-Local
+                    $resp.ContentType = "text/plain; charset=utf-8"
+                    $resp.SendChunked = $true
+                    $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
+                    $writer.AutoFlush = $true
+                    $swCmd = 'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.service     --no-verbose -O /home/kcckiosk/kiosk.service && ' +
+                             'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.run.sh      --no-verbose -O /home/kcckiosk/kiosk.run.sh && ' +
+                             'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.env         --no-verbose -O /home/kcckiosk/kiosk.env && ' +
+                             'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/wifi-watchdog.sh  --no-verbose -O /home/kcckiosk/wifi-watchdog.sh && ' +
+                             'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service --no-verbose -O /home/kcckiosk/unclutter.service && ' +
+                             'sudo reboot'
+                    $writer.WriteLine("Updating $($pis.Count) Pi(s)...")
+                    Invoke-AllParallel $pis $swCmd $writer
+                    $writer.WriteLine("Done.")
+                    $writer.Close(); $resp.Close(); continue
+
+                } elseif ($req.Url.AbsolutePath -eq "/system-update-all") {
+                    $pis = Load-Hosts-Local
+                    $resp.ContentType = "text/plain; charset=utf-8"
+                    $resp.SendChunked = $true
+                    $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
+                    $writer.AutoFlush = $true
+                    $writer.WriteLine("Running system update on $($pis.Count) Pi(s) sequentially...")
+                    $sysCmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1"
+                    foreach ($pi in $pis) {
+                        $writer.WriteLine("")
+                        $writer.WriteLine("--- $($pi.Name) ($($pi.IP)) ---")
+                        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                     "-p", $SSH_PORT, "${SSH_USER}@$($pi.IP)")
+                        try {
+                            if ($IS_WINDOWS) {
+                                & $SSH @sshOpts $sysCmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                            } else {
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $sysCmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                            }
+                            $writer.WriteLine("--- $($pi.Name): Done ---")
+                        } catch {
+                            $writer.WriteLine("--- $($pi.Name): FAILED — $_ ---")
+                        }
+                    }
+                    $writer.WriteLine("")
+                    $writer.WriteLine("All done.")
+                    $writer.Close(); $resp.Close(); continue
 
                 } else {
                     $resp.StatusCode = 404
