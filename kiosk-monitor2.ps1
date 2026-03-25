@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.4
+#  Version 4.5
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -230,6 +230,9 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
         $configHtml  = if ($configLabel -ne "") {
             "<div class=`"pi-config`"><span class=`"pi-config-code`">$($pi.config)</span> $configLabel</div>"
         } else { "" }
+        $lastSeenHtml = if ($pi.lastSeen -ne "" -and $pi.lastSeen -ne $null) {
+            "<div class=`"last-seen`">Last seen: $($pi.lastSeen)</div>"
+        } else { "" }
         $piCards += @"
         <div class="pi-card $cardClass" onclick="openConfigPanel('$($pi.name)','$($pi.ip)','$($pi.config)')" title="Click to configure">
           <div class="pi-name">$($pi.name)</div>
@@ -240,6 +243,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             <div class="check-badge"><span class="svc-badge svc-$svcClass">$($pi.service)</span></div>
           </div>
           $configHtml
+          $lastSeenHtml
         </div>
 "@
     }
@@ -267,6 +271,9 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             if ($cam) {
                 $cls    = if ($cam.up) { "up" } else { "down" }
                 $stat   = if ($cam.up) { "UP" } else { "DOWN" }
+                $lastSeenCamHtml = if (-not $cam.up -and $cam.lastSeen -ne "" -and $cam.lastSeen -ne $null) {
+                    "<div class=`"cam-last-seen`">$($cam.lastSeen)</div>"
+                } else { "" }
                 $imgTag = if ($cam.snapshot -ne "") {
                     "<div class=`"cam-thumb-wrap`"><img class=`"cam-thumb`" src=`"data:image/jpeg;base64,$($cam.snapshot)`" alt=`"Sheet $s $endLabel`"></div>"
                 } else {
@@ -278,6 +285,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
           <span class="cam-ip">$($cam.ip)</span>
           <span class="cam-status $cls">$stat</span>
         </div>
+        $lastSeenCamHtml
         $imgTag
       </div>
 "@
@@ -356,6 +364,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .svc-unknown  { background: #2a2a2a; color: #888; }
     .pi-config { margin-top: 8px; font-size: 0.7rem; color: #7a9ab8; line-height: 1.4; }
     .pi-config-code { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #5b9bd5; font-weight: 700; margin-right: 4px; }
+    .last-seen { margin-top: 6px; font-size: 0.65rem; color: #c0392b; font-style: italic; }
 
     /* ---- Pi card clickable ---- */
     .pi-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
@@ -614,6 +623,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     }
     .cam-status.up   { color: #27ae60; }
     .cam-status.down { color: #c0392b; }
+    .cam-last-seen { font-size: 0.58rem; color: #c0392b; font-style: italic; padding: 0 6px 4px; }
 
     /* thumbnail */
     .cam-thumb-wrap {
@@ -1056,8 +1066,9 @@ $homeRow
 # --------------------------------------------------------------------------------
 # poll loop — parallel
 # --------------------------------------------------------------------------------
-function Invoke-Poll($pis, $camEnv) {
+function Invoke-Poll($pis, $camEnv, $lastSeenPis, $lastSeenCams) {
     $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    $now       = Get-Date
     Write-Host "[$timestamp] Polling $($pis.Count) Pis and $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Count) cameras (parallel)..."
 
     # ---- poll all Pis in parallel ----
@@ -1111,6 +1122,18 @@ function Invoke-Poll($pis, $camEnv) {
         @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config }
 
     } -ThrottleLimit 13
+
+    # update last seen for Pis
+    foreach ($pi in $piResults) {
+        if ($pi.ping) {
+            $lastSeenPis[$pi.ip] = $now
+        }
+        $lastSeen = if ($lastSeenPis.ContainsKey($pi.ip)) {
+            $mins = [int]($now - $lastSeenPis[$pi.ip]).TotalMinutes
+            if ($mins -eq 0) { "less than 1 min ago" } elseif ($mins -eq 1) { "1 min ago" } else { "$mins mins ago" }
+        } else { "never" }
+        $pi.lastSeen = if ($pi.ping) { "" } else { $lastSeen }
+    }
 
     # write dashboard with Pi results immediately (no camera snapshots yet)
     $emptyCamResults = @()
@@ -1166,6 +1189,18 @@ function Invoke-Poll($pis, $camEnv) {
         @{ sheet = $cam.sheet; end = $cam.end; ip = $cam.ip; up = $up; snapshot = $snapshot }
 
     } -ThrottleLimit 26
+
+    # update last seen for cameras
+    foreach ($cam in $camResults) {
+        if ($cam.up) {
+            $lastSeenCams[$cam.ip] = $now
+        }
+        $lastSeen = if ($lastSeenCams.ContainsKey($cam.ip)) {
+            $mins = [int]($now - $lastSeenCams[$cam.ip]).TotalMinutes
+            if ($mins -eq 0) { "less than 1 min ago" } elseif ($mins -eq 1) { "1 min ago" } else { "$mins mins ago" }
+        } else { "never" }
+        $cam.lastSeen = if ($cam.up) { "" } else { $lastSeen }
+    }
 
     # write final dashboard with camera results
     Write-Dashboard $timestamp $piResults $camResults $camEnv.CAM_USER $camEnv.CAM_PASS
@@ -1435,9 +1470,11 @@ Write-Host ""
 
 $listenerJob  = Start-HttpListener
 $firstPoll    = $true
+$lastSeenPis  = @{}   # keyed by IP, value = DateTime last reachable
+$lastSeenCams = @{}   # keyed by IP, value = DateTime last reachable
 
 while ($true) {
-    Invoke-Poll $pis $camEnv
+    Invoke-Poll $pis $camEnv $lastSeenPis $lastSeenCams
     if ($firstPoll) {
         $firstPoll = $false
         if (Test-Path $HTML_FILE) {
