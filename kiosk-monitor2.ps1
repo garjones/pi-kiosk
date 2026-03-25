@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.0
+#  Version 4.1
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -1003,9 +1003,17 @@ Write-Host "  Press Ctrl+C to stop"
 Write-Host "=================================================="
 Write-Host ""
 
-$listenerJob = Start-HttpListener
+$listenerJob  = Start-HttpListener
+$firstPoll    = $true
 
 while ($true) {
     Invoke-Poll $pis $camEnv
+    if ($firstPoll) {
+        $firstPoll = $false
+        if (Test-Path $HTML_FILE) {
+            Write-Host "  Opening dashboard in browser..."
+            if ($IS_WINDOWS) { Start-Process $HTML_FILE } else { & open $HTML_FILE }
+        }
+    }
     Start-Sleep -Seconds $POLL_SECS
 }
