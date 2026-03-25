@@ -18,7 +18,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.3
+#  Version 4.4
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -1054,59 +1054,122 @@ $homeRow
 }
 
 # --------------------------------------------------------------------------------
-# poll loop
+# poll loop — parallel
 # --------------------------------------------------------------------------------
 function Invoke-Poll($pis, $camEnv) {
     $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    Write-Host "[$timestamp] Polling $($pis.Count) Pis and $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Count) cameras..."
+    Write-Host "[$timestamp] Polling $($pis.Count) Pis and $($camEnv.CAM_HOME.Count + $camEnv.CAM_AWAY.Count) cameras (parallel)..."
 
-    # poll Pis
-    $piResults = @()
-    foreach ($pi in $pis) {
-        Write-Host "  Pi $($pi.Name) ($($pi.IP))..." -NoNewline
-        $ping   = Test-Ping $pi.IP
-        $ssh    = if ($ping) { Test-TcpPort $pi.IP $SSH_PORT } else { $false }
-        $svc    = if ($ssh)  { Test-KioskService $pi.IP }      else { "unknown" }
-        $config = if ($ssh)  { Get-KioskConfig $pi.IP }        else { "" }
-        $piResults += @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config }
-        Write-Host " ping=$ping ssh=$ssh service=$svc config=$config"
-    }
+    # ---- poll all Pis in parallel ----
+    $piResults = $pis | ForEach-Object -Parallel {
+        $pi         = $_
+        $SSH_PORT   = $using:SSH_PORT
 
-    # poll cameras + fetch snapshots
-    $camResults = @()
+        function Test-TcpPortLocal($ip, $port) {
+            try {
+                $tcp  = New-Object System.Net.Sockets.TcpClient
+                $conn = $tcp.BeginConnect($ip, $port, $null, $null)
+                $wait = $conn.AsyncWaitHandle.WaitOne(2000, $false)
+                if ($wait) { $tcp.EndConnect($conn); $tcp.Close(); return $true }
+                $tcp.Close(); return $false
+            } catch { return $false }
+        }
 
+        function Test-PingLocal($ip) {
+            try {
+                if ($using:IS_WINDOWS) {
+                    return (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue)
+                } else {
+                    & ping -c 1 -W 2 $ip 2>&1 | Out-Null
+                    return ($LASTEXITCODE -eq 0)
+                }
+            } catch { return $false }
+        }
+
+        function Invoke-SSHLocal($ip, $command) {
+            if (-not $using:SSH) { return "unknown" }
+            try {
+                $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5",
+                             "-p", $using:SSH_PORT, "$($using:SSH_USER)@${ip}")
+                if ($using:IS_WINDOWS) {
+                    $out = & $using:SSH @sshOpts $command 2>&1
+                } else {
+                    if (-not $using:SSHPASS) { return "unknown" }
+                    $out = & $using:SSHPASS -p $using:SSH_PASS $using:SSH @sshOpts $command 2>&1
+                }
+                return ($out -join "").Trim()
+            } catch { return "" }
+        }
+
+        $ping   = Test-PingLocal $pi.IP
+        $ssh    = if ($ping) { Test-TcpPortLocal $pi.IP $SSH_PORT } else { $false }
+        $svc    = if ($ssh)  { Invoke-SSHLocal $pi.IP "systemctl is-active kiosk.service" } else { "unknown" }
+        $svc    = switch ($svc) { "active"{"active"} "inactive"{"inactive"} "failed"{"failed"} default{"unknown"} }
+        $config = if ($ssh)  { (Invoke-SSHLocal $pi.IP "cat /home/kcckiosk/kiosk.config 2>/dev/null").Trim() } else { "" }
+
+        Write-Host "  Pi $($pi.Name) ($($pi.IP)) ping=$ping ssh=$ssh service=$svc config=$config"
+        @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config }
+
+    } -ThrottleLimit 13
+
+    # write dashboard with Pi results immediately (no camera snapshots yet)
+    $emptyCamResults = @()
     for ($i = 0; $i -lt $camEnv.CAM_AWAY.Count; $i++) {
-        $ip    = $camEnv.CAM_AWAY[$i]
-        $sheet = $i + 1
-        $up    = Test-TcpPort $ip $RTSP_PORT
-        Write-Host "  Camera Away sheet $sheet ($ip) up=$up" -NoNewline
-        $snapshot = ""
-        if ($up) {
-            $snapshot = Get-CameraSnapshot $ip $camEnv.CAM_USER $camEnv.CAM_PASS
-            Write-Host " snapshot=$(if ($snapshot -ne '') { 'ok' } else { 'failed' })"
-        } else {
-            Write-Host ""
-        }
-        $camResults += @{ sheet = $sheet; end = "Away"; ip = $ip; up = $up; snapshot = $snapshot }
+        $emptyCamResults += @{ sheet = $i+1; end = "Away"; ip = $camEnv.CAM_AWAY[$i]; up = $false; snapshot = "" }
     }
-
     for ($i = 0; $i -lt $camEnv.CAM_HOME.Count; $i++) {
-        $ip    = $camEnv.CAM_HOME[$i]
-        $sheet = $i + 1
-        $up    = Test-TcpPort $ip $RTSP_PORT
-        Write-Host "  Camera Home sheet $sheet ($ip) up=$up" -NoNewline
-        $snapshot = ""
-        if ($up) {
-            $snapshot = Get-CameraSnapshot $ip $camEnv.CAM_USER $camEnv.CAM_PASS
-            Write-Host " snapshot=$(if ($snapshot -ne '') { 'ok' } else { 'failed' })"
-        } else {
-            Write-Host ""
-        }
-        $camResults += @{ sheet = $sheet; end = "Home"; ip = $ip; up = $up; snapshot = $snapshot }
+        $emptyCamResults += @{ sheet = $i+1; end = "Home"; ip = $camEnv.CAM_HOME[$i]; up = $false; snapshot = "" }
+    }
+    Write-Dashboard $timestamp $piResults $emptyCamResults $camEnv.CAM_USER $camEnv.CAM_PASS
+    Write-Host "  Dashboard written (Pis done, cameras pending)..."
+
+    # ---- poll all cameras in parallel ----
+    $allCamInputs = @()
+    for ($i = 0; $i -lt $camEnv.CAM_AWAY.Count; $i++) {
+        $allCamInputs += @{ sheet = $i+1; end = "Away"; ip = $camEnv.CAM_AWAY[$i] }
+    }
+    for ($i = 0; $i -lt $camEnv.CAM_HOME.Count; $i++) {
+        $allCamInputs += @{ sheet = $i+1; end = "Home"; ip = $camEnv.CAM_HOME[$i] }
     }
 
+    $camResults = $allCamInputs | ForEach-Object -Parallel {
+        $cam      = $_
+        $RTSP_PORT = $using:RTSP_PORT
+
+        function Test-TcpPortLocal($ip, $port) {
+            try {
+                $tcp  = New-Object System.Net.Sockets.TcpClient
+                $conn = $tcp.BeginConnect($ip, $port, $null, $null)
+                $wait = $conn.AsyncWaitHandle.WaitOne(2000, $false)
+                if ($wait) { $tcp.EndConnect($conn); $tcp.Close(); return $true }
+                $tcp.Close(); return $false
+            } catch { return $false }
+        }
+
+        $up       = Test-TcpPortLocal $cam.ip $RTSP_PORT
+        $snapshot = ""
+        if ($up) {
+            try {
+                $tmpFile = [System.IO.Path]::GetTempFileName()
+                & curl --digest --user "$($using:camEnv.CAM_USER):$($using:camEnv.CAM_PASS)" `
+                       "http://$($cam.ip)/axis-cgi/jpg/image.cgi" `
+                       -o $tmpFile --silent --max-time 5 2>$null
+                if (Test-Path $tmpFile) {
+                    $bytes = [System.IO.File]::ReadAllBytes($tmpFile)
+                    Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
+                    if ($bytes.Length -gt 0) { $snapshot = [Convert]::ToBase64String($bytes) }
+                }
+            } catch { }
+        }
+
+        Write-Host "  Camera $($cam.end) sheet $($cam.sheet) ($($cam.ip)) up=$up snapshot=$(if ($snapshot -ne '') { 'ok' } else { 'failed' })"
+        @{ sheet = $cam.sheet; end = $cam.end; ip = $cam.ip; up = $up; snapshot = $snapshot }
+
+    } -ThrottleLimit 26
+
+    # write final dashboard with camera results
     Write-Dashboard $timestamp $piResults $camResults $camEnv.CAM_USER $camEnv.CAM_PASS
-    Write-Host "  Written to $HTML_FILE"
+    Write-Host "  Dashboard written (complete)"
     Write-Host ""
 }
 
