@@ -7,8 +7,8 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 ## [v9.6] — Current
 
 ### Added
-- `kiosk-monitor.ps1` — background PowerShell script that polls all 13 Pis and 24 cameras every 30 seconds and writes results to `status.json`. Checks ping, SSH port availability, and `kiosk.service` status per Pi; checks RTSP port 554 reachability per camera
-- `kiosk-monitor.html` — always-on browser dashboard that reads `status.json` every 30 seconds and displays a summary bar (Pis online, kiosk services active, cameras reachable), a Pi fleet grid with colour-coded ping/SSH/service status per Pi, and a camera grid showing Home and Away status for all 12 sheets
+- `kiosk-monitor.ps1` — background PowerShell script that polls all 13 Pis and 24 cameras every 30 seconds and writes a self-contained `kiosk-monitor.html` file. Checks ping, SSH port availability, and `kiosk.service` status per Pi (via `plink.exe`); checks RTSP port 554 reachability per camera
+- `kiosk-monitor.html` — self-contained always-on browser dashboard written by `kiosk-monitor.ps1` on every poll cycle. Displays a summary bar (Pis online, kiosk services active, cameras reachable), a Pi fleet grid with colour-coded ping/SSH/service status per Pi, and a camera grid showing Home and Away status for all 12 sheets. Uses `<meta http-equiv="refresh">` to auto-reload every 30 seconds — no server required, opens directly in any browser
 
 ---
 
