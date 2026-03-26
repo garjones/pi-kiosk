@@ -13,7 +13,7 @@ The KCC Pi Kiosk system drives every television screen in the Kelowna Curling Cl
 
 Configuration is performed by connecting to each Pi over SSH. On login, a menu-driven interface is automatically presented to the operator — no technical knowledge of Linux is required.
 
-A browser-based monitoring and management dashboard (`kiosk-monitor2.ps1`) runs on a Mac or Windows machine at the club and provides live status, camera thumbnails, and remote management of the entire Pi fleet.
+A browser-based monitoring and management dashboard (`kiosk-monitor.ps1`) runs on a Mac or Windows machine at the club and provides live status, camera thumbnails, and remote management of the entire Pi fleet.
 
 ---
 
@@ -34,8 +34,8 @@ https://github.com/garjones/pi-kiosk
 | `wifi-watchdog.sh` | Cron script that reboots the Pi if the network is unreachable. |
 | `deploy.sh` | Centralised deploy script for pushing updates and rebooting all Pis from a Mac/Linux machine. |
 | `cameras-all.sh` | Utility script for testing all 24 camera feeds locally. |
-| `kiosk-monitor2.ps1` | Cross-platform PowerShell monitoring and management dashboard. |
-| `pi-hosts.txt` | List of Pi IP addresses and hostnames used by `deploy.sh` and `kiosk-monitor2.ps1`. |
+| `kiosk-monitor.ps1` | Cross-platform PowerShell monitoring and management dashboard. |
+| `pi-hosts.txt` | List of Pi IP addresses and hostnames used by `deploy.sh` and `kiosk-monitor.ps1`. |
 | `tiny-test.mp4` | Local test video used in place of RTSP streams during development. |
 
 ---
@@ -177,7 +177,7 @@ Each time the configuration menu is opened (i.e. on every SSH login), `kiosk.sh`
 
 ## Monitoring & Management Dashboard
 
-`kiosk-monitor2.ps1` is a cross-platform PowerShell script that runs on a Mac or Windows machine at the club. It polls all Pis and cameras every 30 seconds and generates a self-contained `kiosk-monitor.html` dashboard that opens automatically in the browser.
+`kiosk-monitor.ps1` is a cross-platform PowerShell script that runs on a Mac or Windows machine at the club. It polls all Pis and cameras every 30 seconds and generates a self-contained `kiosk-monitor.html` dashboard that opens automatically in the browser.
 
 ### Features
 
@@ -205,12 +205,12 @@ Each time the configuration menu is opened (i.e. on every SSH login), `kiosk.sh`
 
 **macOS:**
 ```bash
-pwsh kiosk-monitor2.ps1
+pwsh kiosk-monitor.ps1
 ```
 
 **Windows:**
 ```powershell
-.\kiosk-monitor2.ps1
+.\kiosk-monitor.ps1
 ```
 
 The dashboard opens automatically in the browser after the first poll completes.
