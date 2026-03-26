@@ -4,7 +4,25 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.9] — Current
+## [v10.0] — Current
+
+### Added (kiosk-monitor.ps1 v5.0)
+- Pi cards now show uptime (via `uptime -p`) when reachable
+- Pi cards now show current screen resolution (via `kmsprint`) when reachable
+- Dark/light mode toggle in the dashboard header — preference saved across page reloads via localStorage
+- Live countdown timer in the header — counts down to next refresh, shows `Refresh paused` in amber when paused
+- Page refresh auto-pauses when the config panel or progress modal is open, resumes on close
+- Rename Pi — click the ✏️ icon next to the Pi name in the config panel to rename inline; confirms with ✓, cancels with Escape or ✗, reboots on confirm
+- Install Kiosk action in the config panel — reinstalls kiosk services, cron entries, and `.bashrc` autorun with live streamed output
+
+### Changed
+- `kiosk-monitor2.ps1` renamed to `kiosk-monitor.ps1`
+- `README.md` — corrected all filename references, expanded dashboard feature list to reflect current capabilities
+- `CHANGELOG.md` — updated to reflect v10.0 changes
+
+---
+
+## [v9.9]
 
 ### Changed
 - `kiosk-monitor2.ps1` renamed to `kiosk-monitor.ps1` now that the previous version has been removed
