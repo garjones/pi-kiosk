@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.7
+#  Version 4.8
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -325,19 +325,60 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="30">
   <title>KCC Pi Kiosk -- Status Dashboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f1923; color: #e0e0e0; min-height: 100vh; padding: 0 0 32px 0; }
+
+    /* ---- theme variables ---- */
+    :root {
+      --bg:          #0f1923;
+      --bg-card:     #1a2535;
+      --bg-header:   #1a2a3a;
+      --bg-dark:     #121c28;
+      --bg-input:    #1a2535;
+      --border:      #253545;
+      --border-2:    #2a3a4a;
+      --accent:      #1e5fa8;
+      --accent-2:    #2a7ad8;
+      --text:        #e0e0e0;
+      --text-sub:    #7a9ab8;
+      --text-dim:    #5a7a9a;
+      --text-mono:   #6a8aaa;
+      --text-blue:   #5b9bd5;
+      --ok:          #27ae60;
+      --warn:        #e67e22;
+      --fail:        #c0392b;
+    }
+    body.light {
+      --bg:          #f0f4f8;
+      --bg-card:     #ffffff;
+      --bg-header:   #1a2a3a;
+      --bg-dark:     #e2e8f0;
+      --bg-input:    #f8fafc;
+      --border:      #cbd5e0;
+      --border-2:    #a0aec0;
+      --text:        #1a202c;
+      --text-sub:    #4a5568;
+      --text-dim:    #718096;
+      --text-mono:   #2d3748;
+      --text-blue:   #2b6cb0;
+    }
+
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 32px 0; transition: background 0.2s, color 0.2s; }
 
     /* ---- header ---- */
-    header { background: #1a2a3a; border-bottom: 3px solid #1e5fa8; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+    header { background: var(--bg-header); border-bottom: 3px solid var(--accent); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
     header h1 { font-size: 1.3rem; font-weight: 600; color: #fff; }
     header h1 span { color: #5b9bd5; }
     .subtitle { font-size: 0.72rem; color: #5a7a9a; margin-top: 3px; }
-    .updated { font-size: 0.78rem; color: #7a9ab8; text-align: right; }
-    .refreshing { font-size: 0.78rem; color: #5b9bd5; margin-top: 2px; text-align: right; }
+    .updated { font-size: 0.78rem; color: var(--text-sub); text-align: right; }
+    .refreshing { font-size: 0.78rem; color: var(--text-blue); margin-top: 2px; text-align: right; }
+    .theme-btn {
+      background: none; border: 1px solid #3a5a7a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.78rem; padding: 4px 10px;
+      cursor: pointer; margin-left: 12px; transition: all 0.15s;
+    }
+    .theme-btn:hover { border-color: #5b9bd5; color: #fff; }
 
     /* ---- section titles ---- */
     .section-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5b9bd5; padding: 22px 28px 10px; }
@@ -353,12 +394,12 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
 
     /* ---- Pi grid ---- */
     #pi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 0 28px; }
-    .pi-card { background: #1a2535; border: 1px solid #253545; border-radius: 6px; padding: 12px 14px; }
-    .pi-card.all-ok   { border-left: 3px solid #27ae60; }
-    .pi-card.degraded { border-left: 3px solid #e67e22; }
-    .pi-card.offline  { border-left: 3px solid #c0392b; }
-    .pi-name { font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
-    .pi-ip   { font-size: 0.72rem; color: #6a8aaa; font-family: 'Consolas', monospace; margin-bottom: 10px; }
+    .pi-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+    .pi-card.all-ok   { border-left: 3px solid var(--ok); }
+    .pi-card.degraded { border-left: 3px solid var(--warn); }
+    .pi-card.offline  { border-left: 3px solid var(--fail); }
+    .pi-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .pi-ip   { font-size: 0.72rem; color: var(--text-mono); font-family: 'Consolas', monospace; margin-bottom: 10px; }
     .pi-checks { display: flex; gap: 8px; flex-wrap: wrap; }
     .check-badge { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #aaa; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
@@ -509,17 +550,17 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
       display: flex;
       gap: 8px;
       padding: 10px 28px;
-      background: #121c28;
-      border-bottom: 1px solid #1a2a3a;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
     .toolbar-btn {
-      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
-      color: #7a9ab8; font-size: 0.78rem; font-weight: 600;
+      background: var(--bg-card); border: 1px solid var(--border-2); border-radius: 4px;
+      color: var(--text-sub); font-size: 0.78rem; font-weight: 600;
       padding: 7px 16px; cursor: pointer; transition: all 0.15s;
     }
-    .toolbar-btn:hover { border-color: #2a6ab0; color: #fff; background: #1e3050; }
-    .toolbar-btn.danger:hover { border-color: #c0392b; color: #e07070; background: #2a1a1a; }
+    .toolbar-btn:hover { border-color: var(--accent); color: var(--text); background: #1e3050; }
+    .toolbar-btn.danger:hover { border-color: var(--fail); color: #e07070; background: #2a1a1a; }
 
     /* ---- progress modal ---- */
     #progress-overlay {
@@ -597,8 +638,8 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
 
     /* individual camera cell */
     .cam-cell {
-      background: #1a2535;
-      border: 1px solid #253545;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 5px;
       overflow: hidden;
       display: flex;
@@ -669,9 +710,12 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
       <h1>KCC Pi Kiosk <span>Status Dashboard</span></h1>
       <div class="subtitle">Kelowna Curling Club</div>
     </div>
-    <div>
-      <div class="updated">Updated: $timestamp</div>
-      <div class="refreshing">Page auto-refreshes every 30s</div>
+    <div style="text-align:right; display:flex; align-items:center; gap:12px;">
+      <div>
+        <div class="updated">Updated: $timestamp</div>
+        <div class="refreshing" id="refresh-status">Refreshing in 30s</div>
+      </div>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9788; Light</button>
     </div>
   </header>
 
@@ -863,11 +907,13 @@ $homeRow
       updatePreview();
       document.getElementById('config-overlay').classList.add('open');
       document.getElementById('config-panel').classList.add('open');
+      setPaused(true);
     }
 
     function closeConfigPanel() {
       document.getElementById('config-overlay').classList.remove('open');
       document.getElementById('config-panel').classList.remove('open');
+      setPaused(false);
     }
 
     function setToggle(groupId, btn) {
@@ -1084,8 +1130,54 @@ $homeRow
     // check viewer status on load
     checkViewerStatus();
 
+    // ---- dark / light mode ----
+    function toggleTheme() {
+      const isLight = document.body.classList.toggle('light');
+      const btn     = document.getElementById('theme-btn');
+      btn.innerHTML = isLight ? '&#9790; Dark' : '&#9788; Light';
+      localStorage.setItem('kcc-theme', isLight ? 'light' : 'dark');
+    }
+    // restore saved theme
+    if (localStorage.getItem('kcc-theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('theme-btn').innerHTML = '&#9790; Dark';
+    }
+
+    // ---- countdown timer + auto-pause ----
+    const REFRESH_SECS = 30;
+    let countdown  = REFRESH_SECS;
+    let paused     = false;
+
+    function setPaused(val) {
+      paused = val;
+      updateRefreshStatus();
+    }
+
+    function updateRefreshStatus() {
+      const el = document.getElementById('refresh-status');
+      if (!el) return;
+      if (paused) {
+        el.textContent = 'Refresh paused';
+        el.style.color = 'var(--warn)';
+      } else {
+        el.textContent = countdown > 0 ? 'Refreshing in ' + countdown + 's' : 'Refreshing...';
+        el.style.color = '';
+      }
+    }
+
+    setInterval(() => {
+      if (paused) return;
+      countdown--;
+      updateRefreshStatus();
+      if (countdown <= 0) {
+        countdown = REFRESH_SECS;
+        location.reload();
+      }
+    }, 1000);
+
     async function globalAction(endpoint, title, confirmMsg) {
       if (!confirm(confirmMsg)) return;
+      setPaused(true);
 
       const overlay  = document.getElementById('progress-overlay');
       const logEl    = document.getElementById('pm-log');
@@ -1119,6 +1211,11 @@ $homeRow
 
       closeBtn.style.display = 'inline-block';
       doneBtn.style.display  = 'inline-block';
+    }
+
+    function closeProgressModal() {
+      document.getElementById('progress-overlay').classList.remove('open');
+      setPaused(false);
     }
 
   </script>
