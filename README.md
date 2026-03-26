@@ -183,11 +183,17 @@ Each time the configuration menu is opened (i.e. on every SSH login), `kiosk.sh`
 
 - **Pi fleet status** — live ping, SSH, and kiosk service status per Pi with colour-coded cards
 - **Current config display** — shows what each Pi is displaying (e.g. `Horizontal · Cameras · Sheets 1 & 2`)
+- **Uptime display** — shows how long each Pi has been running
+- **Screen resolution display** — shows the current screen resolution of each Pi
 - **Last seen timestamp** — shows when a Pi or camera was last reachable when currently offline
 - **Camera thumbnail grid** — live JPEG snapshots from all 24 cameras in a 2-row × 12-column grid (Away and Home rows)
+- **Dark/light mode toggle** — switch between dark and light themes, preference saved across reloads
+- **Live refresh countdown** — header shows time until next refresh; pauses automatically when a panel is open
 - **Remote configuration** — click any Pi card to open a slide-in panel and change its display mode
+- **Rename Pi** — click the edit icon next to the Pi name in the panel to rename it and reboot
 - **Software update** — push latest files from GitHub to a Pi and reboot
 - **System update** — run `apt update && apt upgrade` on a Pi with live streamed output
+- **Install Kiosk** — reinstall kiosk services, cron entries, and autorun on a Pi with live output
 - **Global actions toolbar** — Reboot All, Software Update All, System Update All across the entire fleet
 - **Camera viewer** — launch all 24 live RTSP streams in a 2×12 ffplay overlay
 
