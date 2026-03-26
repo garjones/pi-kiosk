@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 5.0
+#  Version 5.1
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -217,6 +217,12 @@ function Get-CameraSnapshot($ip, $user, $pass) {
 # write self-contained HTML dashboard
 # --------------------------------------------------------------------------------
 function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass) {
+
+    # read current pi-hosts.txt for the editor — escape for embedding in JS string
+    $hostsContent = ""
+    if (Test-Path $HOSTS_FILE) {
+        $hostsContent = (Get-Content $HOSTS_FILE -Raw) -replace '\\', '\\\\' -replace "`r`n", '\n' -replace "`n", '\n' -replace "'", "\'" -replace '"', '\"'
+    }
 
     # build Pi cards HTML
     $piCards = ""
@@ -619,6 +625,90 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
       color: #7a9ab8; font-size: 0.85rem; padding: 8px 20px; cursor: pointer;
     }
     .pm-done-btn:hover { border-color: #2a6ab0; color: #fff; }
+
+    /* ---- hosts editor panel ---- */
+    #hosts-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+    }
+    #hosts-overlay.open { display: block; }
+
+    #hosts-panel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 420px;
+      height: 100vh;
+      background: #131f2e;
+      border-left: 3px solid #1e5fa8;
+      z-index: 101;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+    #hosts-panel.open { transform: translateX(0); }
+
+    .hp-header {
+      background: #1a2a3a; padding: 16px 18px;
+      border-bottom: 1px solid #253545; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hp-title { font-size: 1rem; font-weight: 600; color: #fff; }
+    .hp-subtitle { font-size: 0.7rem; color: #5a7a9a; margin-top: 3px; }
+    .hp-close {
+      background: none; border: none; color: #7a9ab8; font-size: 1.4rem;
+      cursor: pointer; line-height: 1; padding: 0;
+    }
+    .hp-close:hover { color: #fff; }
+
+    .hp-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .hp-hint {
+      font-size: 0.68rem; color: #5a7a9a; margin-bottom: 10px; line-height: 1.5;
+    }
+    .hp-hint code { background: #0f1923; padding: 1px 4px; border-radius: 2px; font-family: 'Consolas', monospace; color: #8ab0c8; }
+
+    #hosts-textarea {
+      flex: 1;
+      width: 100%;
+      background: #0a1018;
+      border: 1px solid #253545;
+      border-radius: 4px;
+      color: #c8d8e8;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.75rem;
+      line-height: 1.6;
+      padding: 10px 12px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.15s;
+      min-height: 0;
+    }
+    #hosts-textarea:focus { border-color: #2a6ab0; }
+
+    .hp-message {
+      margin-top: 10px; padding: 8px 12px; border-radius: 4px;
+      font-size: 0.78rem; display: none;
+    }
+    .hp-message.error   { background: #4a1a1a; border: 1px solid #c0392b; color: #e07070; display: block; }
+    .hp-message.success { background: #1a4a2a; border: 1px solid #27ae60; color: #5dca80; display: block; }
+
+    .hp-footer {
+      padding: 14px 18px 20px; display: flex; gap: 10px; flex-shrink: 0;
+    }
+    .hp-save {
+      flex: 1; background: #1e5fa8; border: none; border-radius: 4px;
+      color: #fff; font-size: 0.85rem; font-weight: 600; padding: 10px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .hp-save:hover    { background: #2a7ad8; }
+    .hp-save:disabled { background: #253545; color: #5a7a9a; cursor: not-allowed; }
+    .hp-cancel {
+      background: #1a2535; border: 1px solid #2a3a4a; border-radius: 4px;
+      color: #7a9ab8; font-size: 0.85rem; padding: 10px 18px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .hp-cancel:hover { border-color: #2a6ab0; color: #fff; }
+
     #camera-section { padding: 0 28px; overflow-x: auto; }
 
     .cam-grid {
@@ -743,6 +833,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all $($pis.Count) Pis and reboot?')">&#11015; Software Update All</button>
     <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all $($pis.Count) Pis? This will take several minutes.')">&#9881; System Update All</button>
     <button class="toolbar-btn" id="viewer-btn" onclick="toggleCameraViewer()">&#9654; Camera Viewer</button>
+    <button class="toolbar-btn" onclick="openHostsPanel()">&#9998; Edit Pi Hosts</button>
   </div>
 
   <div id="summary-bar">
@@ -896,10 +987,91 @@ $homeRow
     </div>
   </div>
 
+  <!-- hosts editor overlay -->
+  <div id="hosts-overlay" onclick="closeHostsPanel()"></div>
+
+  <!-- hosts editor panel -->
+  <div id="hosts-panel">
+    <div class="hp-header">
+      <div>
+        <div class="hp-title">Edit Pi Hosts</div>
+        <div class="hp-subtitle">pi-hosts.txt</div>
+      </div>
+      <button class="hp-close" onclick="closeHostsPanel()">×</button>
+    </div>
+    <div class="hp-body">
+      <div class="hp-hint">
+        One Pi per line: <code>&lt;ip-address&gt; &lt;hostname&gt;</code><br>
+        Lines starting with <code>#</code> are comments and are ignored.
+      </div>
+      <textarea id="hosts-textarea" spellcheck="false"></textarea>
+      <div class="hp-message" id="hp-message"></div>
+    </div>
+    <div class="hp-footer">
+      <button class="hp-save" id="hp-save-btn" onclick="saveHosts()">Save</button>
+      <button class="hp-cancel" onclick="closeHostsPanel()">Cancel</button>
+    </div>
+  </div>
+
   <script>
     const API = 'http://localhost:8080';
     let cpIp = '';
     let cpOriginalConfig = '';
+
+    // ---- hosts editor ----
+    const HOSTS_INITIAL = "$hostsContent";
+
+    function openHostsPanel() {
+      const ta = document.getElementById('hosts-textarea');
+      ta.value = HOSTS_INITIAL.replace(/\\n/g, '\n');
+      document.getElementById('hp-message').className = 'hp-message';
+      document.getElementById('hp-save-btn').disabled = false;
+      document.getElementById('hp-save-btn').textContent = 'Save';
+      document.getElementById('hosts-overlay').classList.add('open');
+      document.getElementById('hosts-panel').classList.add('open');
+      setPaused(true);
+      ta.focus();
+    }
+
+    function closeHostsPanel() {
+      document.getElementById('hosts-overlay').classList.remove('open');
+      document.getElementById('hosts-panel').classList.remove('open');
+      setPaused(false);
+    }
+
+    async function saveHosts() {
+      const content = document.getElementById('hosts-textarea').value;
+      const btn     = document.getElementById('hp-save-btn');
+      const msgEl   = document.getElementById('hp-message');
+      msgEl.className = 'hp-message';
+      btn.disabled    = true;
+      btn.textContent = 'Saving…';
+      try {
+        const resp = await fetch(API + '/save-hosts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: content })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          msgEl.textContent = 'Saved. The updated host list will take effect on the next poll cycle.';
+          msgEl.className   = 'hp-message success';
+          btn.textContent   = 'Saved';
+          // reload after a short delay so the new file is picked up immediately
+          setTimeout(() => { closeHostsPanel(); location.reload(); }, 1500);
+        } else {
+          msgEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+          msgEl.className   = 'hp-message error';
+          btn.disabled      = false;
+          btn.textContent   = 'Save';
+        }
+      } catch (e) {
+        msgEl.textContent = 'Could not reach monitor service (localhost:8080). Is kiosk-monitor.ps1 running?';
+        msgEl.className   = 'hp-message error';
+        btn.disabled      = false;
+        btn.textContent   = 'Save';
+      }
+    }
 
     // ---- rename Pi ----
     let cpOriginalName = '';
@@ -1093,7 +1265,7 @@ $homeRow
           updatePreview();
         }
       } catch (e) {
-        showMessage('Could not reach monitor service (localhost:8080). Is kiosk-monitor2.ps1 running?', 'error');
+        showMessage('Could not reach monitor service (localhost:8080). Is kiosk-monitor.ps1 running?', 'error');
         setActionBtnsDisabled(false);
         updatePreview();
       }
@@ -1203,7 +1375,7 @@ $homeRow
     function updateViewerBtn() {
       const btn = document.getElementById('viewer-btn');
       if (viewerRunning) {
-        btn.textContent = '&#x2715; Close Viewer';
+        btn.textContent = '✕ Close Viewer';
         btn.classList.add('danger');
       } else {
         btn.innerHTML = '&#9654; Camera Viewer';
@@ -1486,7 +1658,7 @@ function Invoke-Poll($pis, $camEnv, $lastSeenPis, $lastSeenCams) {
 
 # --------------------------------------------------------------------------------
 # HTTP listener — runs in a background runspace on localhost:8080
-# Handles POST /set-config { ip, config }
+# Handles all browser-to-script actions
 # --------------------------------------------------------------------------------
 function Start-HttpListener {
     $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
@@ -1782,6 +1954,26 @@ echo "Install complete."
                     } else {
                         $resp.StatusCode = 400
                         $result = '{"success":false,"error":"Missing ip or hostname"}'
+                    }
+
+                } elseif ($req.Url.AbsolutePath -eq "/save-hosts") {
+                    # write new pi-hosts.txt content to disk
+                    $content = $json.content
+                    if ($content -ne $null) {
+                        try {
+                            # normalise line endings and write atomically via temp file
+                            $tmpPath = $HOSTS_FILE + ".tmp"
+                            [System.IO.File]::WriteAllText($tmpPath, $content, [System.Text.Encoding]::UTF8)
+                            Move-Item -Path $tmpPath -Destination $HOSTS_FILE -Force
+                            $result = '{"success":true}'
+                        } catch {
+                            $resp.StatusCode = 500
+                            $errMsg = ($_.Exception.Message -replace '"', "'")
+                            $result = "{`"success`":false,`"error`":`"$errMsg`"}"
+                        }
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing content"}'
                     }
 
                 } elseif ($req.Url.AbsolutePath -eq "/launch-camera-viewer") {

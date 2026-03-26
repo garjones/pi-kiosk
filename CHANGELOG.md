@@ -4,7 +4,17 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v10.0] — Current
+## [v10.1] — Current
+
+### Added (kiosk-monitor.ps1 v5.1)
+- Edit Pi Hosts button in the toolbar — opens a slide-in panel showing the raw
+  `pi-hosts.txt` content in an editable textarea. Save writes the file atomically
+  and reloads the dashboard; changes take effect on the next poll cycle
+- `/save-hosts` HTTP endpoint on `localhost:8080` handles the file write from the browser
+
+---
+
+## [v10.0]
 
 ### Added (kiosk-monitor.ps1 v5.0)
 - Pi cards now show uptime (via `uptime -p`) when reachable
