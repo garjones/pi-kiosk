@@ -1768,6 +1768,7 @@ function Start-HttpListener {
                     continue
                 }
 
+                Write-Host "  [HTTP] $($req.HttpMethod) $($req.Url.AbsolutePath)"
                 $body   = New-Object System.IO.StreamReader($req.InputStream)
                 $json   = $body.ReadToEnd() | ConvertFrom-Json
                 $result = ""
@@ -2041,8 +2042,9 @@ echo "Install complete."
                     $result  = "{`"running`":$($running.ToString().ToLower())}"
 
                 } else {
+                    Write-Host "  [HTTP] 404 unmatched path: '$($req.Url.AbsolutePath)'"
                     $resp.StatusCode = 404
-                    $result = '{"success":false,"error":"Not found"}'
+                    $result = '{"success":false,"error":"Not found: ' + $req.Url.AbsolutePath + '"}'
                 }
 
                 $bytes = [System.Text.Encoding]::UTF8.GetBytes($result)
