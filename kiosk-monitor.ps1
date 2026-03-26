@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.8
+#  Version 4.9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -456,6 +456,25 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     }
     .cp-title { font-size: 1rem; font-weight: 600; color: #fff; }
     .cp-ip    { font-size: 0.72rem; color: #6a8aaa; font-family: 'Consolas', monospace; margin-top: 2px; }
+    .cp-rename-icon {
+      background: none; border: none; color: #3a6080; font-size: 0.85rem;
+      cursor: pointer; padding: 0; line-height: 1; transition: color 0.15s;
+    }
+    .cp-rename-icon:hover { color: #5b9bd5; }
+    .cp-rename-input {
+      background: #0f1923; border: 1px solid #2a6ab0; border-radius: 3px;
+      color: #fff; font-size: 0.95rem; font-weight: 600;
+      padding: 2px 6px; width: 160px;
+    }
+    .cp-rename-input:focus { outline: none; border-color: #5b9bd5; }
+    .cp-rename-confirm, .cp-rename-cancel {
+      background: none; border: none; font-size: 1rem;
+      cursor: pointer; padding: 0 2px; line-height: 1;
+    }
+    .cp-rename-confirm { color: #27ae60; }
+    .cp-rename-confirm:hover { color: #5dca80; }
+    .cp-rename-cancel  { color: #c0392b; }
+    .cp-rename-cancel:hover  { color: #e07070; }
     .cp-close {
       background: none; border: none; color: #7a9ab8; font-size: 1.4rem;
       cursor: pointer; line-height: 1; padding: 0 0 0 12px; flex-shrink: 0;
@@ -779,9 +798,16 @@ $homeRow
   <!-- config panel -->
   <div id="config-panel">
     <div class="cp-header">
-      <div>
-        <div class="cp-title" id="cp-pi-name">kcc-pi-01</div>
-        <div class="cp-ip"   id="cp-pi-ip">10.200.30.11</div>
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="cp-title" id="cp-pi-name">kcc-pi-01</div>
+          <button class="cp-rename-icon" id="cp-rename-icon" onclick="startRename()" title="Rename Pi">&#9998;</button>
+          <input class="cp-rename-input" id="cp-rename-input" type="text" style="display:none"
+                 onkeydown="if(event.key==='Enter')confirmRename(); if(event.key==='Escape')cancelRename();">
+          <button class="cp-rename-confirm" id="cp-rename-confirm" onclick="confirmRename()" style="display:none" title="Confirm rename">&#10003;</button>
+          <button class="cp-rename-cancel"  id="cp-rename-cancel"  onclick="cancelRename()"  style="display:none" title="Cancel">&#10007;</button>
+        </div>
+        <div class="cp-ip" id="cp-pi-ip">10.200.30.11</div>
       </div>
       <button class="cp-close" onclick="closeConfigPanel()">×</button>
     </div>
@@ -874,6 +900,58 @@ $homeRow
     let cpIp = '';
     let cpOriginalConfig = '';
 
+    // ---- rename Pi ----
+    let cpOriginalName = '';
+
+    function startRename() {
+      cpOriginalName = document.getElementById('cp-pi-name').textContent;
+      document.getElementById('cp-pi-name').style.display       = 'none';
+      document.getElementById('cp-rename-icon').style.display    = 'none';
+      document.getElementById('cp-rename-input').style.display   = 'inline-block';
+      document.getElementById('cp-rename-confirm').style.display = 'inline-block';
+      document.getElementById('cp-rename-cancel').style.display  = 'inline-block';
+      const input = document.getElementById('cp-rename-input');
+      input.value = cpOriginalName;
+      input.focus();
+      input.select();
+    }
+
+    function cancelRename() {
+      document.getElementById('cp-pi-name').style.display       = '';
+      document.getElementById('cp-rename-icon').style.display    = '';
+      document.getElementById('cp-rename-input').style.display   = 'none';
+      document.getElementById('cp-rename-confirm').style.display = 'none';
+      document.getElementById('cp-rename-cancel').style.display  = 'none';
+    }
+
+    async function confirmRename() {
+      const newName = document.getElementById('cp-rename-input').value.trim();
+      if (!newName || newName === cpOriginalName) { cancelRename(); return; }
+
+      const msgEl = document.getElementById('cp-message');
+      msgEl.className = 'cp-message';
+      setActionBtnsDisabled(true);
+
+      try {
+        const resp = await fetch(API + '/rename-pi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp, hostname: newName })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          document.getElementById('cp-pi-name').textContent = newName;
+          cancelRename();
+          showMessage('Renamed to ' + newName + ' — Pi is rebooting.', 'success');
+        } else {
+          showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+      } catch (e) {
+        showMessage('Could not reach monitor service (localhost:8080).', 'error');
+      }
+      setActionBtnsDisabled(false);
+    }
+
     function openConfigPanel(name, ip, currentConfig) {
       cpIp             = ip;
       cpOriginalConfig = currentConfig;
@@ -913,6 +991,7 @@ $homeRow
     function closeConfigPanel() {
       document.getElementById('config-overlay').classList.remove('open');
       document.getElementById('config-panel').classList.remove('open');
+      cancelRename();
       setPaused(false);
     }
 
@@ -1590,6 +1669,17 @@ function Start-HttpListener {
                     $writer.WriteLine("")
                     $writer.WriteLine("All done.")
                     $writer.Close(); $resp.Close(); continue
+
+                } elseif ($req.Url.AbsolutePath -eq "/rename-pi") {
+                    $ip      = $json.ip
+                    $newName = $json.hostname
+                    if ($ip -and $newName) {
+                        Invoke-SSH-Local $ip "sudo hostnamectl set-hostname '$newName' && sudo sed -i 's/127.0.1.1.*/127.0.1.1\t$newName/' /etc/hosts && sudo reboot" | Out-Null
+                        $result = '{"success":true}'
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip or hostname"}'
+                    }
 
                 } elseif ($req.Url.AbsolutePath -eq "/launch-camera-viewer") {
                     if (-not $FFPLAY) {
