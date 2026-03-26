@@ -48,6 +48,7 @@
     .svc-unknown  { background: #2a2a2a; color: #888; }
     .pi-config { margin-top: 8px; font-size: 0.7rem; color: #7a9ab8; line-height: 1.4; }
     .pi-config-code { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #5b9bd5; font-weight: 700; margin-right: 4px; }
+    .last-seen { margin-top: 6px; font-size: 0.65rem; color: #c0392b; font-style: italic; }
 
     /* ---- Pi card clickable ---- */
     .pi-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
@@ -306,6 +307,7 @@
     }
     .cam-status.up   { color: #27ae60; }
     .cam-status.down { color: #c0392b; }
+    .cam-last-seen { font-size: 0.58rem; color: #c0392b; font-style: italic; padding: 0 6px 4px; }
 
     /* thumbnail */
     .cam-thumb-wrap {
@@ -344,7 +346,7 @@
       <div class="subtitle">Kelowna Curling Club</div>
     </div>
     <div>
-      <div class="updated">Updated: 2026-03-25 15:58:29</div>
+      <div class="updated">Updated: 2026-03-25 21:42:06</div>
       <div class="refreshing">Page auto-refreshes every 30s</div>
     </div>
   </header>
@@ -353,6 +355,7 @@
     <button class="toolbar-btn danger" onclick="globalAction('reboot-all','Reboot All Pis','Are you sure you want to reboot all 13 Pis?')">&#8635; Reboot All</button>
     <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all 13 Pis and reboot?')">&#11015; Software Update All</button>
     <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all 13 Pis? This will take several minutes.')">&#9881; System Update All</button>
+    <button class="toolbar-btn" id="viewer-btn" onclick="toggleCameraViewer()">&#9654; Camera Viewer</button>
   </div>
 
   <div id="summary-bar">
@@ -381,6 +384,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-02','10.200.30.12','')" title="Click to configure">
           <div class="pi-name">kcc-pi-02</div>
           <div class="pi-ip">10.200.30.12</div>
@@ -390,6 +394,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-03','10.200.30.13','')" title="Click to configure">
           <div class="pi-name">kcc-pi-03</div>
           <div class="pi-ip">10.200.30.13</div>
@@ -399,6 +404,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-04','10.200.30.14','')" title="Click to configure">
           <div class="pi-name">kcc-pi-04</div>
           <div class="pi-ip">10.200.30.14</div>
@@ -408,6 +414,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-05','10.200.30.15','')" title="Click to configure">
           <div class="pi-name">kcc-pi-05</div>
           <div class="pi-ip">10.200.30.15</div>
@@ -417,6 +424,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-06','10.200.30.16','')" title="Click to configure">
           <div class="pi-name">kcc-pi-06</div>
           <div class="pi-ip">10.200.30.16</div>
@@ -426,6 +434,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-07','10.200.30.17','')" title="Click to configure">
           <div class="pi-name">kcc-pi-07</div>
           <div class="pi-ip">10.200.30.17</div>
@@ -435,6 +444,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-08','10.200.30.18','')" title="Click to configure">
           <div class="pi-name">kcc-pi-08</div>
           <div class="pi-ip">10.200.30.18</div>
@@ -444,6 +454,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-09','10.200.30.19','')" title="Click to configure">
           <div class="pi-name">kcc-pi-09</div>
           <div class="pi-ip">10.200.30.19</div>
@@ -453,6 +464,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-10','10.200.30.20','')" title="Click to configure">
           <div class="pi-name">kcc-pi-10</div>
           <div class="pi-ip">10.200.30.20</div>
@@ -462,6 +474,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-11','10.200.30.21','')" title="Click to configure">
           <div class="pi-name">kcc-pi-11</div>
           <div class="pi-ip">10.200.30.21</div>
@@ -471,6 +484,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-12','10.200.30.22','')" title="Click to configure">
           <div class="pi-name">kcc-pi-12</div>
           <div class="pi-ip">10.200.30.22</div>
@@ -480,6 +494,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-13','10.200.30.23','')" title="Click to configure">
           <div class="pi-name">kcc-pi-13</div>
           <div class="pi-ip">10.200.30.23</div>
@@ -489,6 +504,7 @@
             <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
           </div>
           
+          <div class="last-seen">Last seen: never</div>
         </div>
   </div>
 
@@ -518,72 +534,84 @@
           <span class="cam-ip">10.100.1.71</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.72</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.73</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.74</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.75</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.76</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.77</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.78</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.79</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.80</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.81</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.82</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>    </div>
 
@@ -595,72 +623,84 @@
           <span class="cam-ip">10.100.1.51</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.52</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.53</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.54</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.55</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.56</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.57</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.58</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.59</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.60</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.61</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>      <div class="cam-cell down">
         <div class="cam-info">
           <span class="cam-ip">10.100.1.62</span>
           <span class="cam-status down">DOWN</span>
         </div>
+        <div class="cam-last-seen">never</div>
         <div class="cam-thumb-wrap cam-no-image">No image</div>
       </div>    </div>
 
@@ -978,6 +1018,63 @@
     function closeProgressModal() {
       document.getElementById('progress-overlay').classList.remove('open');
     }
+
+    // ---- camera viewer ----
+    let viewerRunning = false;
+
+    async function checkViewerStatus() {
+      try {
+        const resp = await fetch(API + '/viewer-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+        viewerRunning = data.running;
+        updateViewerBtn();
+      } catch (e) { }
+    }
+
+    function updateViewerBtn() {
+      const btn = document.getElementById('viewer-btn');
+      if (viewerRunning) {
+        btn.textContent = '&#x2715; Close Viewer';
+        btn.classList.add('danger');
+      } else {
+        btn.innerHTML = '&#9654; Camera Viewer';
+        btn.classList.remove('danger');
+      }
+    }
+
+    async function toggleCameraViewer() {
+      const btn = document.getElementById('viewer-btn');
+      btn.disabled = true;
+      try {
+        if (viewerRunning) {
+          await fetch(API + '/close-camera-viewer', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+          });
+          viewerRunning = false;
+        } else {
+          const resp = await fetch(API + '/launch-camera-viewer', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}'
+          });
+          const data = await resp.json();
+          if (data.success) {
+            viewerRunning = true;
+          } else {
+            alert('Camera Viewer error: ' + (data.error || 'Unknown error'));
+          }
+        }
+      } catch (e) {
+        alert('Could not reach monitor service (localhost:8080).');
+      }
+      updateViewerBtn();
+      btn.disabled = false;
+    }
+
+    // check viewer status on load
+    checkViewerStatus();
 
     async function globalAction(endpoint, title, confirmMsg) {
       if (!confirm(confirmMsg)) return;

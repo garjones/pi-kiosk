@@ -4,7 +4,15 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v9.8] — Current
+## [v9.9] — Current
+
+### Changed
+- `kiosk-monitor2.ps1` renamed to `kiosk-monitor.ps1` now that the previous version has been removed
+- `README.md`, `CHANGELOG.md`, `INSTALLATION.md` updated to reflect the rename
+
+---
+
+## [v9.8]
 
 ### Added
 - `kiosk-monitor2.ps1` — new cross-platform PowerShell monitoring and management dashboard (v4.6), superseding `kiosk-monitor.ps1` and `kiosk-manager.ps1`. Features:
