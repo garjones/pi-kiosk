@@ -218,10 +218,16 @@ function Get-CameraSnapshot($ip, $user, $pass) {
 # --------------------------------------------------------------------------------
 function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass) {
 
-    # read current pi-hosts.txt for the editor — escape for embedding in JS string
-    $hostsContent = ""
+    # read current pi-hosts.txt for the editor
+    # ConvertTo-Json produces a properly-escaped JSON string literal (including newlines,
+    # backslashes, quotes) — strip the surrounding outer quotes so it embeds cleanly as a JS value
+    $hostsContentJson = ""
     if (Test-Path $HOSTS_FILE) {
-        $hostsContent = (Get-Content $HOSTS_FILE -Raw) -replace '\\', '\\\\' -replace "`r`n", '\n' -replace "`n", '\n' -replace "'", "\'" -replace '"', '\"'
+        $hostsRaw = Get-Content $HOSTS_FILE -Raw
+        if ($hostsRaw -eq $null) { $hostsRaw = "" }
+        $hostsContentJson = ($hostsRaw | ConvertTo-Json)
+    } else {
+        $hostsContentJson = '""'
     }
 
     # build Pi cards HTML
@@ -1019,11 +1025,11 @@ $homeRow
     let cpOriginalConfig = '';
 
     // ---- hosts editor ----
-    const HOSTS_INITIAL = "$hostsContent";
+    const HOSTS_INITIAL = $hostsContentJson;
 
     function openHostsPanel() {
       const ta = document.getElementById('hosts-textarea');
-      ta.value = HOSTS_INITIAL.replace(/\\n/g, '\n');
+      ta.value = HOSTS_INITIAL;
       document.getElementById('hp-message').className = 'hp-message';
       document.getElementById('hp-save-btn').disabled = false;
       document.getElementById('hp-save-btn').textContent = 'Save';
@@ -1958,7 +1964,8 @@ echo "Install complete."
 
                 } elseif ($req.Url.AbsolutePath -eq "/save-hosts") {
                     # write new pi-hosts.txt content to disk
-                    $content = $json.content
+                    # $json.content may be $null if the property is absent, or a string (even empty)
+                    $content = if ($json -ne $null -and $json.PSObject.Properties['content']) { $json.content } else { $null }
                     if ($content -ne $null) {
                         try {
                             # normalise line endings and write atomically via temp file
@@ -1973,7 +1980,7 @@ echo "Install complete."
                         }
                     } else {
                         $resp.StatusCode = 400
-                        $result = '{"success":false,"error":"Missing content"}'
+                        $result = '{"success":false,"error":"Missing content field in request body"}'
                     }
 
                 } elseif ($req.Url.AbsolutePath -eq "/launch-camera-viewer") {
