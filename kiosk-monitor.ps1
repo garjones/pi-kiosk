@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.9
+#  Version 5.0
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -883,8 +883,9 @@ $homeRow
     <div class="cp-message" id="cp-message"></div>
 
     <div class="cp-actions">
-      <button class="cp-action-btn" id="cp-sw-update-btn"  onclick="doSoftwareUpdate()">&#11015; Software Update</button>
-      <button class="cp-action-btn" id="cp-sys-update-btn" onclick="doSystemUpdate()">&#9881; System Update</button>
+      <button class="cp-action-btn" id="cp-sw-update-btn"      onclick="doSoftwareUpdate()">&#11015; Software Update</button>
+      <button class="cp-action-btn" id="cp-sys-update-btn"     onclick="doSystemUpdate()">&#9881; System Update</button>
+      <button class="cp-action-btn" id="cp-install-kiosk-btn"  onclick="doInstallKiosk()">&#9881; Install Kiosk</button>
     </div>
 
     <div class="cp-log" id="cp-log"></div>
@@ -962,6 +963,7 @@ $homeRow
       document.getElementById('cp-log').textContent        = '';
       document.getElementById('cp-apply-btn').disabled     = false;
       document.getElementById('cp-apply-btn').textContent  = 'Reboot';
+      document.getElementById('cp-install-kiosk-btn').textContent = '⚙ Install Kiosk';
       setActionBtnsDisabled(false);
 
       // parse current config into controls
@@ -1058,9 +1060,10 @@ $homeRow
     }
 
     function setActionBtnsDisabled(disabled) {
-      document.getElementById('cp-sw-update-btn').disabled  = disabled;
-      document.getElementById('cp-sys-update-btn').disabled = disabled;
-      document.getElementById('cp-apply-btn').disabled      = disabled;
+      document.getElementById('cp-sw-update-btn').disabled     = disabled;
+      document.getElementById('cp-sys-update-btn').disabled    = disabled;
+      document.getElementById('cp-install-kiosk-btn').disabled = disabled;
+      document.getElementById('cp-apply-btn').disabled         = disabled;
     }
 
     function showMessage(msg, type) {
@@ -1094,6 +1097,35 @@ $homeRow
         setActionBtnsDisabled(false);
         updatePreview();
       }
+    }
+
+    async function doInstallKiosk() {
+      document.getElementById('cp-message').className = 'cp-message';
+      const logEl = document.getElementById('cp-log');
+      logEl.textContent = '';
+      logEl.className   = 'cp-log visible';
+      setActionBtnsDisabled(true);
+      document.getElementById('cp-install-kiosk-btn').textContent = 'Installing…';
+      try {
+        const resp = await fetch(API + '/install-kiosk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp })
+        });
+        const reader  = resp.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          logEl.textContent += decoder.decode(value);
+          logEl.scrollTop    = logEl.scrollHeight;
+        }
+        showMessage('Install complete.', 'success');
+      } catch (e) {
+        showMessage('Could not reach monitor service (localhost:8080).', 'error');
+      }
+      document.getElementById('cp-install-kiosk-btn').textContent = '⚙ Install Kiosk';
+      setActionBtnsDisabled(false);
     }
 
     async function doSoftwareUpdate() {
@@ -1669,6 +1701,77 @@ function Start-HttpListener {
                     $writer.WriteLine("")
                     $writer.WriteLine("All done.")
                     $writer.Close(); $resp.Close(); continue
+
+                } elseif ($req.Url.AbsolutePath -eq "/install-kiosk") {
+                    $ip = $json.ip
+                    if ($ip) {
+                        $resp.ContentType = "text/plain; charset=utf-8"
+                        $resp.SendChunked = $true
+                        $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
+                        $writer.AutoFlush = $true
+                        try {
+                            $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                         "-p", $SSH_PORT, "${SSH_USER}@${ip}")
+                            $cmd = @'
+# create unclutter service symlink if needed
+if [ ! -e /lib/systemd/system/unclutter.service ]; then
+  sudo ln -s /home/kcckiosk/unclutter.service /lib/systemd/system/unclutter.service
+  sudo systemctl enable unclutter.service
+  echo "[Done] unclutter.service installed"
+else
+  echo "[Skip] unclutter.service already exists"
+fi
+
+# create kiosk service symlink if needed
+if [ ! -e /lib/systemd/system/kiosk.service ]; then
+  chmod u+x /home/kcckiosk/kiosk.run.sh
+  sudo ln -s /home/kcckiosk/kiosk.service /lib/systemd/system/kiosk.service
+  sudo systemctl enable kiosk.service
+  echo "[Done] kiosk.service installed"
+else
+  echo "[Skip] kiosk.service already exists"
+fi
+
+# cron entries
+(echo "0 7 * * * /sbin/shutdown -r now"; echo "*/15 * * * * /bin/bash /home/kcckiosk/wifi-watchdog.sh") | crontab -
+echo "[Done] cron entries set"
+
+# enable cron
+sudo systemctl enable cron
+sudo systemctl start cron
+echo "[Done] cron enabled"
+
+# disable desktop autostart
+if [ -e /etc/xdg/labwc/autostart ]; then
+  sudo mv /etc/xdg/labwc/autostart /etc/xdg/labwc/autostart.disabled
+  echo "[Done] desktop autostart disabled"
+else
+  echo "[Skip] desktop autostart already disabled"
+fi
+
+# add kiosk autorun to .bashrc
+if grep -Fxq "/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)\"" /home/kcckiosk/.bashrc; then
+  echo "[Skip] .bashrc autorun already set"
+else
+  echo "/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/garjones/pi-kiosk/main/kiosk.sh)\"" >> /home/kcckiosk/.bashrc
+  echo "[Done] .bashrc autorun added"
+fi
+
+echo "Install complete."
+'@
+                            if ($IS_WINDOWS) {
+                                & $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                            } else {
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                            }
+                        } catch {
+                            $writer.WriteLine("ERROR: $_")
+                        }
+                        $writer.Close(); $resp.Close(); continue
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip"}'
+                    }
 
                 } elseif ($req.Url.AbsolutePath -eq "/rename-pi") {
                     $ip      = $json.ip
