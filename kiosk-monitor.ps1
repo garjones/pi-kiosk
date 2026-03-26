@@ -1,8 +1,6 @@
 #!/usr/bin/env pwsh
 # --------------------------------------------------------------------------------
 #  kiosk-monitor.ps1
-# --------------------------------------------------------------------------------
-#  KCC Pi Kiosk -- Background Monitor
 #
 #  Polls all Raspberry Pis and cameras every 30 seconds and writes a
 #  self-contained kiosk-monitor.html with status data embedded directly.
@@ -18,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 4.6
+#  Version 4.7
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -231,6 +229,12 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
         $configHtml  = if ($configLabel -ne "") {
             "<div class=`"pi-config`"><span class=`"pi-config-code`">$($pi.config)</span> $configLabel</div>"
         } else { "" }
+        $uptimeHtml = if ($pi.uptime -ne "" -and $pi.uptime -ne $null) {
+            "<div class=`"pi-meta`">&#9201; $($pi.uptime)</div>"
+        } else { "" }
+        $resHtml = if ($pi.resolution -ne "" -and $pi.resolution -ne $null) {
+            "<div class=`"pi-meta`">&#9974; $($pi.resolution)</div>"
+        } else { "" }
         $lastSeenHtml = if ($pi.lastSeen -ne "" -and $pi.lastSeen -ne $null) {
             "<div class=`"last-seen`">Last seen: $($pi.lastSeen)</div>"
         } else { "" }
@@ -244,6 +248,8 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             <div class="check-badge"><span class="svc-badge svc-$svcClass">$($pi.service)</span></div>
           </div>
           $configHtml
+          $uptimeHtml
+          $resHtml
           $lastSeenHtml
         </div>
 "@
@@ -365,6 +371,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .svc-unknown  { background: #2a2a2a; color: #888; }
     .pi-config { margin-top: 8px; font-size: 0.7rem; color: #7a9ab8; line-height: 1.4; }
     .pi-config-code { font-family: 'Consolas', monospace; font-size: 0.7rem; color: #5b9bd5; font-weight: 700; margin-right: 4px; }
+    .pi-meta { margin-top: 4px; font-size: 0.68rem; color: #5a7a9a; }
     .last-seen { margin-top: 6px; font-size: 0.65rem; color: #c0392b; font-style: italic; }
 
     /* ---- Pi card clickable ---- */
@@ -1176,9 +1183,11 @@ function Invoke-Poll($pis, $camEnv, $lastSeenPis, $lastSeenCams) {
         $svc    = if ($ssh)  { Invoke-SSHLocal $pi.IP "systemctl is-active kiosk.service" } else { "unknown" }
         $svc    = switch ($svc) { "active"{"active"} "inactive"{"inactive"} "failed"{"failed"} default{"unknown"} }
         $config = if ($ssh)  { (Invoke-SSHLocal $pi.IP "cat /home/kcckiosk/kiosk.config 2>/dev/null").Trim() } else { "" }
+        $uptime = if ($ssh)  { (Invoke-SSHLocal $pi.IP "uptime -p 2>/dev/null").Trim() } else { "" }
+        $res    = if ($ssh)  { (Invoke-SSHLocal $pi.IP "kmsprint 2>/dev/null | awk '/Crtc/ { match(`$0, /[0-9]+x[0-9]+/); print substr(`$0, RSTART, RLENGTH); exit }'").Trim() } else { "" }
 
-        Write-Host "  Pi $($pi.Name) ($($pi.IP)) ping=$ping ssh=$ssh service=$svc config=$config"
-        @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config }
+        Write-Host "  Pi $($pi.Name) ($($pi.IP)) ping=$ping ssh=$ssh service=$svc config=$config uptime=$uptime res=$res"
+        @{ name = $pi.Name; ip = $pi.IP; ping = $ping; ssh = $ssh; service = $svc; config = $config; uptime = $uptime; resolution = $res }
 
     } -ThrottleLimit 13
 
