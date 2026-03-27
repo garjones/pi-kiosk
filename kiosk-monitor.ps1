@@ -2103,6 +2103,7 @@ $lastSeenPis  = @{}   # keyed by IP, value = DateTime last reachable
 $lastSeenCams = @{}   # keyed by IP, value = DateTime last reachable
 
 while ($true) {
+    $pis = Load-Hosts
     Invoke-Poll $pis $camEnv $lastSeenPis $lastSeenCams
     if ($firstPoll) {
         $firstPoll = $false
