@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 5.1
+#  Version 5.2
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -602,7 +602,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     #progress-overlay.open { display: flex; }
     #progress-modal {
       background: #131f2e; border: 1px solid #1e5fa8; border-radius: 6px;
-      width: 560px; max-width: 95vw; max-height: 80vh;
+      width: 1120px; max-width: 95vw; max-height: 80vh;
       display: flex; flex-direction: column;
     }
     .pm-header {
@@ -1577,6 +1577,9 @@ function Invoke-Poll($pis, $camEnv, $lastSeenPis, $lastSeenCams) {
 
     } -ThrottleLimit 13
 
+    # sort Pi results by name so cards always appear in order
+    $piResults = $piResults | Sort-Object { $_.name }
+
     # update last seen for Pis
     foreach ($pi in $piResults) {
         if ($pi.ping) {
@@ -1710,41 +1713,21 @@ function Start-HttpListener {
             return $hosts
         }
 
-        # run a command on all Pis in parallel, stream results to writer
-        function Invoke-AllParallel($pis, $command, $writer) {
-            $jobs = @()
+        # run a command on all Pis sequentially, stream results to writer
+        function Invoke-AllSequential($pis, $command, $writer) {
             foreach ($pi in $pis) {
-                $jobs += @{
-                    Pi   = $pi
-                    Job  = [System.Threading.Tasks.Task]::Run([System.Func[string]]{
-                        # capture vars for closure
-                        $localIp      = $pi.IP
-                        $localName    = $pi.Name
-                        $localCmd     = $command
-                        $localOpts    = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
-                                          "-p", $SSH_PORT, "${SSH_USER}@${localIp}")
-                        try {
-                            if ($IS_WINDOWS) {
-                                $out = & $SSH @localOpts $localCmd 2>&1
-                            } else {
-                                $out = & $SSHPASS -p $SSH_PASS $SSH @localOpts $localCmd 2>&1
-                            }
-                            return "$localName ($localIp): OK"
-                        } catch {
-                            return "$localName ($localIp): FAILED — $_"
-                        }
-                    })
+                $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                             "-p", $SSH_PORT, "${SSH_USER}@$($pi.IP)")
+                try {
+                    if ($IS_WINDOWS) {
+                        & $SSH @sshOpts $command 2>&1 | Out-Null
+                    } else {
+                        & $SSHPASS -p $SSH_PASS $SSH @sshOpts $command 2>&1 | Out-Null
+                    }
+                    $writer.WriteLine("$($pi.Name) ($($pi.IP)): OK")
+                } catch {
+                    $writer.WriteLine("$($pi.Name) ($($pi.IP)): FAILED — $_")
                 }
-            }
-            # collect results as they complete
-            $remaining = [System.Collections.Generic.List[object]]($jobs)
-            while ($remaining.Count -gt 0) {
-                $done = $remaining | Where-Object { $_.Job.IsCompleted }
-                foreach ($j in $done) {
-                    $writer.WriteLine($j.Job.Result)
-                    $remaining.Remove($j) | Out-Null
-                }
-                Start-Sleep -Milliseconds 200
             }
         }
 
@@ -1810,7 +1793,7 @@ function Start-HttpListener {
                         try {
                             $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
                                          "-p", $SSH_PORT, "${SSH_USER}@${ip}")
-                            $cmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1"
+                            $cmd = "sudo DEBIAN_FRONTEND=noninteractive stdbuf -oL apt-get update 2>&1 && sudo DEBIAN_FRONTEND=noninteractive stdbuf -oL apt-get upgrade -y 2>&1"
                             if ($IS_WINDOWS) {
                                 & $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
                             } else {
@@ -1832,7 +1815,21 @@ function Start-HttpListener {
                     $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
                     $writer.AutoFlush = $true
                     $writer.WriteLine("Rebooting $($pis.Count) Pi(s)...")
-                    Invoke-AllParallel $pis "sudo /sbin/shutdown -r now" $writer
+                    foreach ($pi in $pis) {
+                        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                     "-p", $SSH_PORT, "${SSH_USER}@$($pi.IP)")
+                        try {
+                            if ($IS_WINDOWS) {
+                                & $SSH @sshOpts "sudo /sbin/shutdown -r now" 2>&1 | Out-Null
+                            } else {
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts "sudo /sbin/shutdown -r now" 2>&1 | Out-Null
+                            }
+                            $writer.WriteLine("$($pi.Name) ($($pi.IP)): OK")
+
+                        } catch {
+                            $writer.WriteLine("$($pi.Name) ($($pi.IP)): FAILED — $_")
+                        }
+                    }
                     $writer.WriteLine("Done.")
                     $writer.Close(); $resp.Close(); continue
 
@@ -1849,7 +1846,20 @@ function Start-HttpListener {
                              'wget https://raw.githubusercontent.com/garjones/pi-kiosk/main/unclutter.service --no-verbose -O /home/kcckiosk/unclutter.service && ' +
                              'sudo reboot'
                     $writer.WriteLine("Updating $($pis.Count) Pi(s)...")
-                    Invoke-AllParallel $pis $swCmd $writer
+                    foreach ($pi in $pis) {
+                        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                     "-p", $SSH_PORT, "${SSH_USER}@$($pi.IP)")
+                        try {
+                            if ($IS_WINDOWS) {
+                                & $SSH @sshOpts $swCmd 2>&1 | Out-Null
+                            } else {
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $swCmd 2>&1 | Out-Null
+                            }
+                            $writer.WriteLine("$($pi.Name) ($($pi.IP)): OK")
+                        } catch {
+                            $writer.WriteLine("$($pi.Name) ($($pi.IP)): FAILED — $_")
+                        }
+                    }
                     $writer.WriteLine("Done.")
                     $writer.Close(); $resp.Close(); continue
 
@@ -1860,7 +1870,7 @@ function Start-HttpListener {
                     $writer = New-Object System.IO.StreamWriter($resp.OutputStream, [System.Text.Encoding]::UTF8)
                     $writer.AutoFlush = $true
                     $writer.WriteLine("Running system update on $($pis.Count) Pi(s) sequentially...")
-                    $sysCmd = "sudo apt-get update 2>&1 && sudo apt-get upgrade -y 2>&1"
+                    $cmd = "sudo DEBIAN_FRONTEND=noninteractive stdbuf -oL apt-get update 2>&1 && sudo DEBIAN_FRONTEND=noninteractive stdbuf -oL apt-get upgrade -y 2>&1"
                     foreach ($pi in $pis) {
                         $writer.WriteLine("")
                         $writer.WriteLine("--- $($pi.Name) ($($pi.IP)) ---")
@@ -1868,9 +1878,9 @@ function Start-HttpListener {
                                      "-p", $SSH_PORT, "${SSH_USER}@$($pi.IP)")
                         try {
                             if ($IS_WINDOWS) {
-                                & $SSH @sshOpts $sysCmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                                & $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
                             } else {
-                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $sysCmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
+                                & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1 | ForEach-Object { $writer.WriteLine($_) }
                             }
                             $writer.WriteLine("--- $($pi.Name): Done ---")
                         } catch {
