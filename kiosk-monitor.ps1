@@ -828,7 +828,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     <div style="text-align:right; display:flex; align-items:center; gap:12px;">
       <div>
         <div class="updated">Updated: $timestamp</div>
-        <div class="refreshing" id="refresh-status">Refreshing in 30s</div>
+        <div class="refreshing" id="refresh-status">Refreshing in 15s</div>
       </div>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9788; Light</button>
     </div>
@@ -840,6 +840,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all $($pis.Count) Pis? This will take several minutes.')">&#9881; System Update All</button>
     <button class="toolbar-btn" id="viewer-btn" onclick="toggleCameraViewer()">&#9654; Camera Viewer</button>
     <button class="toolbar-btn" onclick="openHostsPanel()">&#9998; Edit Pi Hosts</button>
+    <button class="toolbar-btn danger" onclick="exitMonitor()" style="margin-left:auto">&#9211; Exit Monitor</button>
   </div>
 
   <div id="summary-bar">
@@ -1433,9 +1434,9 @@ $homeRow
     }
 
     // ---- countdown timer + auto-pause ----
-    const REFRESH_SECS = 30;
-    let countdown  = REFRESH_SECS;
-    let paused     = false;
+    const REFRESH_SECS = 15;
+    let countdown = REFRESH_SECS;
+    let paused    = false;
 
     function setPaused(val) {
       paused = val;
@@ -1463,6 +1464,24 @@ $homeRow
         location.reload();
       }
     }, 1000);
+
+    // ---- exit monitor ----
+    async function exitMonitor() {
+      if (!confirm('Stop the kiosk monitor script?')) return;
+      setPaused(true);
+      try {
+        await fetch(API + '/exit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        });
+      } catch (e) { }
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:sans-serif;background:#0f1923;color:#e0e0e0;">' +
+        '<div style="font-size:2rem;">&#9211;</div>' +
+        '<div style="font-size:1.2rem;font-weight:600;">Monitor stopped.</div>' +
+        '<div style="font-size:0.85rem;color:#7a9ab8;">You can close this tab.</div>' +
+        '</div>';
+    }
 
     async function globalAction(endpoint, title, confirmMsg) {
       if (!confirm(confirmMsg)) return;
@@ -1682,6 +1701,8 @@ function Start-HttpListener {
     $rs.SessionStateProxy.SetVariable("HOSTS_FILE", $script:HOSTS_FILE)
     $rs.SessionStateProxy.SetVariable("FFPLAY",     $script:FFPLAY)
     $rs.SessionStateProxy.SetVariable("CAM_ENV",    $script:camEnv)
+    $rs.SessionStateProxy.SetVariable("SCRIPT_DIR", $script:SCRIPT_DIR)
+    $rs.SessionStateProxy.SetVariable("HTML_FILE",  $script:HTML_FILE)
 
     $ps = [System.Management.Automation.PowerShell]::Create()
     $ps.Runspace = $rs
@@ -1752,6 +1773,23 @@ function Start-HttpListener {
                 }
 
                 Write-Host "  [HTTP] $($req.HttpMethod) $($req.Url.AbsolutePath)"
+
+                # serve the dashboard HTML on GET /
+                if ($req.HttpMethod -eq "GET" -and $req.Url.AbsolutePath -eq "/") {
+                    $resp.ContentType = "text/html; charset=utf-8"
+                    if (Test-Path $HTML_FILE) {
+                        $htmlBytes = [System.IO.File]::ReadAllBytes($HTML_FILE)
+                        $resp.ContentLength64 = $htmlBytes.Length
+                        $resp.OutputStream.Write($htmlBytes, 0, $htmlBytes.Length)
+                    } else {
+                        $msg = [System.Text.Encoding]::UTF8.GetBytes("<html><body>Dashboard not ready yet. Please wait...</body></html>")
+                        $resp.ContentLength64 = $msg.Length
+                        $resp.OutputStream.Write($msg, 0, $msg.Length)
+                    }
+                    $resp.Close()
+                    continue
+                }
+
                 $body   = New-Object System.IO.StreamReader($req.InputStream)
                 $json   = $body.ReadToEnd() | ConvertFrom-Json
                 $result = ""
@@ -2029,11 +2067,21 @@ echo "Install complete."
                         $layout        = $layoutParts -join "|"
                         $filterComplex = "${scaleFilter}${xstackInputs}xstack=inputs=24:layout=${layout}[out]"
 
-                        $inputArgs = ($inputs | ForEach-Object { "-i `"$_`"" }) -join " "
-                        $ffArgs    = "$inputArgs -filter_complex `"$filterComplex`" -map `"[out]`" -an -noborder -x $SCRN_W -y $SCRN_H"
+                        $inputArgs = @()
+                        foreach ($url in $inputs) { $inputArgs += "-i"; $inputArgs += $url }
+                        $ffArgs = $inputArgs + @("-filter_complex", $filterComplex, "-map", "[out]", "-an", "-noborder", "-x", $SCRN_W, "-y", $SCRN_H)
 
-                        $script:viewerProcess = Start-Process -FilePath $FFPLAY `
-                            -ArgumentList $ffArgs -PassThru -WindowStyle Normal
+                        # write a temp shell script to launch ffplay — most reliable cross-platform approach
+                        $tmpScript = [System.IO.Path]::GetTempFileName() + ".sh"
+                        $shCmd = $FFPLAY
+                        foreach ($url in $inputs) { $shCmd += " -i '$url'" }
+                        $shCmd += " -filter_complex '$filterComplex'"
+                        $shCmd += " -map '[out]' -an -noborder -x $SCRN_W -y $SCRN_H"
+                        $shContent = "#!/bin/bash" + [char]10 + $shCmd + [char]10
+                        [System.IO.File]::WriteAllText($tmpScript, $shContent)
+                        & chmod +x $tmpScript
+                        $script:viewerProcess = Start-Process -FilePath "/bin/bash" `
+                            -ArgumentList $tmpScript -PassThru
                         $result = '{"success":true}'
                     }
 
@@ -2041,15 +2089,20 @@ echo "Install complete."
                     if ($script:viewerProcess -and -not $script:viewerProcess.HasExited) {
                         $script:viewerProcess.Kill()
                         $script:viewerProcess = $null
-                        $result = '{"success":true}'
-                    } else {
-                        $script:viewerProcess = $null
-                        $result = '{"success":true}'
                     }
+                    # also kill any lingering ffplay processes
+                    Get-Process ffplay -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                    $result = '{"success":true}'
 
                 } elseif ($req.Url.AbsolutePath -eq "/viewer-status") {
                     $running = ($script:viewerProcess -and -not $script:viewerProcess.HasExited)
                     $result  = "{`"running`":$($running.ToString().ToLower())}"
+
+                } elseif ($req.Url.AbsolutePath -eq "/exit") {
+                    # write exit flag file — main loop will pick it up after current poll
+                    $exitFlagPath = Join-Path $SCRIPT_DIR "kiosk-monitor.exit"
+                    [System.IO.File]::WriteAllText($exitFlagPath, "exit")
+                    $result = '{"success":true}'
 
                 } else {
                     Write-Host "  [HTTP] 404 unmatched path: '$($req.Url.AbsolutePath)'"
@@ -2102,15 +2155,27 @@ $firstPoll    = $true
 $lastSeenPis  = @{}   # keyed by IP, value = DateTime last reachable
 $lastSeenCams = @{}   # keyed by IP, value = DateTime last reachable
 
+$exitFlagPath = Join-Path $SCRIPT_DIR "kiosk-monitor.exit"
+
+# clean up any stale exit flag from a previous run
+if (Test-Path $exitFlagPath) { Remove-Item $exitFlagPath -Force -ErrorAction SilentlyContinue }
+
 while ($true) {
     $pis = Load-Hosts
     Invoke-Poll $pis $camEnv $lastSeenPis $lastSeenCams
+
     if ($firstPoll) {
         $firstPoll = $false
-        if (Test-Path $HTML_FILE) {
-            Write-Host "  Opening dashboard in browser..."
-            if ($IS_WINDOWS) { Start-Process $HTML_FILE } else { & open $HTML_FILE }
-        }
+        Write-Host "  Opening dashboard in browser..."
+        if ($IS_WINDOWS) { Start-Process "http://localhost:${HTTP_PORT}" } else { & open "http://localhost:${HTTP_PORT}" }
     }
+
+    # check exit flag — written by /exit HTTP endpoint
+    if (Test-Path $exitFlagPath) {
+        Remove-Item $exitFlagPath -Force -ErrorAction SilentlyContinue
+        Write-Host "  Exit requested — stopping."
+        exit 0
+    }
+
     Start-Sleep -Seconds $POLL_SECS
 }

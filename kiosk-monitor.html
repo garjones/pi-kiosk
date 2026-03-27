@@ -492,28 +492,29 @@
     </div>
     <div style="text-align:right; display:flex; align-items:center; gap:12px;">
       <div>
-        <div class="updated">Updated: 2026-03-27 10:20:04</div>
-        <div class="refreshing" id="refresh-status">Refreshing in 30s</div>
+        <div class="updated">Updated: 2026-03-27 13:15:03</div>
+        <div class="refreshing" id="refresh-status">Refreshing in 15s</div>
       </div>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#9788; Light</button>
     </div>
   </header>
 
   <div id="global-toolbar">
-    <button class="toolbar-btn danger" onclick="globalAction('reboot-all','Reboot All Pis','Are you sure you want to reboot all 12 Pis?')">&#8635; Reboot All</button>
-    <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all 12 Pis and reboot?')">&#11015; Software Update All</button>
-    <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all 12 Pis? This will take several minutes.')">&#9881; System Update All</button>
+    <button class="toolbar-btn danger" onclick="globalAction('reboot-all','Reboot All Pis','Are you sure you want to reboot all 13 Pis?')">&#8635; Reboot All</button>
+    <button class="toolbar-btn"        onclick="globalAction('software-update-all','Software Update — All Pis','Download latest files from GitHub to all 13 Pis and reboot?')">&#11015; Software Update All</button>
+    <button class="toolbar-btn"        onclick="globalAction('system-update-all','System Update — All Pis','Run apt update &amp; upgrade on all 13 Pis? This will take several minutes.')">&#9881; System Update All</button>
     <button class="toolbar-btn" id="viewer-btn" onclick="toggleCameraViewer()">&#9654; Camera Viewer</button>
     <button class="toolbar-btn" onclick="openHostsPanel()">&#9998; Edit Pi Hosts</button>
+    <button class="toolbar-btn danger" onclick="exitMonitor()" style="margin-left:auto">&#9211; Exit Monitor</button>
   </div>
 
   <div id="summary-bar">
     <div class="summary-item">
-      <div class="summary-count fail">0/12</div>
+      <div class="summary-count fail">0/13</div>
       <div class="summary-label">Pis<br>online</div>
     </div>
     <div class="summary-item">
-      <div class="summary-count warn">0/12</div>
+      <div class="summary-count warn">0/13</div>
       <div class="summary-label">Kiosk service<br>active</div>
     </div>
     <div class="summary-item">
@@ -659,6 +660,18 @@
         </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-12','10.200.30.22','')" title="Click to configure">
           <div class="pi-name">kcc-pi-12</div>
           <div class="pi-ip">10.200.30.22</div>
+          <div class="pi-checks">
+            <div class="check-badge"><span class="dot fail"></span> Ping</div>
+            <div class="check-badge"><span class="dot fail"></span> SSH</div>
+            <div class="check-badge"><span class="svc-badge svc-unknown">unknown</span></div>
+          </div>
+          
+          
+          
+          <div class="last-seen">Last seen: never</div>
+        </div>        <div class="pi-card offline" onclick="openConfigPanel('kcc-pi-13','10.200.30.23','')" title="Click to configure">
+          <div class="pi-name">kcc-pi-13</div>
+          <div class="pi-ip">10.200.30.23</div>
           <div class="pi-checks">
             <div class="check-badge"><span class="dot fail"></span> Ping</div>
             <div class="check-badge"><span class="dot fail"></span> SSH</div>
@@ -1428,9 +1441,9 @@
     }
 
     // ---- countdown timer + auto-pause ----
-    const REFRESH_SECS = 30;
-    let countdown  = REFRESH_SECS;
-    let paused     = false;
+    const REFRESH_SECS = 15;
+    let countdown = REFRESH_SECS;
+    let paused    = false;
 
     function setPaused(val) {
       paused = val;
@@ -1458,6 +1471,24 @@
         location.reload();
       }
     }, 1000);
+
+    // ---- exit monitor ----
+    async function exitMonitor() {
+      if (!confirm('Stop the kiosk monitor script?')) return;
+      setPaused(true);
+      try {
+        await fetch(API + '/exit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        });
+      } catch (e) { }
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:sans-serif;background:#0f1923;color:#e0e0e0;">' +
+        '<div style="font-size:2rem;">&#9211;</div>' +
+        '<div style="font-size:1.2rem;font-weight:600;">Monitor stopped.</div>' +
+        '<div style="font-size:0.85rem;color:#7a9ab8;">You can close this tab.</div>' +
+        '</div>';
+    }
 
     async function globalAction(endpoint, title, confirmMsg) {
       if (!confirm(confirmMsg)) return;
