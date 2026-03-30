@@ -2037,6 +2037,10 @@ echo "Install complete."
                         $resp.StatusCode = 500
                         $result = '{"success":false,"error":"ffplay not found. Install FFmpeg: brew install ffmpeg"}'
                     } else {
+                        # derive ffmpeg path from ffplay (same directory)
+                        $FFMPEG = Join-Path (Split-Path $FFPLAY) "ffmpeg"
+                        if (-not (Test-Path $FFMPEG)) { $FFMPEG = "ffmpeg" }
+
                         # build RTSP URLs for all 24 cameras
                         $inputs = @()
                         for ($i = 0; $i -lt $CAM_ENV.CAM_AWAY.Count; $i++) {
@@ -2067,16 +2071,14 @@ echo "Install complete."
                         $layout        = $layoutParts -join "|"
                         $filterComplex = "${scaleFilter}${xstackInputs}xstack=inputs=24:layout=${layout}[out]"
 
-                        $inputArgs = @()
-                        foreach ($url in $inputs) { $inputArgs += "-i"; $inputArgs += $url }
-                        $ffArgs = $inputArgs + @("-filter_complex", $filterComplex, "-map", "[out]", "-an", "-noborder", "-x", $SCRN_W, "-y", $SCRN_H)
-
-                        # write a temp shell script to launch ffplay — most reliable cross-platform approach
+                        # write a temp shell script using ffmpeg piped to ffplay
+                        # ffplay 8.1 dropped multi-input support; ffmpeg handles muxing and pipes rawvideo to ffplay
                         $tmpScript = [System.IO.Path]::GetTempFileName() + ".sh"
-                        $shCmd = $FFPLAY
+                        $shCmd = $FFMPEG
                         foreach ($url in $inputs) { $shCmd += " -i '$url'" }
                         $shCmd += " -filter_complex '$filterComplex'"
-                        $shCmd += " -map '[out]' -an -noborder -x $SCRN_W -y $SCRN_H"
+                        $shCmd += " -map '[out]' -f rawvideo -"
+                        $shCmd += " | $FFPLAY -"
                         $shContent = "#!/bin/bash" + [char]10 + $shCmd + [char]10
                         [System.IO.File]::WriteAllText($tmpScript, $shContent)
                         & chmod +x $tmpScript
