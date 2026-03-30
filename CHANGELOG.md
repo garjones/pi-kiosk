@@ -4,7 +4,28 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v10.1] — Current
+## [v10.2] — Current
+
+### Changed (kiosk-monitor.ps1 v5.2)
+- Dashboard now served over HTTP at `http://localhost:8080` instead of being opened as a `file://` URL — eliminates browser cross-origin security restrictions that blocked all `fetch()` API calls
+- Pi fleet cards now sorted by hostname on every poll cycle so cards always appear in numeric order (kcc-pi-01 through kcc-pi-13) regardless of parallel poll completion order
+- **Exit Monitor** button added to the toolbar — prompts for confirmation, signals the script to stop cleanly after the current poll completes, and replaces the browser page with a "Monitor stopped. You can close this tab." message
+- Page refresh interval reduced from 30 seconds to 15 seconds
+- System Update and System Update All now use `stdbuf -oL` and `DEBIAN_FRONTEND=noninteractive` to force line-buffered output, fixing missing streamed apt output in the log area
+- Reboot All and Software Update All handlers rewritten as inline `foreach` loops — previous `Invoke-AllParallel` implementation silently failed to execute SSH commands due to PowerShell runspace variable scoping
+- Progress modal width doubled to 1120px for easier reading of System Update All output
+- `/save-hosts` handler now correctly rereads `pi-hosts.txt` on every poll cycle — previously the host list was loaded once at startup and edits made via the hosts panel were not picked up until the script was restarted
+- Camera Viewer switched from `ffplay` multi-input (broken in ffplay 8.1) to `ffmpeg` piped to `ffplay` — generates a temp shell script with the full 24-camera xstack command and executes it via `/bin/bash`
+- `HTML_FILE` and `SCRIPT_DIR` added to HTTP listener runspace variables — previously absent, causing the dashboard file and exit flag path to be unavailable inside the listener
+
+### Known Limitations
+- Camera Viewer: full 24-camera xstack with live RTSP streams not yet validated on-site
+- Screen rotation (V mode): `kiosk.run.sh` does not yet apply `transpose` filter to video feeds, only to labels
+- Camera dropout recovery: not yet tested with live hardware
+
+---
+
+## [v10.1]
 
 ### Added (kiosk-monitor.ps1 v5.1)
 - Edit Pi Hosts button in the toolbar — opens a slide-in panel showing the raw
