@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 5.3
+#  Version 5.4
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -251,7 +251,7 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
             "<div class=`"last-seen`">Last seen: $($pi.lastSeen)</div>"
         } else { "" }
         $piCards += @"
-        <div class="pi-card $cardClass" onclick="openConfigPanel('$($pi.name)','$($pi.ip)','$($pi.config)')" title="Click to configure">
+        <div class="pi-card $cardClass" onclick="openConfigPanel('$($pi.name)','$($pi.ip)','$($pi.config)','$($pi.resolution)')" title="Click to configure">
           <div class="pi-name">$($pi.name)</div>
           <div class="pi-ip">$($pi.ip)</div>
           <div class="pi-checks">
@@ -984,12 +984,7 @@ $homeRow
         <div class="cp-label">Resolution</div>
         <div class="cp-res-row">
           <select class="cp-select" id="cp-resolution">
-            <option value="1920x1080">1920 &times; 1080 &nbsp;(1080p)</option>
-            <option value="1680x1050">1680 &times; 1050</option>
-            <option value="1600x900">1600 &times; 900</option>
-            <option value="1366x768">1366 &times; 768</option>
-            <option value="1280x1024">1280 &times; 1024</option>
-            <option value="1280x720">1280 &times; 720 &nbsp;&nbsp;(720p)</option>
+            <option value="">Loading…</option>
           </select>
           <button class="cp-res-apply" id="cp-res-apply-btn" onclick="applyResolution()">Apply</button>
         </div>
@@ -1156,7 +1151,7 @@ $homeRow
       setActionBtnsDisabled(false);
     }
 
-    function openConfigPanel(name, ip, currentConfig) {
+    function openConfigPanel(name, ip, currentConfig, currentRes) {
       cpIp             = ip;
       cpOriginalConfig = currentConfig;
       document.getElementById('cp-pi-name').textContent    = name;
@@ -1188,6 +1183,7 @@ $homeRow
       }
 
       updatePreview();
+      fetchResolutions(currentRes);
       document.getElementById('config-overlay').classList.add('open');
       document.getElementById('config-panel').classList.add('open');
       setPaused(true);
@@ -1355,6 +1351,51 @@ $homeRow
       setActionBtnsDisabled(false);
     }
 
+    const KNOWN_RES = [
+      { v: '3840x2160', l: '3840 × 2160  (4K)'   },
+      { v: '2560x1440', l: '2560 × 1440  (1440p)' },
+      { v: '1920x1080', l: '1920 × 1080  (1080p)' },
+      { v: '1680x1050', l: '1680 × 1050'               },
+      { v: '1600x900',  l: '1600 × 900'                },
+      { v: '1366x768',  l: '1366 × 768'                },
+      { v: '1280x1024', l: '1280 × 1024'               },
+      { v: '1280x720',  l: '1280 × 720  (720p)'   },
+    ];
+
+    async function fetchResolutions(currentRes) {
+      const sel = document.getElementById('cp-resolution');
+      const btn = document.getElementById('cp-res-apply-btn');
+      sel.innerHTML = '<option value="">Loading…</option>';
+      sel.disabled  = true;
+      btn.disabled  = true;
+      try {
+        const resp = await fetch(API + '/get-resolutions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp })
+        });
+        const data = await resp.json();
+        if (data.success && data.modes && data.modes.length > 0) {
+          sel.innerHTML = '';
+          data.modes.forEach(function(v) {
+            const known = KNOWN_RES.find(function(k) { return k.v === v; });
+            const label = known ? known.l : v;
+            const opt   = document.createElement('option');
+            opt.value       = v;
+            opt.textContent = label;
+            if (v === currentRes) { opt.selected = true; }
+            sel.appendChild(opt);
+          });
+        } else {
+          sel.innerHTML = '<option value="">Could not load modes</option>';
+        }
+      } catch (e) {
+        sel.innerHTML = '<option value="">Error loading modes</option>';
+      }
+      sel.disabled = false;
+      btn.disabled = false;
+    }
+
     async function applyResolution() {
       const mode  = document.getElementById('cp-resolution').value;
       const btn   = document.getElementById('cp-res-apply-btn');
@@ -1370,8 +1411,7 @@ $homeRow
         });
         const data = await resp.json();
         if (data.success) {
-          showMessage('Resolution set to ' + mode + '.', 'success');
-        } else {
+          showMessage('Resolution set to ' + mode + ' — kiosk restarting.', 'success');        } else {
           showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
         }
       } catch (e) {
@@ -2050,12 +2090,37 @@ echo "Install complete."
                         $result = '{"success":false,"error":"Missing ip"}'
                     }
 
+                } elseif ($req.Url.AbsolutePath -eq "/get-resolutions") {
+                    $ip = $json.ip
+                    if ($ip) {
+                        $cmd = 'WAYLAND_DISPLAY=wayland-0 wlr-randr | grep " px," | awk ''{print $1}'' | sort -u'
+                        $sshOpts = @("-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=10",
+                                     "-p", $SSH_PORT, "${SSH_USER}@${ip}")
+                        if ($IS_WINDOWS) {
+                            $rawLines = & $SSH @sshOpts $cmd 2>&1
+                        } else {
+                            $rawLines = & $SSHPASS -p $SSH_PASS $SSH @sshOpts $cmd 2>&1
+                        }
+                        $raw = $rawLines -join " "
+                        $knownRes = @('3840x2160','2560x1440','1920x1080','1680x1050','1600x900','1366x768','1280x1024','1280x720')
+                        $available = @()
+                        foreach ($res in $knownRes) {
+                            if ($rawLines -contains $res) { $available += $res }
+                        }
+                        $modesJson = ($available | ForEach-Object { "`"$_`"" }) -join ","
+                        $result = "{`"success`":true,`"modes`":[$modesJson]}"
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip"}'
+                    }
+
                 } elseif ($req.Url.AbsolutePath -eq "/set-resolution") {
                     $ip   = $json.ip
                     $mode = $json.mode
                     if ($ip -and $mode) {
                         $cmd = 'OUTPUT=$(WAYLAND_DISPLAY=wayland-0 wlr-randr | grep ''^HDMI'' | head -1 | awk ''{print $1}'') && ' +
-                               "WAYLAND_DISPLAY=wayland-0 wlr-randr --output `"`$OUTPUT`" --mode $mode"
+                               "WAYLAND_DISPLAY=wayland-0 wlr-randr --output `"`$OUTPUT`" --mode $mode && " +
+                               'sudo systemctl restart kiosk.service'
                         Invoke-SSH-Local $ip $cmd | Out-Null
                         $result = '{"success":true}'
                     } else {

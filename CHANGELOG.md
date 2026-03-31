@@ -4,24 +4,45 @@ All notable changes to the KCC Pi Kiosk project are documented here.
 
 ---
 
-## [v10.2] — Current
+## [v10.3] — Current
 
-### Changed (kiosk-monitor.ps1 v5.2)
-- Dashboard now served over HTTP at `http://localhost:8080` instead of being opened as a `file://` URL — eliminates browser cross-origin security restrictions that blocked all `fetch()` API calls
-- Pi fleet cards now sorted by hostname on every poll cycle so cards always appear in numeric order (kcc-pi-01 through kcc-pi-13) regardless of parallel poll completion order
-- **Exit Monitor** button added to the toolbar — prompts for confirmation, signals the script to stop cleanly after the current poll completes, and replaces the browser page with a "Monitor stopped. You can close this tab." message
-- Page refresh interval reduced from 30 seconds to 15 seconds
-- System Update and System Update All now use `stdbuf -oL` and `DEBIAN_FRONTEND=noninteractive` to force line-buffered output, fixing missing streamed apt output in the log area
-- Reboot All and Software Update All handlers rewritten as inline `foreach` loops — previous `Invoke-AllParallel` implementation silently failed to execute SSH commands due to PowerShell runspace variable scoping
-- Progress modal width doubled to 1120px for easier reading of System Update All output
-- `/save-hosts` handler now correctly rereads `pi-hosts.txt` on every poll cycle — previously the host list was loaded once at startup and edits made via the hosts panel were not picked up until the script was restarted
-- Camera Viewer switched from `ffplay` multi-input (broken in ffplay 8.1) to `ffmpeg` piped to `ffplay` — generates a temp shell script with the full 24-camera xstack command and executes it via `/bin/bash`
-- `HTML_FILE` and `SCRIPT_DIR` added to HTTP listener runspace variables — previously absent, causing the dashboard file and exit flag path to be unavailable inside the listener
+### Added (kiosk-monitor.ps1 v5.4)
+- Resolution control in the per-Pi config panel — a dropdown populated dynamically
+  from the modes the connected TV actually advertises (via `wlr-randr`), filtered to
+  known-standard resolutions: 4K (3840×2160), 1440p (2560×1440), 1080p (1920×1080),
+  1680×1050, 1600×900, 1366×768, 1280×1024, and 720p (1280×720)
+- Current resolution pre-selected in the dropdown, sourced from the Pi card poll data
+- **Apply** button sets the resolution immediately via `wlr-randr` (no reboot required)
+  and restarts `kiosk.service` so the display layout recalculates at the new resolution
+- `/get-resolutions` HTTP endpoint SSHes into the Pi, runs `wlr-randr`, and returns
+  the subset of supported modes that match the known-standard list
+- `/set-resolution` HTTP endpoint SSHes into the Pi, auto-detects the active HDMI
+  output name via `wlr-randr`, applies the selected mode, and restarts `kiosk.service`
 
 ### Known Limitations
-- Camera Viewer: full 24-camera xstack with live RTSP streams not yet validated on-site
-- Screen rotation (V mode): `kiosk.run.sh` does not yet apply `transpose` filter to video feeds, only to labels
-- Camera dropout recovery: not yet tested with live hardware
+- Resolution changes require `wlr-randr` to be installed on the Pi (present by default
+  on Raspberry Pi OS Debian 13 Trixie with labwc)
+- `WAYLAND_DISPLAY=wayland-0` is assumed — correct for the standard labwc session on
+  this fleet but may differ on other Pi OS configurations
+
+---
+
+## [v10.2]
+
+### Added (kiosk-monitor.ps1 v5.2)
+- Camera Viewer now uses ffmpeg piped to ffplay to work around ffplay 8.1 dropping
+  multi-input support
+- `/viewer-status` HTTP endpoint returns whether the camera viewer process is running
+- Camera Viewer toolbar button toggles between launch and close states
+
+### Changed
+- Bulk action handlers (Reboot All, Software Update All, System Update All) rewritten
+  as inline `foreach` loops directly in HTTP handlers — fixes variable scoping issues
+  in runspaces that caused silent failures
+- `Load-Hosts` now called on every poll cycle so fleet changes take effect without
+  restarting the script
+- JavaScript template literals replaced with string concatenation throughout the
+  HTTP-served HTML to avoid PowerShell consuming backtick characters
 
 ---
 
