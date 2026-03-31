@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 5.2
+#  Version 5.3
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -551,6 +551,14 @@ function Write-Dashboard($timestamp, $piResults, $camResults, $camUser, $camPass
     .cp-action-btn:hover    { border-color: #2a6ab0; color: #fff; background: #1e3050; }
     .cp-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    .cp-res-row { display: flex; gap: 8px; align-items: center; }
+    .cp-res-apply {
+      flex-shrink: 0; background: #1a3a28; border: 1px solid #27ae60; border-radius: 4px;
+      color: #5dca80; font-size: 0.78rem; font-weight: 600; padding: 7px 12px;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .cp-res-apply:hover    { background: #1e5a38; border-color: #5dca80; color: #fff; }
+    .cp-res-apply:disabled { opacity: 0.4; cursor: not-allowed; }
     .cp-log {
       display: none;
       margin: 0 18px 16px;
@@ -971,7 +979,23 @@ $homeRow
         </div>
       </div>
 
-      <!-- preview -->
+      <!-- resolution -->
+      <div class="cp-section">
+        <div class="cp-label">Resolution</div>
+        <div class="cp-res-row">
+          <select class="cp-select" id="cp-resolution">
+            <option value="1920x1080">1920 &times; 1080 &nbsp;(1080p)</option>
+            <option value="1680x1050">1680 &times; 1050</option>
+            <option value="1600x900">1600 &times; 900</option>
+            <option value="1366x768">1366 &times; 768</option>
+            <option value="1280x1024">1280 &times; 1024</option>
+            <option value="1280x720">1280 &times; 720 &nbsp;&nbsp;(720p)</option>
+          </select>
+          <button class="cp-res-apply" id="cp-res-apply-btn" onclick="applyResolution()">Apply</button>
+        </div>
+      </div>
+
+      <!-- preview -->      
       <div class="cp-preview">
         <span class="cp-preview-code"  id="cp-code">HC0102</span>
         <div  class="cp-preview-label" id="cp-label-text">Horizontal · Cameras · Sheets 1 &amp; 2</div>
@@ -1329,6 +1353,32 @@ $homeRow
       }
       document.getElementById('cp-sw-update-btn').textContent = '⬇ Software Update';
       setActionBtnsDisabled(false);
+    }
+
+    async function applyResolution() {
+      const mode  = document.getElementById('cp-resolution').value;
+      const btn   = document.getElementById('cp-res-apply-btn');
+      const msgEl = document.getElementById('cp-message');
+      msgEl.className = 'cp-message';
+      btn.disabled    = true;
+      btn.textContent = 'Applying…';
+      try {
+        const resp = await fetch(API + '/set-resolution', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: cpIp, mode: mode })
+        });
+        const data = await resp.json();
+        if (data.success) {
+          showMessage('Resolution set to ' + mode + '.', 'success');
+        } else {
+          showMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+        }
+      } catch (e) {
+        showMessage('Could not reach monitor service (localhost:8080).', 'error');
+      }
+      btn.disabled    = false;
+      btn.textContent = 'Apply';
     }
 
     async function doSystemUpdate() {
@@ -1998,6 +2048,19 @@ echo "Install complete."
                     } else {
                         $resp.StatusCode = 400
                         $result = '{"success":false,"error":"Missing ip"}'
+                    }
+
+                } elseif ($req.Url.AbsolutePath -eq "/set-resolution") {
+                    $ip   = $json.ip
+                    $mode = $json.mode
+                    if ($ip -and $mode) {
+                        $cmd = 'OUTPUT=$(WAYLAND_DISPLAY=wayland-0 wlr-randr | grep ''^HDMI'' | head -1 | awk ''{print $1}'') && ' +
+                               "WAYLAND_DISPLAY=wayland-0 wlr-randr --output `"`$OUTPUT`" --mode $mode"
+                        Invoke-SSH-Local $ip $cmd | Out-Null
+                        $result = '{"success":true}'
+                    } else {
+                        $resp.StatusCode = 400
+                        $result = '{"success":false,"error":"Missing ip or mode"}'
                     }
 
                 } elseif ($req.Url.AbsolutePath -eq "/rename-pi") {
