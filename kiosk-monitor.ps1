@@ -16,7 +16,7 @@
 #    - pi-hosts.txt -- Pi IP addresses and hostnames
 #    - kiosk.env    -- camera credentials and IPs
 #
-#  Version 5.4
+#  Version 5.5
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -2165,68 +2165,72 @@ echo "Install complete."
                         $resp.StatusCode = 500
                         $result = '{"success":false,"error":"ffplay not found. Install FFmpeg: brew install ffmpeg"}'
                     } else {
-                        # derive ffmpeg path from ffplay (same directory)
-                        $FFMPEG = Join-Path (Split-Path $FFPLAY) "ffmpeg"
-                        if (-not (Test-Path $FFMPEG)) { $FFMPEG = "ffmpeg" }
+                        # test mode: if tiny-test.mp4 exists in script dir, use it instead of live RTSP
+                        $testVideo = Join-Path $SCRIPT_DIR "tiny-test.mp4"
+                        $testMode  = Test-Path $testVideo
 
-                        # build RTSP URLs for all 24 cameras
+                        # build URL list for all 24 cameras (Away 1-12, Home 1-12)
                         $inputs = @()
                         for ($i = 0; $i -lt $CAM_ENV.CAM_AWAY.Count; $i++) {
-                            $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_AWAY[$i])/axis-media/media.amp"
+                            if ($testMode) { $inputs += $testVideo }
+                            else { $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_AWAY[$i])/axis-media/media.amp" }
                         }
                         for ($i = 0; $i -lt $CAM_ENV.CAM_HOME.Count; $i++) {
-                            $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_HOME[$i])/axis-media/media.amp"
+                            if ($testMode) { $inputs += $testVideo }
+                            else { $inputs += "rtsp://$($CAM_ENV.CAM_USER):$($CAM_ENV.CAM_PASS)@$($CAM_ENV.CAM_HOME[$i])/axis-media/media.amp" }
                         }
 
-                        $SCRN_W  = 1920
-                        $SCRN_H  = 1080
-                        $cellW   = [int]($SCRN_W / 12)
-                        $cellH   = [int]($SCRN_H / 2)
+                        # fixed viewer size — works on 1080p and above
+                        $cellW  = 160   # 1920 / 12
+                        $cellH  = 540   # 1080 / 2
 
-                        # build filter_complex
-                        $scaleFilter  = ""
-                        $layoutParts  = @()
-                        $xstackInputs = ""
-                        for ($i = 0; $i -lt 24; $i++) {
-                            $col = if ($i -lt 12) { $i } else { $i - 12 }
-                            $row = if ($i -lt 12) { 0 } else { 1 }
-                            $x   = $col * $cellW
-                            $y   = $row * $cellH
-                            $scaleFilter  += "[$i`:v]scale=${cellW}:${cellH}[v$i];"
-                            $layoutParts  += "${x}_${y}"
-                            $xstackInputs += "[v$i]"
+                        # build and run a shell script mirroring cameras-all.sh (proven approach)
+                        # Start-Process -ArgumentList array has cross-platform quoting issues
+                        $shLines = @("#!/bin/bash")
+                        for ($i = 0; $i -lt $inputs.Count; $i++) {
+                            $col  = $i % 12
+                            $row  = [int]($i / 12)
+                            $left = $col * $cellW
+                            $top  = $row * $cellH
+                            $url  = $inputs[$i]
+                            $loopArg = if ($testMode) { "-loop 1" } else { "" }
+                            $shLines += "ffplay `"$url`" -an -noborder -alwaysontop -x $cellW -y $cellH -left $left -top $top $loopArg &"
                         }
-                        $layout        = $layoutParts -join "|"
-                        $filterComplex = "${scaleFilter}${xstackInputs}xstack=inputs=24:layout=${layout}[out]"
-
-                        # write a temp shell script using ffmpeg piped to ffplay
-                        # ffplay 8.1 dropped multi-input support; ffmpeg handles muxing and pipes rawvideo to ffplay
+                        $shLines += "exit 0"
                         $tmpScript = [System.IO.Path]::GetTempFileName() + ".sh"
-                        $shCmd = $FFMPEG
-                        foreach ($url in $inputs) { $shCmd += " -i '$url'" }
-                        $shCmd += " -filter_complex '$filterComplex'"
-                        $shCmd += " -map '[out]' -f rawvideo -"
-                        $shCmd += " | $FFPLAY -"
-                        $shContent = "#!/bin/bash" + [char]10 + $shCmd + [char]10
-                        [System.IO.File]::WriteAllText($tmpScript, $shContent)
-                        & chmod +x $tmpScript
-                        $script:viewerProcess = Start-Process -FilePath "/bin/bash" `
-                            -ArgumentList $tmpScript -PassThru
+                        [System.IO.File]::WriteAllText($tmpScript, ($shLines -join "`n"))
+                        if (-not $IS_WINDOWS) { & chmod +x $tmpScript }
+
+                        # send success response immediately before launching
                         $result = '{"success":true}'
+                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($result)
+                        $resp.ContentLength64 = $bytes.Length
+                        $resp.OutputStream.Write($bytes, 0, $bytes.Length)
+                        $resp.Close()
+
+                        # launch after response is sent
+                        $proc = Start-Process -FilePath "/bin/bash" `
+                            -ArgumentList $tmpScript -PassThru -ErrorAction SilentlyContinue
+                        $script:viewerProcesses = @($proc)
+                        continue
                     }
 
                 } elseif ($req.Url.AbsolutePath -eq "/close-camera-viewer") {
-                    if ($script:viewerProcess -and -not $script:viewerProcess.HasExited) {
-                        $script:viewerProcess.Kill()
-                        $script:viewerProcess = $null
+                    # kill all tracked viewer processes
+                    if ($script:viewerProcesses) {
+                        foreach ($proc in $script:viewerProcesses) {
+                            try { if (-not $proc.HasExited) { $proc.Kill() } } catch { }
+                        }
+                        $script:viewerProcesses = @()
                     }
-                    # also kill any lingering ffplay processes
+                    # also kill any lingering ffplay processes (belt and braces)
                     Get-Process ffplay -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
                     $result = '{"success":true}'
 
                 } elseif ($req.Url.AbsolutePath -eq "/viewer-status") {
-                    $running = ($script:viewerProcess -and -not $script:viewerProcess.HasExited)
-                    $result  = "{`"running`":$($running.ToString().ToLower())}"
+                    $ffplayProcs = Get-Process ffplay -ErrorAction SilentlyContinue
+                    $running     = ($null -ne $ffplayProcs -and @($ffplayProcs).Count -gt 0)
+                    $result      = "{`"running`":$($running.ToString().ToLower())}"
 
                 } elseif ($req.Url.AbsolutePath -eq "/exit") {
                     # write exit flag file — main loop will pick it up after current poll

@@ -31,6 +31,81 @@ do_kiosk() {
 
 
 # --------------------------------------------------------------------------------
+#  do_kiosk_overlay() - Write a local HTML wrapper with status bar and launch it
+# --------------------------------------------------------------------------------
+#    1 - URL to iframe
+#    2 - Label text for bar (e.g. "10.200.30.11 - kcc-pi-01")
+# --------------------------------------------------------------------------------
+do_kiosk_overlay() {
+    local URL="$1"
+    local LABEL="$2"
+    local HTML_FILE="/tmp/kiosk.html"
+ 
+    cat > "$HTML_FILE" << HTMLEOF
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 100vw; height: 100vh; overflow: hidden; background: black; }
+  iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: calc(100% - 50px);
+    border: none;
+  }
+  #bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    height: 50px;
+    background: black;
+    color: white;
+    font-family: 'DejaVu Sans', sans-serif;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+</style>
+</head>
+<body>
+  <iframe src="$URL" allowfullscreen></iframe>
+  <div id="bar">
+    <span>Kelowna Curling Club</span>
+    <span id="clock"></span>
+    <span>$LABEL</span>
+  </div>
+  <script>
+    function tick() {
+      var now = new Date();
+      var h = now.getHours().toString().padStart(2,'0');
+      var m = now.getMinutes().toString().padStart(2,'0');
+      document.getElementById('clock').textContent = h + ':' + m;
+    }
+    tick();
+    setInterval(tick, 10000);
+  </script>
+</body>
+</html>
+HTMLEOF
+ 
+    if $ON_PI; then
+        /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk \
+            --disable-web-security --allow-file-access-from-files \
+            "file://$HTML_FILE"
+    else
+        /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --kiosk \
+            --disable-web-security --allow-file-access-from-files \
+            "file://$HTML_FILE"
+    fi
+}
+ 
+
+# --------------------------------------------------------------------------------
 #  do_label() - Draw white label, black border, text in centre
 # --------------------------------------------------------------------------------
 #    1 - Label
@@ -250,9 +325,7 @@ fi
 # --------------------------------------------------------------------------------
 case $KCC_CONFIG in
     K)
-        do_kiosk "${URL_KIOSK[SHEET_BOT]}"
-        sleep 9
-        do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
+        do_kiosk_overlay "${URL_KIOSK[SHEET_BOT]}" "$MY_IP - $MY_HOSTNAME"
         ;;
     C)
         #         URL                             WIDTH   HEIGHT  LEFT    TOP       ROTATION
