@@ -6,7 +6,7 @@
 # 
 #  Displays HTML kiosks or RTSP camera feeds in a mosaic on a Raspberry Pi
 #
-#  Version 9.7
+#  Version 9
 # --------------------------------------------------------------------------------
 #  (C) Copyright Gareth Jones - gareth@gareth.com
 # --------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ do_kiosk_overlay() {
     local URL="$1"
     local LABEL="$2"
     local HTML_FILE="/tmp/kiosk.html"
- 
+
     cat > "$HTML_FILE" << HTMLEOF
 <!DOCTYPE html>
 <html>
@@ -92,7 +92,7 @@ do_kiosk_overlay() {
 </body>
 </html>
 HTMLEOF
- 
+
     if $ON_PI; then
         /usr/bin/chromium --noerrdialogs --disable-infobars --kiosk \
             --disable-web-security --allow-file-access-from-files \
@@ -103,7 +103,7 @@ HTMLEOF
             "file://$HTML_FILE"
     fi
 }
- 
+
 
 # --------------------------------------------------------------------------------
 #  do_label() - Draw white label, black border, text in centre
@@ -117,14 +117,11 @@ HTMLEOF
 #    7 - Rotation
 # --------------------------------------------------------------------------------
 do_label() {
-  (while true; do
-    ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
-      "color=white@0:size=$2x$3:rate=1,
-      drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
-      drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:
-      $7"
-    sleep 5
-  done) &
+  ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
+    "color=white@0:size=$2x$3:rate=1,
+    drawbox=x=0:y=0:w=$2:h=$3:color=black@1:t=$6,
+    drawtext=text='$1':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=48:fontcolor=black:x=(w-text_w)/2:y=(h-text_h)/2:
+    $7" &
 }
 
 
@@ -140,16 +137,14 @@ do_label() {
 #    7 - Rotation
 # --------------------------------------------------------------------------------
 do_labelip() {
-  (while true; do
     ffplay -noborder -alwaysontop -left $4 -top $5 -f lavfi \
-      "color=black@0:size=${2}x${3}:rate=1,
-      drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
-      drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
-      drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
-      $7"
-    sleep 5
-  done) &
+    "color=black@0:size=${2}x${3}:rate=1,
+    drawbox=x=0:y=0:w=${2}:h=${3}:color=black@1:t=${6},
+    drawtext=text='Kelowna Curling Club':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=20:y=(h-text_h)/2 ${7},
+    drawtext=text='${1} - ${MY_HOSTNAME}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:fontsize=24:fontcolor=white:x=(w-text_w-20):y=(h-text_h)/2:
+    $7" &
 }
+
 
 # --------------------------------------------------------------------------------
 #  do_video() - Display a video feed with automatic reconnection
@@ -159,11 +154,10 @@ do_labelip() {
 #    $3 - Height
 #    $4 - Left
 #    $5 - Top
-#    $6 - Rotation
 # --------------------------------------------------------------------------------
 do_video() {
   (while true; do
-    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5 $6
+    ffplay $1 -an -noborder -alwaysontop -x $2 -y $3 -left $4 -top $5
     sleep 5
   done) &
 }
@@ -178,7 +172,7 @@ else
 fi
 
 # --------------------------------------------------------------------------------
-# load central config (camera IPs, credentials, RTSP URLs, kiosk URLs)
+# load central config (camera IPs, credentials, kiosk URLs)
 # --------------------------------------------------------------------------------
 if $ON_PI; then
     ENV_FILE="/home/kcckiosk/kiosk.env"
@@ -195,20 +189,80 @@ fi
 source "$ENV_FILE"
 
 # --------------------------------------------------------------------------------
-# dev override — replace RTSP URLs with local test video when not on Pi
-# --------------------------------------------------------------------------------
-if ! $ON_PI; then
-    URL_CAM_HOME=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
-                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
-                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
-    URL_CAM_AWAY=("" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
-                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" \
-                     "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4" "tiny-test.mp4")
-fi
-
-# --------------------------------------------------------------------------------
 # constants & variables
 # --------------------------------------------------------------------------------
+
+# home cameras (built from kiosk.env)
+if $ON_PI; then
+    URL_CAM_HOME=(
+      ""
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[1]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[2]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[3]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[4]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[5]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[6]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[7]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[8]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[9]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[10]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[11]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_HOME[12]}/axis-media/media.amp"
+    )
+else
+    URL_CAM_HOME=(
+      ""
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4" 
+    )
+fi
+
+# away cameras (built from kiosk.env)
+if $ON_PI; then
+    URL_CAM_AWAY=(
+      ""
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[1]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[2]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[3]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[4]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[5]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[6]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[7]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[8]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[9]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[10]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[11]}/axis-media/media.amp"
+      "rtsp://${CAM_USER}:${CAM_PASS}@${CAM_AWAY[12]}/axis-media/media.amp"
+    )
+else
+    URL_CAM_AWAY=(
+      ""
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+      "tiny-test.mp4"
+    )
+fi
+
+# URL_KIOSK is loaded directly from kiosk.env
 
 # get config
 if $ON_PI; then
@@ -305,10 +359,8 @@ fi
 # check for screen rotation
 if [ "$KCC_ROTATION" = "H" ]; then
     LBL_R=""
-    VID_R=""
 else
     LBL_R=",transpose=2"
-    VID_R="-vf transpose=2"
 fi
 
 # --------------------------------------------------------------------------------
@@ -328,22 +380,22 @@ case $KCC_CONFIG in
         do_kiosk_overlay "${URL_KIOSK[SHEET_BOT]}" "$MY_IP - $MY_HOSTNAME"
         ;;
     C)
-        #         URL                             WIDTH   HEIGHT  LEFT    TOP       ROTATION
-        do_video    ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0         "$VID_R"
-        do_video    ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0         "$VID_R"
-        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T    "$VID_R"
-        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T    "$VID_R"
+        #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
+        do_video    ${URL_CAM_AWAY[$SHEET_TOP]}   $VID_W  $VID_H  0       0
+        do_video    ${URL_CAM_HOME[$SHEET_TOP]}   $VID_W  $VID_H  $VID_L  0
+        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
+        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label    $SHEET_TOP                    $LBL_W  $LBL_H  $LBL_L  0         $LBL_B     $LBL_R    
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 9
         do_labelip  $LIP_I                        $LIP_W  $LIP_H  $LIP_L  $LIP_T    $LIP_B     $LBL_R  
         ;;
     S)
-        #         URL                             WIDTH   HEIGHT  LEFT    TOP       ROTATION
+        #         URL                             WIDTH   HEIGHT  LEFT    TOP       BORDER     ROTATION
         do_label    " "                           $VID_W  $VID_H  0       0         0          $LBL_R
         do_label    " "                           $VID_W  $VID_H  $VID_L  0         0          $LBL_R
-        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T    "$VID_R"
-        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T    "$VID_R"
+        do_video    ${URL_CAM_AWAY[$SHEET_BOT]}   $VID_W  $VID_H  0       $VID_T
+        do_video    ${URL_CAM_HOME[$SHEET_BOT]}   $VID_W  $VID_H  $VID_L  $VID_T
         do_label    " "                           $LBL_W  $LBL_H  $LBL_L  0         0          $LBL_R
         do_label    $SHEET_BOT                    $LBL_W  $LBL_H  $LBL_L  $LBL_T    $LBL_B     $LBL_R
         sleep 9
